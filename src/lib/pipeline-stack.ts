@@ -1,7 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import * as codepipeline from '@aws-cdk/aws-codepipeline';
 import * as codepipeline_actions from '@aws-cdk/aws-codepipeline-actions';
-import { DeployCronLambdaStage } from './pipeline-stage';
+import { DeployCronLambdaStage } from './deploy-cron-lambda-stage';
 import { SimpleSynthAction, CdkPipeline } from "@aws-cdk/pipelines";
 
 export class CDKPipelineStack extends cdk.Stack {
@@ -26,7 +26,8 @@ export class CDKPipelineStack extends cdk.Stack {
                 output: sourceArtifact,
                 oauthToken: githubAuth,
                 owner: "nortakales",
-                repo: "cron-lambdas"
+                repo: "cron-lambdas",
+                branch: "main"
             }),
 
             synthAction: SimpleSynthAction.standardNpmSynth({
