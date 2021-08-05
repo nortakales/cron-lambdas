@@ -7,6 +7,8 @@ import { LambdaFunction } from '@aws-cdk/aws-events-targets'
 
 export class AutoxReminderCron extends cdk.Construct {
 
+    private tableName = 'autox_reminder_urls';
+
     constructor(scope: cdk.Construct, id: string) {
         super(scope, id);
 
@@ -20,7 +22,8 @@ export class AutoxReminderCron extends cdk.Construct {
                     'nortakales@gmail.com'
                 ].join(','),
                 from: 'nortakales@gmail.com',
-                subject: 'Evergreen Autox Alert 2'
+                subject: 'Evergreen Autox Alert 2',
+                tableName: this.tableName
             }
         });
 
@@ -37,11 +40,10 @@ export class AutoxReminderCron extends cdk.Construct {
             },
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
-            tableName: 'autox_reminder_urls',
+            tableName: this.tableName
         });
 
-        dynamoTable.grantWriteData(lambdaFunction);
-        dynamoTable.grantReadData(lambdaFunction);
+        dynamoTable.grantReadWriteData(lambdaFunction);
 
         const schedule = new Rule(this, 'AutoxReminderSchedule', {
             schedule: Schedule.expression('rate(1 minute)'),

@@ -6,6 +6,7 @@ const HTTPS = require('https');
 const EMAIL_LIST = process.env.emailList;
 const SUBJECT = process.env.subject;
 const FROM = process.env.from;
+const TABLE_NAME = process.env.tableName;
 
 AWS.config.update({ region: 'us-west-2' });
 
@@ -15,7 +16,7 @@ const DDB = new AWS.DynamoDB({ region: "us-west-2" });
 async function getUrlFromDDB(url) {
 
   var params = {
-    TableName: 'autox_urls',
+    TableName: TABLE_NAME,
     Key: {
       'url': { S: url }
     }
