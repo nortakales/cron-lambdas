@@ -14,6 +14,13 @@ export class CronLambdaStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_14_X,
       code: lambda.Code.fromAsset('lambda'),
       handler: 'autox-reminder.handler',
+      environment: {
+        emailList: [
+          'nortakales@gmail.com'
+        ].join(','),
+        from: 'nortakales@gmail.com',
+        subject: 'Evergreen Autox Alert 2'
+      }
     });
 
     /*
