@@ -19,10 +19,15 @@ export class AutoxReminderCron extends cdk.Construct {
             handler: 'autox-reminder.handler',
             environment: {
                 emailList: [
-                    'nortakales@gmail.com'
+                    'nortakales@gmail.com',
+                    'kurt@hammondjp.com',
+                    'adamsdb@outlook.com',
+                    'michelegraaff@outlook.com',
+                    'sungcampbell@gmail.com',
+                    'nathan.olotoa@hotmail.com'
                 ].join(','),
                 from: 'nortakales@gmail.com',
-                subject: 'Evergreen Autox Alert 2',
+                subject: 'Evergreen Autox Alert',
                 tableName: this.tableName
             }
         });
@@ -46,7 +51,7 @@ export class AutoxReminderCron extends cdk.Construct {
         dynamoTable.grantReadWriteData(lambdaFunction);
 
         const schedule = new Rule(this, 'AutoxReminderSchedule', {
-            schedule: Schedule.expression('rate(1 minute)'),
+            schedule: Schedule.expression('rate(1 hour)'),
         });
 
         schedule.addTarget(new LambdaFunction(lambdaFunction));
