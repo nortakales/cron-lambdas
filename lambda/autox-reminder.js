@@ -38,7 +38,7 @@ async function getUrlFromDDB(url) {
 async function writeUrlToDDB(url, name) {
 
   var params = {
-    TableName: 'autox_urls',
+    TableName: TABLE_NAME,
     Item: {
       'url': { S: url },
       'name': { S: name }
