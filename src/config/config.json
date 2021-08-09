@@ -1,0 +1,16 @@
+{
+    "autoxReminder": {
+        "dynamoTableName": "autox_reminder_urls",
+        "rate": "rate(1 hour)",
+        "fromEmail": "nortakales@gmail.com",
+        "emailSubject": "Evergreen Autox Alert",
+        "emailList": [
+            "nortakales@gmail.com",
+            "kurt@hammondjp.com",
+            "adamsdb@outlook.com",
+            "michelegraaff@outlook.com",
+            "sungcampbell@gmail.com",
+            "nathan.olotoa@hotmail.com"
+        ]
+    }
+}
