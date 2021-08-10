@@ -15,13 +15,21 @@ export class AutoxReminderCron extends cdk.Construct {
             functionName: 'AutoxReminderLambda',
             runtime: lambda.Runtime.NODEJS_14_X,
             code: lambda.Code.fromAsset('lambda'),
-            handler: 'autox-reminder.handler',
+            handler: 'autox-reminder-lambda.handler',
+            environment: {
+                emailList: "nortakales@gmail.com",
+                from: "nortakales@gmail.com",
+                subject: "Test",
+                tableName: config.autoxReminder.dynamoTableName
+            }
+            /*
             environment: {
                 emailList: config.autoxReminder.emailList.join(','),
                 from: config.autoxReminder.fromEmail,
                 subject: config.autoxReminder.emailSubject,
                 tableName: config.autoxReminder.dynamoTableName
             }
+            */
         });
 
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
