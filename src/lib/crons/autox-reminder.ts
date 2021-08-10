@@ -1,36 +1,51 @@
 import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda';
+import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as iam from '@aws-cdk/aws-iam';
 import { Schedule, Rule } from '@aws-cdk/aws-events'
 import { LambdaFunction } from '@aws-cdk/aws-events-targets'
 import * as config from '../../config/config.json'
+import * as path from 'path';
 
 export class AutoxReminderCron extends cdk.Construct {
 
     constructor(scope: cdk.Construct, id: string) {
         super(scope, id);
 
-        const lambdaFunction = new lambda.Function(this, 'AutoxReminderLambdaFunction', {
+        const lambdaFunction = new nodejslambda.NodejsFunction(this, 'AutoxReminderLambdaFunction', {
             functionName: 'AutoxReminderLambda',
             runtime: lambda.Runtime.NODEJS_14_X,
-            code: lambda.Code.fromAsset('lambda'),
-            handler: 'autox-reminder-lambda.handler',
+            entry: __dirname + '/../../lambda/autox-reminder-lambda.ts',
+            handler: 'handler',
             environment: {
                 emailList: "nortakales@gmail.com",
                 from: "nortakales@gmail.com",
                 subject: "Test",
                 tableName: config.autoxReminder.dynamoTableName
             }
-            /*
-            environment: {
-                emailList: config.autoxReminder.emailList.join(','),
-                from: config.autoxReminder.fromEmail,
-                subject: config.autoxReminder.emailSubject,
-                tableName: config.autoxReminder.dynamoTableName
-            }
-            */
         });
+        /*
+                const lambdaFunction = new lambda.Function(this, 'AutoxReminderLambdaFunction', {
+                    functionName: 'AutoxReminderLambda',
+                    runtime: lambda.Runtime.NODEJS_14_X,
+                    code: lambda.Code.fromAsset('lambda'),
+                    handler: 'autox-reminder-lambda.handler',
+                    environment: {
+                        emailList: "nortakales@gmail.com",
+                        from: "nortakales@gmail.com",
+                        subject: "Test",
+                        tableName: config.autoxReminder.dynamoTableName
+                    }
+                    /*
+                    environment: {
+                        emailList: config.autoxReminder.emailList.join(','),
+                        from: config.autoxReminder.fromEmail,
+                        subject: config.autoxReminder.emailSubject,
+                        tableName: config.autoxReminder.dynamoTableName
+                    }
+                    
+                });*/
 
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
             actions: ['ses:SendEmail'],
@@ -57,6 +72,5 @@ export class AutoxReminderCron extends cdk.Construct {
         });
 
         schedule.addTarget(new LambdaFunction(lambdaFunction));
-
     }
 }
