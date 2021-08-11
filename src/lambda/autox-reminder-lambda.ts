@@ -189,4 +189,4 @@ exports.handler = async (event = {}) => {
 };
 
 // Uncomment this to call locally through ts-node
-exports.handler();
+// exports.handler();

@@ -19,9 +19,9 @@ export class AutoxReminderCron extends cdk.Construct {
             entry: __dirname + '/../../lambda/autox-reminder-lambda.ts',
             handler: 'handler',
             environment: {
-                EMAIL_LIST: "nortakales@gmail.com",
-                FROM: "nortakales@gmail.com",
-                SUBJECT: "Test",
+                EMAIL_LIST: config.autoxReminder.emailList.join(','),
+                FROM: config.autoxReminder.fromEmail,
+                SUBJECT: config.autoxReminder.emailSubject,
                 TABLE_NAME: config.autoxReminder.dynamoTableName,
                 REGION: "us-west-2"
             }
@@ -60,7 +60,7 @@ export class AutoxReminderCron extends cdk.Construct {
                 type: dynamodb.AttributeType.STRING
             },
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            removalPolicy: cdk.RemovalPolicy.RETAIN,
             tableName: config.autoxReminder.dynamoTableName
         });
 
