@@ -10,10 +10,10 @@ interface UrlMatch {
     name: string,
 }
 
-const EMAIL_LIST = process.env.emailList!;
-const SUBJECT = process.env.subject!;
-const FROM = process.env.from!;
-const TABLE_NAME = process.env.tableName!;
+const EMAIL_LIST = process.env.EMAIL_LIST!;
+const SUBJECT = process.env.SUBJECT!;
+const FROM = process.env.FROM!;
+const TABLE_NAME = process.env.TABLE_NAME!;
 const REGION = process.env.region!;
 
 const DDB = DynamoDBDocument.from(new DynamoDB({ region: REGION }));

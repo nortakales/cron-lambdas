@@ -19,10 +19,11 @@ export class AutoxReminderCron extends cdk.Construct {
             entry: __dirname + '/../../lambda/autox-reminder-lambda.ts',
             handler: 'handler',
             environment: {
-                emailList: "nortakales@gmail.com",
-                from: "nortakales@gmail.com",
-                subject: "Test",
-                tableName: config.autoxReminder.dynamoTableName
+                EMAIL_LIST: "nortakales@gmail.com",
+                FROM: "nortakales@gmail.com",
+                SUBJECT: "Test",
+                TABLE_NAME: config.autoxReminder.dynamoTableName,
+                REGION: "us-west-2"
             }
         });
         /*
@@ -32,17 +33,17 @@ export class AutoxReminderCron extends cdk.Construct {
                     code: lambda.Code.fromAsset('lambda'),
                     handler: 'autox-reminder-lambda.handler',
                     environment: {
-                        emailList: "nortakales@gmail.com",
-                        from: "nortakales@gmail.com",
-                        subject: "Test",
-                        tableName: config.autoxReminder.dynamoTableName
+                        EMAIL_LIST: "nortakales@gmail.com",
+                        FROM: "nortakales@gmail.com",
+                        SUBJECT: "Test",
+                        TABLE_NAME: config.autoxReminder.dynamoTableName
                     }
                     /*
                     environment: {
-                        emailList: config.autoxReminder.emailList.join(','),
-                        from: config.autoxReminder.fromEmail,
-                        subject: config.autoxReminder.emailSubject,
-                        tableName: config.autoxReminder.dynamoTableName
+                        EMAIL_LIST: config.autoxReminder.emailList.join(','),
+                        FROM: config.autoxReminder.fromEmail,
+                        SUBJECT: config.autoxReminder.emailSubject,
+                        TABLE_NAME: config.autoxReminder.dynamoTableName
                     }
                     
                 });*/
