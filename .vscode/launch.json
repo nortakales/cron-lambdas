@@ -1,0 +1,52 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Weather Reminder",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/lambda/weather-alert-lambda.ts",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "${defaultBuildTask}",
+            "env": {
+                "EMAIL_LIST": "nortakales@gmail.com",
+                "SUBJECT": "Test Weather Alert",
+                "FROM": "nortakales@gmail.com",
+                "API_KEY": "c6eaff3ab2bec2990b0df6123e69b74e",
+                "LATITUDE": "47.806994",
+                "LONGITUDE": "-122.192443",
+                "ENABLED": "true",
+                "REGION": "us-west-2"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Autox Reminder",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/lambda/autox-reminder-lambda.ts",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "${defaultBuildTask}",
+            "env": {
+                "EMAIL_LIST": "nortakales@gmail.com",
+                "SUBJECT": "Test Autox Alert",
+                "FROM": "nortakales@gmail.com",
+                "TABLE_NAME": "autox_reminder_urls",
+                "ENABLED": "true",
+                "REGION": "us-west-2"
+            }
+        }
+    ]
+}

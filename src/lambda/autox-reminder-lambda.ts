@@ -14,7 +14,8 @@ const EMAIL_LIST = process.env.EMAIL_LIST!;
 const SUBJECT = process.env.SUBJECT!;
 const FROM = process.env.FROM!;
 const TABLE_NAME = process.env.TABLE_NAME!;
-const REGION = process.env.region!;
+const REGION = process.env.REGION!;
+const ENABLED = process.env.ENABLED!;
 
 const DDB = DynamoDBDocument.from(new DynamoDB({ region: REGION }));
 
@@ -174,6 +175,10 @@ async function sendEmail(urls: UrlMatch[]) {
 }
 
 exports.handler = async (event = {}) => {
+    if (ENABLED !== 'true') {
+        console.log("Autox Reminder is not enabled, exiting...");
+        return;
+    }
 
     console.log("Running...");
 
@@ -188,5 +193,5 @@ exports.handler = async (event = {}) => {
     await sendEmail(newUrls);
 };
 
-// Uncomment this to call locally through ts-node
+// Uncomment this to call locally
 // exports.handler();

@@ -1,7 +1,11 @@
 {
+    "base": {
+        "region": "us-west-2"
+    },
     "autoxReminder": {
-        "dynamoTableName": "autox_reminder_urls",
+        "enabled": "true",
         "rate": "rate(1 hour)",
+        "dynamoTableName": "autox_reminder_urls",
         "fromEmail": "nortakales@gmail.com",
         "emailSubject": "Evergreen Autox Alert",
         "emailList": [
@@ -12,5 +16,17 @@
             "sungcampbell@gmail.com",
             "nathan.olotoa@hotmail.com"
         ]
+    },
+    "weatherAlert": {
+        "enabled": "false",
+        "rate": "rate(1 hour)",
+        "fromEmail": "nortakales@gmail.com",
+        "emailSubject": "Weather Alert",
+        "emailList": [
+            "nortakales@gmail.com"
+        ],
+        "apiKey": "c6eaff3ab2bec2990b0df6123e69b74e",
+        "latitude": "47.806994",
+        "longitude": "-122.192443"
     }
 }

@@ -8,8 +8,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk",
-    "test-autox": "emailList=nortakales@gmail.com subject=Test from=nortakales@gmail.com tableName=autox_reminder_urls region=us-west-2 ts-node src/lambda/autox-reminder-lambda.ts"
+    "cdk": "cdk"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.81",

@@ -23,7 +23,8 @@ export class AutoxReminderCron extends cdk.Construct {
                 FROM: config.autoxReminder.fromEmail,
                 SUBJECT: config.autoxReminder.emailSubject,
                 TABLE_NAME: config.autoxReminder.dynamoTableName,
-                REGION: "us-west-2"
+                ENABLED: config.autoxReminder.enabled,
+                REGION: config.base.region
             }
         });
         /*
