@@ -25,7 +25,8 @@ export class AutoxReminderCron extends cdk.Construct {
                 TABLE_NAME: config.autoxReminder.dynamoTableName,
                 ENABLED: config.autoxReminder.enabled,
                 REGION: config.base.region
-            }
+            },
+            timeout: cdk.Duration.seconds(10)
         });
         /*
                 const lambdaFunction = new lambda.Function(this, 'AutoxReminderLambdaFunction', {
