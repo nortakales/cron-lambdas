@@ -18,7 +18,7 @@
         ]
     },
     "weatherAlert": {
-        "enabled": "false",
+        "enabled": "true",
         "rate": "rate(1 hour)",
         "fromEmail": "nortakales@gmail.com",
         "emailSubject": "Weather Alert",

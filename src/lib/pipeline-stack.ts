@@ -35,7 +35,6 @@ export class CDKPipelineStack extends cdk.Stack {
                 cloudAssemblyArtifact,
                 installCommand: 'npm i -g npm@7 && npm ci', // Upgrading to npm 7 is necessary or npm ci fails
                 buildCommand: 'npm run build'
-
             })
         })
 
