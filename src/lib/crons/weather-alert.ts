@@ -27,7 +27,8 @@ export class WeatherAlertCron extends cdk.Construct {
                 LONGITUDE: config.weatherAlert.longitude,
                 ENABLED: config.weatherAlert.enabled,
                 REGION: config.base.region
-            }
+            },
+
         });
 
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
