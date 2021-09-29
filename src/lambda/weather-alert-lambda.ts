@@ -71,7 +71,7 @@ exports.handler = async (event = {}) => {
         alerts = 'No alerts!';
     }
 
-    sendEmail(alerts)
+    await sendEmail(alerts)
 
     console.log("Complete");
 };
