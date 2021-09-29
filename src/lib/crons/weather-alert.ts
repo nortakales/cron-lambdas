@@ -50,6 +50,7 @@ export class WeatherAlertCron extends cdk.Construct {
         // dynamoTable.grantReadWriteData(lambdaFunction);
 
         const schedule = new Rule(this, 'WeatherAlertSchedule', {
+            ruleName: 'WeatherAlertSchedule',
             // Supports minute(s), hour(s), day(s):
             // https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
             schedule: Schedule.expression(config.autoxReminder.rate),
