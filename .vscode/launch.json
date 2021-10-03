@@ -47,6 +47,19 @@
                 "ENABLED": "true",
                 "REGION": "us-west-2"
             }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Current File",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${file}",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "${defaultBuildTask}"
         }
     ]
 }
