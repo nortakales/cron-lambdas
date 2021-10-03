@@ -16,7 +16,7 @@ export class WeatherAlertCron extends cdk.Construct {
         const lambdaFunction = new nodejslambda.NodejsFunction(this, 'WeatherAlertLambdaFunction', {
             functionName: 'WeatherAlertCronLambda',
             runtime: lambda.Runtime.NODEJS_14_X,
-            entry: __dirname + '/../../lambda/weather-alert-lambda.ts',
+            entry: __dirname + '/../../lambda/weather/weather-alert-lambda.ts',
             handler: 'handler',
             environment: {
                 EMAIL_LIST: config.weatherAlert.emailList.join(','),

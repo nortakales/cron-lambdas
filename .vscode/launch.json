@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/lambda/weather-alert-lambda.ts",
+            "program": "${workspaceFolder}/src/lambda/weather/weather-alert-lambda.ts",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
