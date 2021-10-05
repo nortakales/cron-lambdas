@@ -16,7 +16,7 @@
     "aws-cdk": "1.117.0",
     "esbuild": "^0.12.19",
     "ts-node": "^10.2.0",
-    "typescript": "^3.9.10"
+    "typescript": "^4.4.3"
   },
   "dependencies": {
     "@aws-cdk/aws-codepipeline": "^1.117.0",
