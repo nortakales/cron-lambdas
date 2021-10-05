@@ -19,11 +19,16 @@ export async function sendPushNotification(title: string, message: string) {
         priority: 0
     }
 
-    await pushService.send(notification, function (error: any, result: any) {
-        if (error) {
-            throw error;
-        }
+    const promise = new Promise<void>((resolve, reject) => {
+        pushService.send(notification, function (error: any, result: any) {
+            if (error) {
+                reject(error);
+            }
 
-        console.log("Notification result: " + result);
-    })
+            console.log("Notification result: " + result);
+            resolve();
+        })
+    });
+
+    return promise;
 }
