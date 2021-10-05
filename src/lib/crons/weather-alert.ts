@@ -26,7 +26,8 @@ export class WeatherAlertCron extends cdk.Construct {
                 LATITUDE: config.weatherAlert.latitude,
                 LONGITUDE: config.weatherAlert.longitude,
                 ENABLED: config.weatherAlert.enabled,
-                REGION: config.base.region
+                REGION: config.base.region,
+                TABLE_NAME: config.weatherAlert.trackingDynamoTableName,
             },
             timeout: cdk.Duration.seconds(10)
         });
@@ -37,17 +38,17 @@ export class WeatherAlertCron extends cdk.Construct {
             effect: iam.Effect.ALLOW,
         }));
 
-        // const dynamoTable = new dynamodb.Table(this, 'AutoxReminderDynamoTable', {
-        //     partitionKey: {
-        //         name: 'url',
-        //         type: dynamodb.AttributeType.STRING
-        //     },
-        //     billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-        //     removalPolicy: cdk.RemovalPolicy.RETAIN,
-        //     tableName: config.autoxReminder.dynamoTableName
-        // });
+        const dynamoTable = new dynamodb.Table(this, 'WeatherAlertTrackingDynamoTable', {
+            partitionKey: {
+                name: 'alertKey',
+                type: dynamodb.AttributeType.STRING
+            },
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+            removalPolicy: cdk.RemovalPolicy.RETAIN,
+            tableName: config.weatherAlert.trackingDynamoTableName
+        });
 
-        // dynamoTable.grantReadWriteData(lambdaFunction);
+        dynamoTable.grantReadWriteData(lambdaFunction);
 
         const schedule = new Rule(this, 'WeatherAlertSchedule', {
             ruleName: 'WeatherAlertSchedule',

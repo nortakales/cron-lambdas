@@ -36,7 +36,9 @@ export class CDKPipelineStack extends cdk.Stack {
                 installCommand: 'npm i -g npm@7 && npm ci', // Upgrading to npm 7 is necessary or npm ci fails
                 buildCommand: 'npm run build'
             })
-        })
+        });
+
+        // TODO A Lambda monitor to monitor for errors specifically for this
 
         const deploy = new DeployCronLambdaStage(this, 'DeployCronLambdaStage');
         pipeline.addApplicationStage(deploy);

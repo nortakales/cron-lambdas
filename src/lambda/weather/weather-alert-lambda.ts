@@ -1,56 +1,100 @@
-
-import * as HTTPS from 'https';
 import { sendEmail } from '../emailer';
-import { DailyWindAlert } from './alerts/daily-wind-alert';
-import { Alert } from './interfaces/alert-types';
+import { sendPushNotification } from '../notifier';
+import { BiDaily48HourWindAlert } from './alerts/bidaily-48-hour-wind-alert';
+import { Daily7DayWindAlert } from './alerts/daily-7-day-wind-alert';
+import { Alert, AlertFrequency, NotificationType } from './interfaces/alert-types';
 import { WeatherData } from './interfaces/data';
+import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
+import { DynamoDB } from "@aws-sdk/client-dynamodb";
+import { httpsGet } from '../http';
 
 const API_KEY = process.env.API_KEY!;
 const LATITUDE = process.env.LATITUDE!;
 const LONGITUDE = process.env.LONGITUDE!;
 const ENABLED = process.env.ENABLED!;
+const REGION = process.env.REGION!;
+const TABLE_NAME = process.env.TABLE_NAME!;
 
-async function httpsGet(url: string): Promise<string> {
+const DDB = DynamoDBDocument.from(new DynamoDB({ region: REGION }));
 
-    console.log("Getting " + url);
+async function getLastTimestamp(alertKey: string) {
 
-    return new Promise(function (resolve, reject) {
+    const item = await DDB.get({
+        TableName: TABLE_NAME,
+        Key: {
+            alertKey: alertKey
+        }
+    });
 
-        const options = {
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-        };
+    if (item.Item !== undefined) {
+        console.log("Found in DDB: " + item.Item.alertKey + " " + item.Item.lastTimestamp);
+    }
 
-        var request = HTTPS.get(url, options, (response) => {
+    return item.Item;
+}
 
-            if (response?.statusCode === undefined ||
-                response.statusCode < 200 ||
-                response.statusCode >= 300) {
-                return reject(new Error('statusCode=' + response.statusCode));
-            }
+async function updateLastTimestamp(alertKey: string, lastTimestamp: string) {
 
-            let data = '';
+    console.log("Writing to DDB: " + alertKey + " " + lastTimestamp);
 
-            response.on('data', (chunk) => {
-                console.log("Retrieving data");
-                data += chunk;
-            });
-
-            response.on('end', () => {
-                console.log("Ended data transfer");
-                resolve(data);
-            });
-
-        }).on("error", (err) => {
-            console.log("Error: " + err.message);
-            reject(err.message);
-        });
-
-        request.end();
+    await DDB.put({
+        TableName: TABLE_NAME,
+        Item: {
+            alertKey: alertKey,
+            lastTimestamp: lastTimestamp
+        }
     });
 }
 
+const isoOptions: Intl.DateTimeFormatOptions = {
+    timeZone: 'America/Los_Angeles',
+    dateStyle: 'full',
+    timeStyle: 'full',
+    timeZoneName: 'short'
+}
+
+const allowableOffset = 600 * 1000; // 10 minutes
+
+async function shouldRunAlert(alert: Alert) {
+
+    const currentTime = new Date();
+    const currentTimeIso = currentTime.toLocaleString('en-US', isoOptions);
+    let runAlert = true;
+
+    const item = await getLastTimestamp(alert.alertKey);
+
+    if (item?.lastTimestamp) {
+        const lastAlertTime = new Date(item.lastTimestamp);
+        console.log("Comparing " + lastAlertTime.toLocaleString('en-US', isoOptions), + " and " + currentTimeIso);
+
+        let timeComparison = 3600 * 1000; // Smallest value, 1 hour in millis
+
+        if (alert.frequency === AlertFrequency.DAILY) {
+            timeComparison = 86400 * 1000; // 1 day in millis
+        }
+        if (alert.frequency === AlertFrequency.BIDAILY) {
+            timeComparison = 86400 / 2 * 1000; // 12 hours in millis
+        }
+
+        timeComparison -= allowableOffset;
+
+        if (currentTime.getTime() - lastAlertTime.getTime() < timeComparison) {
+            console.log("Not enough time has passed to run " + alert.alertKey);
+            runAlert = false;
+        }
+    } else {
+        console.log("No timestamp for alert <" + alert.alertKey + ">");
+    }
+
+    console.log("Updating timestamp for alert <" + alert.alertKey + ">, at " + currentTimeIso);
+    updateLastTimestamp(alert.alertKey, currentTimeIso);
+
+    return runAlert;
+}
+
 const alerts: Alert[] = [
-    new DailyWindAlert()
+    new Daily7DayWindAlert(),
+    new BiDaily48HourWindAlert()
 ];
 
 exports.handler = async (event = {}) => {
@@ -67,21 +111,44 @@ exports.handler = async (event = {}) => {
     const weatherData: WeatherData = JSON.parse(data);
 
     let hasAlerts = false;
-    let alertBody = '';
+    let hasEmailAlert = false;
+    let hasPushAlert = false;
+    let emailAlertBody = '';
+    let pushAlertBody = '';
 
     for (let alert of alerts) {
+
+        if (!shouldRunAlert(alert)) {
+            continue;
+        }
+
         const alertData = alert.process(weatherData);
         if (alertData.hasAlert) {
             hasAlerts = true;
-            alertBody += alertData.alertMessage + '\n\n';
+            if (alertData.notificationType === NotificationType.EMAIL || alertData.notificationType === NotificationType.EMAIL_AND_PUSH) {
+                hasEmailAlert = true;
+                emailAlertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
+            }
+            if (alertData.notificationType === NotificationType.PUSH || alertData.notificationType === NotificationType.EMAIL_AND_PUSH) {
+                hasPushAlert = true;
+                pushAlertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
+            }
         }
     }
 
     if (!hasAlerts) {
-        alertBody = 'No alerts!';
+        console.log("No alerts!");
+        console.log("Complete");
+        return;
     }
 
-    await sendEmail(alertBody)
+    if (hasEmailAlert) {
+        await sendEmail(emailAlertBody);
+    }
+
+    if (hasPushAlert) {
+        await sendPushNotification("Weather Alert", pushAlertBody);
+    }
 
     console.log("Complete");
 };
@@ -89,4 +156,4 @@ exports.handler = async (event = {}) => {
 
 
 // Uncomment this to call locally
-// exports.handler();
+exports.handler();

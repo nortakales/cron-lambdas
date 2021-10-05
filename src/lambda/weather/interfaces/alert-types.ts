@@ -15,7 +15,8 @@ export interface AlertData {
 
 export enum AlertFrequency {
     HOURLY,
-    DAILY
+    BIDAILY,
+    DAILY,
 }
 
 export enum NotificationType {

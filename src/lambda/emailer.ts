@@ -12,6 +12,9 @@ AWS.config.update(awsOptions);
 const SES = new AWS.SES(awsOptions);
 
 export async function sendEmail(body: string) {
+
+    console.log("Sending email");
+
     var params: AWS.SES.SendEmailRequest = {
         Destination: {
             ToAddresses: EMAIL_LIST.split(","),
