@@ -7,6 +7,7 @@ import { WeatherData } from './interfaces/data';
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import { httpsGet } from '../http';
+import { toIsoString } from './utilities';
 
 const API_KEY = process.env.API_KEY!;
 const LATITUDE = process.env.LATITUDE!;
@@ -46,26 +47,18 @@ async function updateLastTimestamp(alertKey: string, lastTimestamp: string) {
     });
 }
 
-const isoOptions: Intl.DateTimeFormatOptions = {
-    timeZone: 'America/Los_Angeles',
-    dateStyle: 'full',
-    timeStyle: 'full',
-    timeZoneName: 'short'
-}
-
 const allowableOffset = 600 * 1000; // 10 minutes
 
 async function shouldRunAlert(alert: Alert) {
 
     const currentTime = new Date();
-    const currentTimeIso = currentTime.toLocaleString('en-US', isoOptions);
     let runAlert = true;
 
     const item = await getLastTimestamp(alert.alertKey);
 
     if (item?.lastTimestamp) {
         const lastAlertTime = new Date(item.lastTimestamp);
-        console.log("Comparing " + lastAlertTime.toLocaleString('en-US', isoOptions), + " and " + currentTimeIso);
+        console.log("Comparing " + toIsoString(lastAlertTime) + " and " + toIsoString(currentTime));
 
         let timeComparison = 3600 * 1000; // Smallest value, 1 hour in millis
 
@@ -86,8 +79,10 @@ async function shouldRunAlert(alert: Alert) {
         console.log("No timestamp for alert <" + alert.alertKey + ">");
     }
 
-    console.log("Updating timestamp for alert <" + alert.alertKey + ">, at " + currentTimeIso);
-    updateLastTimestamp(alert.alertKey, currentTimeIso);
+    if (runAlert) {
+        console.log("Updating timestamp for alert " + alert.alertKey + " to " + toIsoString(currentTime));
+        await updateLastTimestamp(alert.alertKey, toIsoString(currentTime));
+    }
 
     return runAlert;
 }
@@ -118,7 +113,8 @@ exports.handler = async (event = {}) => {
 
     for (let alert of alerts) {
 
-        if (!shouldRunAlert(alert)) {
+        let runAlert = await shouldRunAlert(alert);
+        if (!runAlert) {
             continue;
         }
 
@@ -156,4 +152,4 @@ exports.handler = async (event = {}) => {
 
 
 // Uncomment this to call locally
-exports.handler();
+// exports.handler();

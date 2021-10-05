@@ -24,7 +24,8 @@
                 "LATITUDE": "47.806994",
                 "LONGITUDE": "-122.192443",
                 "ENABLED": "true",
-                "REGION": "us-west-2"
+                "REGION": "us-west-2",
+                "TABLE_NAME": "weather_alert_tracker"
             }
         },
         {
