@@ -58,7 +58,6 @@ async function shouldRunAlert(alert: Alert) {
 
     if (item?.lastTimestamp) {
         const lastAlertTime = new Date(item.lastTimestamp);
-        console.log("Comparing " + toIsoString(lastAlertTime) + " and " + toIsoString(currentTime));
 
         let timeComparison = 3600 * 1000; // Smallest value, 1 hour in millis
 
@@ -69,7 +68,13 @@ async function shouldRunAlert(alert: Alert) {
             timeComparison = 86400 / 2 * 1000; // 12 hours in millis
         }
 
+        console.log("Comparing " + toIsoString(lastAlertTime) + " and " + toIsoString(currentTime));
+        console.log("Last alert time: " + lastAlertTime.getTime());
+        console.log("Current time: " + currentTime.getTime());
+
         timeComparison -= allowableOffset;
+
+        console.log("Time comparison including offset: " + timeComparison);
 
         if (currentTime.getTime() - lastAlertTime.getTime() < timeComparison) {
             console.log("Not enough time has passed to run " + alert.alertKey);
