@@ -4,7 +4,7 @@ import { getDirectionFromDegrees } from "../utilities";
 
 export class BiDaily48HourWindAlert implements Alert {
 
-    frequency = AlertFrequency.DAILY;
+    frequency = AlertFrequency.BIDAILY;
     alertTitle = "48 Hour Wind Alert";
     alertKey = "bidaily-48-hour-wind-alert";
 
