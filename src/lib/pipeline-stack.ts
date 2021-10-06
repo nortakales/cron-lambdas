@@ -46,13 +46,14 @@ export class CDKPipelineStack extends cdk.Stack {
         pipeline.addApplicationStage(deploy);
 
 
-        const pipelineTopic = new sns.Topic(this, 'CronLambdaPipelineTopic', {
-            topicName: 'CronLambdaPipelineTopic',
-            displayName: 'CronLambdaPipelineTopic'
+        const pipelineTopic = new sns.Topic(this, 'CronLambdaPipelineNotificationTopic', {
+            topicName: 'CronLambdaPipelineNotificationTopic',
+            displayName: 'Cron Lambda Pipeline Notification'
         });
         pipelineTopic.addSubscription(new subscriptions.EmailSubscription(config.base.infrastructureAlertEmail));
 
-        new notifications.NotificationRule(this, 'NotificationRule', {
+        new notifications.NotificationRule(this, 'CronLambdaPipelineNotificationRule', {
+            notificationRuleName: 'CronLambdaPipelineNotificationRule',
             source: pipeline.codePipeline,
             events: [
                 'codepipeline-pipeline-action-execution-failed',

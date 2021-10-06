@@ -6,12 +6,20 @@ import * as iam from '@aws-cdk/aws-iam';
 import { Schedule, Rule } from '@aws-cdk/aws-events'
 import { LambdaFunction } from '@aws-cdk/aws-events-targets'
 import * as config from '../../config/config.json'
-import * as path from 'path';
+import * as actions from '@aws-cdk/aws-cloudwatch-actions';
+import * as sns from '@aws-cdk/aws-sns';
+import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
 
 export class AutoxReminderCron extends cdk.Construct {
 
     constructor(scope: cdk.Construct, id: string) {
         super(scope, id);
+
+        const errorTopic = new sns.Topic(this, 'AutoxReminderErrorTopic', {
+            topicName: 'AutoxReminderErrorTopic',
+            displayName: 'Autox Reminder Error Notification'
+        });
+        errorTopic.addSubscription(new subscriptions.EmailSubscription(config.base.infrastructureAlertEmail));
 
         const lambdaFunction = new nodejslambda.NodejsFunction(this, 'AutoxReminderLambdaFunction', {
             functionName: 'AutoxReminderLambda',
@@ -49,6 +57,14 @@ export class AutoxReminderCron extends cdk.Construct {
                     }
                     
                 });*/
+
+
+        const alarm = lambdaFunction.metricErrors().createAlarm(this, 'AutoxReminderErrorsMonitor', {
+            alarmName: 'AutoxReminderErrorsMonitor',
+            threshold: 1,
+            evaluationPeriods: 1,
+        });
+        alarm.addAlarmAction(new actions.SnsAction(errorTopic));
 
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
             actions: ['ses:SendEmail'],

@@ -6,7 +6,6 @@ import * as iam from '@aws-cdk/aws-iam';
 import { Schedule, Rule } from '@aws-cdk/aws-events'
 import { LambdaFunction } from '@aws-cdk/aws-events-targets'
 import * as config from '../../config/config.json'
-import * as path from 'path';
 import * as actions from '@aws-cdk/aws-cloudwatch-actions';
 import * as sns from '@aws-cdk/aws-sns';
 import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
@@ -18,7 +17,7 @@ export class WeatherAlertCron extends cdk.Construct {
 
         const errorTopic = new sns.Topic(this, 'WeatherAlertErrorTopic', {
             topicName: 'WeatherAlertErrorTopic',
-            displayName: 'WeatherAlertErrorTopic'
+            displayName: 'Weather Alert Error Notification'
         });
         errorTopic.addSubscription(new subscriptions.EmailSubscription(config.base.infrastructureAlertEmail));
 
