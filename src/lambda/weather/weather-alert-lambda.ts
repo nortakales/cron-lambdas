@@ -15,6 +15,9 @@ const LONGITUDE = process.env.LONGITUDE!;
 const ENABLED = process.env.ENABLED!;
 const REGION = process.env.REGION!;
 const TABLE_NAME = process.env.TABLE_NAME!;
+const EMAIL_LIST = process.env.EMAIL_LIST!;
+const SUBJECT = process.env.SUBJECT!;
+const FROM = process.env.FROM!;
 
 const DDB = DynamoDBDocument.from(new DynamoDB({ region: REGION }));
 
@@ -144,7 +147,12 @@ exports.handler = async (event = {}) => {
     }
 
     if (hasEmailAlert) {
-        await sendEmail(emailAlertBody);
+        await sendEmail({
+            toAddresses: EMAIL_LIST.split(','),
+            fromAddress: FROM,
+            subject: SUBJECT,
+            body: emailAlertBody
+        });
     }
 
     if (hasPushAlert) {

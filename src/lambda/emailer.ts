@@ -1,9 +1,6 @@
 import * as AWS from 'aws-sdk';
 
 const REGION = process.env.REGION!;
-const EMAIL_LIST = process.env.EMAIL_LIST!;
-const SUBJECT = process.env.SUBJECT!;
-const FROM = process.env.FROM!;
 
 const awsOptions: AWS.ConfigurationOptions = {
     region: REGION
@@ -11,23 +8,30 @@ const awsOptions: AWS.ConfigurationOptions = {
 AWS.config.update(awsOptions);
 const SES = new AWS.SES(awsOptions);
 
-export async function sendEmail(body: string) {
+export async function sendEmail(options: SendEmailOptions) {
 
     console.log("Sending email");
 
     var params: AWS.SES.SendEmailRequest = {
         Destination: {
-            ToAddresses: EMAIL_LIST.split(","),
+            ToAddresses: options.toAddresses,
         },
         Message: {
             Body: {
-                Text: { Data: body },
+                Text: { Data: options.body },
             },
 
-            Subject: { Data: SUBJECT },
+            Subject: { Data: options.subject },
         },
-        Source: FROM,
+        Source: options.fromAddress,
     };
 
     await SES.sendEmail(params).promise();
+}
+
+export interface SendEmailOptions {
+    toAddresses: string[],
+    body: string,
+    subject: string,
+    fromAddress: string
 }

@@ -29,3 +29,4 @@ TODO More reminders:
 * Use feels like temperature for anything?
 * do we care about sunrise/sunset, moonphase?
 * use alerts from their API
+* weekly forecast ? - this would really benefit from averaging across different sources

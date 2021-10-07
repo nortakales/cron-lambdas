@@ -1,8 +1,7 @@
-import * as AWS from 'aws-sdk';
-
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import { httpsGet } from './http';
+import { sendEmail } from './emailer';
 
 interface UrlMatch {
     fullMatch: string,
@@ -18,12 +17,6 @@ const REGION = process.env.REGION!;
 const ENABLED = process.env.ENABLED!;
 
 const DDB = DynamoDBDocument.from(new DynamoDB({ region: REGION }));
-
-const awsOptions: AWS.ConfigurationOptions = {
-    region: REGION
-};
-AWS.config.update(awsOptions);
-const SES = new AWS.SES(awsOptions);
 
 async function getUrlFromDDB(url: string) {
 
@@ -99,14 +92,7 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
     return newUrls;
 }
 
-async function sendEmail(urls: UrlMatch[]) {
-
-    if (urls == undefined || urls.length < 1) {
-        console.log("No email to send");
-        return;
-    }
-
-    console.log("Sending email");
+function createEmailBody(urls: UrlMatch[]): string {
 
     let emailBody = "New AutoX discovered:\n\n";
 
@@ -118,21 +104,7 @@ async function sendEmail(urls: UrlMatch[]) {
     console.log(emailBody);
     console.log("End email body -----------");
 
-    var params: AWS.SES.SendEmailRequest = {
-        Destination: {
-            ToAddresses: EMAIL_LIST.split(","),
-        },
-        Message: {
-            Body: {
-                Text: { Data: emailBody },
-            },
-
-            Subject: { Data: SUBJECT },
-        },
-        Source: FROM,
-    };
-
-    return SES.sendEmail(params).promise();
+    return emailBody;
 }
 
 exports.handler = async (event = {}) => {
@@ -151,7 +123,14 @@ exports.handler = async (event = {}) => {
         return;
     }
 
-    await sendEmail(newUrls);
+    const emailBody = createEmailBody(newUrls);
+
+    await sendEmail({
+        toAddresses: EMAIL_LIST.split(','),
+        fromAddress: FROM,
+        subject: SUBJECT,
+        body: emailBody
+    });
 };
 
 // Uncomment this to call locally
