@@ -1,7 +1,12 @@
-import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
-import { DynamoDB } from "@aws-sdk/client-dynamodb";
-import { httpsGet } from './http';
-import { sendEmail } from './emailer';
+import { httpsGet } from '../http';
+import { sendEmail } from '../emailer';
+import * as DDB from '../dynamo';
+
+const EMAIL_LIST = process.env.EMAIL_LIST!;
+const SUBJECT = process.env.SUBJECT!;
+const FROM = process.env.FROM!;
+const TABLE_NAME = process.env.TABLE_NAME!;
+const ENABLED = process.env.ENABLED!;
 
 interface UrlMatch {
     fullMatch: string,
@@ -9,41 +14,16 @@ interface UrlMatch {
     name: string,
 }
 
-const EMAIL_LIST = process.env.EMAIL_LIST!;
-const SUBJECT = process.env.SUBJECT!;
-const FROM = process.env.FROM!;
-const TABLE_NAME = process.env.TABLE_NAME!;
-const REGION = process.env.REGION!;
-const ENABLED = process.env.ENABLED!;
-
-const DDB = DynamoDBDocument.from(new DynamoDB({ region: REGION }));
-
 async function getUrlFromDDB(url: string) {
-
-    const item = await DDB.get({
-        TableName: TABLE_NAME,
-        Key: {
-            url: url
-        }
+    return await DDB.get(TABLE_NAME, {
+        url: url
     });
-
-    if (item.Item !== undefined) {
-        console.log("Found in DDB: " + item.Item.url + " " + item.Item.name);
-    }
-
-    return item.Item;
 }
 
 async function writeUrlToDDB(url: string, name: string) {
-
-    console.log("Writing to DDB: " + url + " " + name);
-
-    await DDB.put({
-        TableName: TABLE_NAME,
-        Item: {
-            url: url,
-            name: name
-        }
+    await DDB.put(TABLE_NAME, {
+        url: url,
+        name: name
     });
 }
 

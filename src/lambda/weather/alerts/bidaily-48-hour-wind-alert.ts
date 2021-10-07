@@ -1,10 +1,11 @@
-import { Alert, AlertData, AlertFrequency, NotificationType } from "../interfaces/alert-types";
+import { Duration } from "typed-duration";
+import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import { WeatherData } from "../interfaces/data";
 import { getDirectionFromDegrees } from "../utilities";
 
 export class BiDaily48HourWindAlert implements Alert {
 
-    frequency = AlertFrequency.BIDAILY;
+    interval = Duration.hours.of(12);
     alertTitle = "48 Hour Wind Alert";
     alertKey = "bidaily-48-hour-wind-alert";
 

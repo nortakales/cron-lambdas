@@ -2,55 +2,37 @@ import { sendEmail } from '../emailer';
 import { sendPushNotification } from '../notifier';
 import { BiDaily48HourWindAlert } from './alerts/bidaily-48-hour-wind-alert';
 import { Daily7DayWindAlert } from './alerts/daily-7-day-wind-alert';
-import { Alert, AlertFrequency, NotificationType } from './interfaces/alert-types';
+import { Alert, NotificationType } from './interfaces/alert-types';
 import { WeatherData } from './interfaces/data';
-import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
-import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import { httpsGet } from '../http';
 import { toIsoString } from './utilities';
+import { Duration } from "typed-duration";
+import * as DDB from '../dynamo';
 
 const API_KEY = process.env.API_KEY!;
 const LATITUDE = process.env.LATITUDE!;
 const LONGITUDE = process.env.LONGITUDE!;
 const ENABLED = process.env.ENABLED!;
-const REGION = process.env.REGION!;
 const TABLE_NAME = process.env.TABLE_NAME!;
 const EMAIL_LIST = process.env.EMAIL_LIST!;
 const SUBJECT = process.env.SUBJECT!;
 const FROM = process.env.FROM!;
 
-const DDB = DynamoDBDocument.from(new DynamoDB({ region: REGION }));
 
 async function getLastTimestamp(alertKey: string) {
-
-    const item = await DDB.get({
-        TableName: TABLE_NAME,
-        Key: {
-            alertKey: alertKey
-        }
+    return await DDB.get(TABLE_NAME, {
+        alertKey: alertKey
     });
-
-    if (item.Item !== undefined) {
-        console.log("Found in DDB: " + item.Item.alertKey + " " + item.Item.lastTimestamp);
-    }
-
-    return item.Item;
 }
 
 async function updateLastTimestamp(alertKey: string, lastTimestamp: string) {
-
-    console.log("Writing to DDB: " + alertKey + " " + lastTimestamp);
-
-    await DDB.put({
-        TableName: TABLE_NAME,
-        Item: {
-            alertKey: alertKey,
-            lastTimestamp: lastTimestamp
-        }
-    });
+    await DDB.put(TABLE_NAME, {
+        alertKey: alertKey,
+        lastTimestamp: lastTimestamp
+    })
 }
 
-const allowableOffset = 600 * 1000; // 10 minutes
+const allowableOffset = Duration.minutes.of(10);
 
 async function shouldRunAlert(alert: Alert) {
 
@@ -62,22 +44,10 @@ async function shouldRunAlert(alert: Alert) {
     if (item?.lastTimestamp) {
         const lastAlertTime = new Date(item.lastTimestamp);
 
-        let timeComparison = 3600 * 1000; // Smallest value, 1 hour in millis
+        let timeComparison = Duration.milliseconds.from(alert.interval) - Duration.milliseconds.from(allowableOffset);
 
-        if (alert.frequency === AlertFrequency.DAILY) {
-            timeComparison = 86400 * 1000; // 1 day in millis
-        }
-        if (alert.frequency === AlertFrequency.BIDAILY) {
-            timeComparison = 86400 / 2 * 1000; // 12 hours in millis
-        }
-
-        console.log("Comparing " + toIsoString(lastAlertTime) + " and " + toIsoString(currentTime));
-        console.log("Last alert time: " + lastAlertTime.getTime());
-        console.log("Current time: " + currentTime.getTime());
-
-        timeComparison -= allowableOffset;
-
-        console.log("Time comparison including offset: " + timeComparison);
+        console.log("Last alert time: " + lastAlertTime.getTime() + " / " + toIsoString(lastAlertTime));
+        console.log("Current time: " + currentTime.getTime() + " / " + toIsoString(currentTime));
 
         if (currentTime.getTime() - lastAlertTime.getTime() < timeComparison) {
             console.log("Not enough time has passed to run " + alert.alertKey);
@@ -112,6 +82,7 @@ exports.handler = async (event = {}) => {
 
     const data = await httpsGet(url);
     const weatherData: WeatherData = JSON.parse(data);
+    console.log(JSON.stringify(weatherData, null, 2));
 
     let hasAlerts = false;
     let hasEmailAlert = false;
@@ -165,4 +136,4 @@ exports.handler = async (event = {}) => {
 
 
 // Uncomment this to call locally
-// exports.handler();
+exports.handler();

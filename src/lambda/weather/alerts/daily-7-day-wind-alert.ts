@@ -1,10 +1,11 @@
-import { Alert, AlertData, AlertFrequency, NotificationType } from "../interfaces/alert-types";
+import { Duration } from "typed-duration";
+import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import { WeatherData } from "../interfaces/data";
 import { getDirectionFromDegrees } from "../utilities";
 
 export class Daily7DayWindAlert implements Alert {
 
-    frequency = AlertFrequency.DAILY;
+    interval = Duration.days.of(1);
     alertTitle = "7 Day Wind Alert";
     alertKey = "daily-7-day-wind-alert";
 

@@ -32,6 +32,7 @@
     "@aws-sdk/client-dynamodb": "^3.25.0",
     "@aws-sdk/lib-dynamodb": "^3.25.0",
     "aws-sdk": "^2.964.0",
-    "pushover-notifications": "^1.2.2"
+    "pushover-notifications": "^1.2.2",
+    "typed-duration": "^1.0.13"
   }
 }

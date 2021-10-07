@@ -6,14 +6,12 @@ Runs once per hour and scrapes for any new Evergreen AutoX URLs. When new URLs a
 
 TODO: another good global install to add is `npm install -g ts-node`
 
-TODO: Is there anything from SES I can get into CDK? I manually set that config up I think
-TODO leverage utilities classes
+TODO: Is there anything from SES I can get into CDK? I manually set that config up I think - this might be used across many things though
 
 Had to upgrade deps to use nodejs lambda, then got crazy cryptic docker error, eventually had to `npm install --save-dev esbuild@0` to use esbuild instead, found that here: https://pypi.org/project/aws-cdk.aws-lambda-nodejs/
 
 ## Weather Reminder
 
-TODO cleanup code related to intervals and dates and times
 TODO More reminders:
 * heavy rainfall (this might need to be hourly or maybe even can look at minute data to get true downpours)
 * First below freezing (at night) temp of the year
