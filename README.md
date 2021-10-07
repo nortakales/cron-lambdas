@@ -7,5 +7,25 @@ Runs once per hour and scrapes for any new Evergreen AutoX URLs. When new URLs a
 TODO: another good global install to add is `npm install -g ts-node`
 
 TODO: Is there anything from SES I can get into CDK? I manually set that config up I think
+TODO leverage utilities classes
 
 Had to upgrade deps to use nodejs lambda, then got crazy cryptic docker error, eventually had to `npm install --save-dev esbuild@0` to use esbuild instead, found that here: https://pypi.org/project/aws-cdk.aws-lambda-nodejs/
+
+## Weather Reminder
+
+TODO cleanup code related to intervals and dates and times
+TODO More reminders:
+* heavy rainfall (this might need to be hourly or maybe even can look at minute data to get true downpours)
+* First below freezing (at night) temp of the year
+* snowfall
+* heat waves
+* Using historical data:
+  * record temps
+  * record rainfall
+  * record snowfall
+  * record wind
+  * record humidity
+* Are there any gaps where I should maybe notify on a quicker basis, like if the last 48 hour alert the wind didn't look too bad, but in the next few hours it did start to get bad, maybe a 3 hour look ahead for bad weather
+* Use feels like temperature for anything?
+* do we care about sunrise/sunset, moonphase?
+* use alerts from their API
