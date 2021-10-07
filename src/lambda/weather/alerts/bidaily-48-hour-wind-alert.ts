@@ -9,7 +9,10 @@ export class BiDaily48HourWindAlert implements Alert {
     alertTitle = "48 Hour Wind Alert";
     alertKey = "bidaily-48-hour-wind-alert";
 
-    process(weatherData: WeatherData): AlertData {
+    private readonly windSpeedThreshold = 25;
+    private readonly windGustThreshold = 25;
+
+    async process(weatherData: WeatherData) {
 
         console.log("Running " + this.alertTitle);
 
@@ -17,7 +20,7 @@ export class BiDaily48HourWindAlert implements Alert {
         let message = '';
 
         for (let hourlyData of weatherData.hourly) {
-            if (hourlyData.wind_speed > 25 || hourlyData.wind_gust > 25) {
+            if (hourlyData.wind_speed > this.windSpeedThreshold || hourlyData.wind_gust > this.windGustThreshold) {
                 hasAlert = true;
                 message += new Date(hourlyData.dt * 1000).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }) +
                     `: wind speed of ${hourlyData.wind_speed} mph and wind gust of ${hourlyData.wind_gust} mph blowing ${getDirectionFromDegrees(hourlyData.wind_deg)}\n`;

@@ -28,3 +28,5 @@ TODO More reminders:
 * do we care about sunrise/sunset, moonphase?
 * use alerts from their API
 * weekly forecast ? - this would really benefit from averaging across different sources
+
+TODO move all of this out of my main aws account

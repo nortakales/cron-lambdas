@@ -62,7 +62,8 @@ export class CDKPipelineStack extends cdk.Stack {
                 'codepipeline-pipeline-manual-approval-failed',
                 'codepipeline-pipeline-manual-approval-needed',
 
-                'codepipeline-pipeline-pipeline-execution-succeeded'
+                // Success was getting annoying
+                //'codepipeline-pipeline-pipeline-execution-succeeded'
             ],
             targets: [
                 pipelineTopic

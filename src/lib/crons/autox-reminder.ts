@@ -24,7 +24,7 @@ export class AutoxReminderCron extends cdk.Construct {
         const lambdaFunction = new nodejslambda.NodejsFunction(this, 'AutoxReminderLambdaFunction', {
             functionName: 'AutoxReminderLambda',
             runtime: lambda.Runtime.NODEJS_14_X,
-            entry: __dirname + '/../../lambda/autox-reminder-lambda.ts',
+            entry: __dirname + '/../../lambda/autox/autox-reminder-lambda.ts',
             handler: 'handler',
             environment: {
                 EMAIL_LIST: config.autoxReminder.emailList.join(','),

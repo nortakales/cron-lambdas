@@ -8,6 +8,7 @@ import { httpsGet } from '../http';
 import { toIsoString } from './utilities';
 import { Duration } from "typed-duration";
 import * as DDB from '../dynamo';
+import { YearlyFirstFreezeAlert } from './alerts/yearly-first-freeze-alert';
 
 const API_KEY = process.env.API_KEY!;
 const LATITUDE = process.env.LATITUDE!;
@@ -67,7 +68,8 @@ async function shouldRunAlert(alert: Alert) {
 
 const alerts: Alert[] = [
     new Daily7DayWindAlert(),
-    new BiDaily48HourWindAlert()
+    new BiDaily48HourWindAlert(),
+    new YearlyFirstFreezeAlert()
 ];
 
 exports.handler = async (event = {}) => {
@@ -82,7 +84,7 @@ exports.handler = async (event = {}) => {
 
     const data = await httpsGet(url);
     const weatherData: WeatherData = JSON.parse(data);
-    console.log(JSON.stringify(weatherData, null, 2));
+    //console.log(JSON.stringify(weatherData, null, 2));
 
     let hasAlerts = false;
     let hasEmailAlert = false;
@@ -97,7 +99,8 @@ exports.handler = async (event = {}) => {
             continue;
         }
 
-        const alertData = alert.process(weatherData);
+        const alertData = await alert.process(weatherData);
+
         if (alertData.hasAlert) {
             hasAlerts = true;
             if (alertData.notificationType === NotificationType.EMAIL || alertData.notificationType === NotificationType.EMAIL_AND_PUSH) {
@@ -132,8 +135,6 @@ exports.handler = async (event = {}) => {
 
     console.log("Complete");
 };
-
-
 
 // Uncomment this to call locally
 // exports.handler();

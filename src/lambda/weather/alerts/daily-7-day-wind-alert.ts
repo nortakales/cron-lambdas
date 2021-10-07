@@ -9,7 +9,10 @@ export class Daily7DayWindAlert implements Alert {
     alertTitle = "7 Day Wind Alert";
     alertKey = "daily-7-day-wind-alert";
 
-    process(weatherData: WeatherData): AlertData {
+    private readonly windSpeedThreshold = 25;
+    private readonly windGustThreshold = 25;
+
+    async process(weatherData: WeatherData) {
 
         console.log("Running " + this.alertTitle);
 
@@ -17,7 +20,7 @@ export class Daily7DayWindAlert implements Alert {
         let message = '';
 
         for (let dailyData of weatherData.daily) {
-            if (dailyData.wind_speed > 25 || dailyData.wind_gust > 25) {
+            if (dailyData.wind_speed > this.windSpeedThreshold || dailyData.wind_gust > this.windGustThreshold) {
                 hasAlert = true;
                 message += new Date(dailyData.dt * 1000).toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles' }) +
                     `: wind speed of ${dailyData.wind_speed} mph and wind gust of ${dailyData.wind_gust} mph blowing ${getDirectionFromDegrees(dailyData.wind_deg)}\n`;
