@@ -81,7 +81,13 @@ export class AutoxReminderCron extends cdk.Construct {
             removalPolicy: cdk.RemovalPolicy.RETAIN,
             tableName: config.autoxReminder.dynamoTableName
         });
-
+        dynamoTable.addGlobalSecondaryIndex({
+            indexName: 'id-index',
+            partitionKey: {
+                name: 'id',
+                type: dynamodb.AttributeType.STRING
+            }
+        });
         dynamoTable.grantReadWriteData(lambdaFunction);
 
         const schedule = new Rule(this, 'AutoxReminderSchedule', {
