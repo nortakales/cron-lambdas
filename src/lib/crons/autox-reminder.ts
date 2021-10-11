@@ -9,6 +9,7 @@ import * as config from '../../config/config.json'
 import * as actions from '@aws-cdk/aws-cloudwatch-actions';
 import * as sns from '@aws-cdk/aws-sns';
 import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
+import { CfnOutput } from '@aws-cdk/core';
 
 export class AutoxReminderCron extends cdk.Construct {
 
@@ -34,7 +35,8 @@ export class AutoxReminderCron extends cdk.Construct {
                 ENABLED: config.autoxReminder.enabled,
                 REGION: config.base.region
             },
-            timeout: cdk.Duration.seconds(10)
+            timeout: cdk.Duration.seconds(10),
+            retryAttempts: 2
         });
         /*
                 const lambdaFunction = new lambda.Function(this, 'AutoxReminderLambdaFunction', {
@@ -98,5 +100,25 @@ export class AutoxReminderCron extends cdk.Construct {
         });
 
         schedule.addTarget(new LambdaFunction(lambdaFunction));
+
+
+
+
+        const pushNotificationLambdaFunction = new nodejslambda.NodejsFunction(this, 'AutoxPushLambdaFunction', {
+            functionName: 'AutoxPushLambdaFunction',
+            runtime: lambda.Runtime.NODEJS_14_X,
+            entry: __dirname + '/../../lambda/autox/autox-push-lambda.ts',
+            handler: 'handler',
+            environment: {
+                EMAIL_LIST: config.autoxReminder.emailList.join(','),
+                FROM: config.autoxReminder.fromEmail,
+                SUBJECT: config.autoxReminder.emailSubject,
+                TABLE_NAME: config.autoxReminder.dynamoTableName,
+                ENABLED: config.autoxReminder.enabled,
+                REGION: config.base.region
+            },
+            timeout: cdk.Duration.seconds(10),
+            retryAttempts: 2
+        });
     }
 }
