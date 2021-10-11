@@ -30,3 +30,4 @@ TODO More reminders:
 * weekly forecast ? - this would really benefit from averaging across different sources
 
 TODO move all of this out of my main aws account
+TODO use DLQs for lambda, trigger monitors on DLQ, this seems like the only way to get alarms AFTER retries
