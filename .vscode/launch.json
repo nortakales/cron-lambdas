@@ -35,7 +35,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/lambda/autox-reminder-lambda.ts",
+            "program": "${workspaceFolder}/src/lambda/autox/autox-reminder-lambda.ts",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
