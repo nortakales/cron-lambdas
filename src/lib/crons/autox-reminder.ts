@@ -118,7 +118,11 @@ export class AutoxReminderCron extends cdk.Construct {
                 REGION: config.base.region
             },
             timeout: cdk.Duration.seconds(10),
-            retryAttempts: 2
+            retryAttempts: 2,
+        });
+
+        pushNotificationLambdaFunction.addPermission('CloudWatchEventsPermission', {
+            principal: new iam.ServicePrincipal('events.amazonaws.com')
         });
     }
 }
