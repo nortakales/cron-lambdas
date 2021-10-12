@@ -56,7 +56,7 @@ export class DeleteTimerConstruct extends cdk.Construct {
         // Make sure the Lambda can delete EventBridge rules
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,
-            actions: ['events:DeleteRule'],
+            actions: ['events:*'],
             resources: ['arn:aws:events:*:*:rule/*']
         }));
     }
