@@ -52,5 +52,12 @@ export class DeleteTimerConstruct extends cdk.Construct {
         lambdaFunction.addPermission('DeleteTimerLambdaFunction-CloudWatchEventsPermission', {
             principal: new iam.ServicePrincipal('events.amazonaws.com')
         });
+
+        // Make sure the Lambda can delete EventBridge rules
+        lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: ['events:DeleteRule'],
+            resources: ['arn:aws:events:*:*:rule/*']
+        }));
     }
 }
