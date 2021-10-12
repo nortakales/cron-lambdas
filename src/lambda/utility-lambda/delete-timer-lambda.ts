@@ -14,6 +14,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     const timerId = event.timerId;
 
     // Must first delete targets
+    // Target IDs come from the events client that creates these targets
     await events.send(new RemoveTargetsCommand({
         Rule: timerId,
         Ids: [
