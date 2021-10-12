@@ -1,8 +1,23 @@
-import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocument, TranslateConfig } from "@aws-sdk/lib-dynamodb";
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 
 const REGION = process.env.REGION!;
-const DDB = DynamoDBDocument.from(new DynamoDB({ region: REGION }));
+const dynamoClient = new DynamoDB({ region: REGION });
+const marshallOptions = {
+    // Whether to automatically convert empty strings, blobs, and sets to `null`.
+    convertEmptyValues: false, // false, by default.
+    // Whether to remove undefined values while marshalling.
+    removeUndefinedValues: false, // false, by default.
+    // Whether to convert typeof object to map attribute.
+    convertClassInstanceToMap: false, // false, by default.
+};
+const unmarshallOptions = {
+    // Whether to return numbers as a string instead of converting them to native JavaScript numbers.
+    wrapNumbers: false, // false, by default.
+};
+const translateConfig: TranslateConfig = { marshallOptions, unmarshallOptions };
+
+const DDB = DynamoDBDocument.from(dynamoClient, translateConfig);
 
 export async function get(table: string, key: { [key: string]: any }) {
 
@@ -26,6 +41,7 @@ export async function put(table: string, item: { [key: string]: any }) {
 
     await DDB.put({
         TableName: table,
-        Item: item
+        Item: item,
+
     });
 }

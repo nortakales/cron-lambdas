@@ -9,7 +9,6 @@ import * as config from '../../config/config.json'
 import * as actions from '@aws-cdk/aws-cloudwatch-actions';
 import * as sns from '@aws-cdk/aws-sns';
 import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
-import { CfnOutput } from '@aws-cdk/core';
 
 export class AutoxReminderCron extends cdk.Construct {
 
@@ -33,7 +32,8 @@ export class AutoxReminderCron extends cdk.Construct {
                 SUBJECT: config.autoxReminder.emailSubject,
                 TABLE_NAME: config.autoxReminder.dynamoTableName,
                 ENABLED: config.autoxReminder.enabled,
-                REGION: config.base.region
+                REGION: config.base.region,
+                PUSH_NOTIFICATION_LAMBDA_ARN: config.autoxReminder.pushNotificationLambdaArn
             },
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2

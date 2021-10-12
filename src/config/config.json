@@ -16,7 +16,8 @@
             "michelegraaff@outlook.com",
             "sungcampbell@gmail.com",
             "nathan.olotoa@hotmail.com"
-        ]
+        ],
+        "pushNotificationLambdaArn": "arn:aws:lambda:us-west-2:787068200846:function:AutoxPushLambdaFunction"
     },
     "weatherAlert": {
         "enabled": "true",

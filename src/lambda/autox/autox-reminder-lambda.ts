@@ -1,17 +1,22 @@
 import { httpsGet } from '../http';
 import { sendEmail } from '../emailer';
 import * as DDB from '../dynamo';
+import moment from 'moment';
+import { createTimer } from '../events';
 
 const EMAIL_LIST = process.env.EMAIL_LIST!;
 const SUBJECT = process.env.SUBJECT!;
 const FROM = process.env.FROM!;
 const TABLE_NAME = process.env.TABLE_NAME!;
 const ENABLED = process.env.ENABLED!;
+const PUSH_NOTIFICATION_LAMBDA_ARN = process.env.PUSH_NOTIFICATION_LAMBDA_ARN!;
 
 interface UrlMatch {
     fullMatch: string,
     url: string,
     name: string,
+    id: string | null
+    registrationDate: Date | null
 }
 
 async function getUrlFromDDB(url: string) {
@@ -20,11 +25,20 @@ async function getUrlFromDDB(url: string) {
     });
 }
 
-async function writeUrlToDDB(url: string, name: string) {
-    await DDB.put(TABLE_NAME, {
-        url: url,
-        name: name
-    });
+async function writeUrlToDDB(url: string, name: string, id: string | null, registrationDate: Date | null) {
+    if (id && registrationDate) {
+        await DDB.put(TABLE_NAME, {
+            url: url,
+            name: name,
+            id: id,
+            registrationDate: registrationDate?.getTime()
+        });
+    } else {
+        await DDB.put(TABLE_NAME, {
+            url: url,
+            name: name
+        });
+    }
 }
 
 async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
@@ -38,34 +52,43 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
     let newUrls: UrlMatch[] = [];
 
     // For every URL on the page
-    for (const urlMatch of allUrls) {
-        const url = {
-            fullMatch: urlMatch[0],
-            url: urlMatch[1],
-            name: urlMatch[2]
+    for (const url of allUrls) {
+        const urlMatch: UrlMatch = {
+            fullMatch: url[0],
+            url: url[1],
+            name: url[2],
+            id: null,
+            registrationDate: null
         }
 
-        if (processedUrls[url.url])
+        if (processedUrls[urlMatch.url])
             continue;
 
-        processedUrls[url.url] = true;
+        processedUrls[urlMatch.url] = true;
 
         // Only look at those containing some variation of "autocross"
-        if (url.fullMatch.match(/auto\s*(x|cross)/i)) {
+        if (urlMatch.fullMatch.match(/auto\s*(x|cross)/i)) {
 
-            console.log("Processing " + url.fullMatch);
+            console.log("Processing " + urlMatch.fullMatch);
 
-            const urlFromDb = await getUrlFromDDB(url.url);
+            const urlFromDb = await getUrlFromDDB(urlMatch.url);
 
             if (urlFromDb !== undefined) {
                 continue;
             }
 
-            console.log("New!");
+            console.log("New Autox URL!");
 
-            await writeUrlToDDB(url.url, url.name);
+            urlMatch.registrationDate = getRegistrationTimeFromHtml(html);
 
-            newUrls.push(url);
+            if (urlMatch.registrationDate !== null) {
+                const timerId = await createTimer(urlMatch.registrationDate, PUSH_NOTIFICATION_LAMBDA_ARN, urlMatch)
+                urlMatch.id = timerId;
+            }
+
+            await writeUrlToDDB(urlMatch.url, urlMatch.name, urlMatch.id, urlMatch.registrationDate);
+
+            newUrls.push(urlMatch);
         }
     }
 
@@ -77,7 +100,15 @@ function createEmailBody(urls: UrlMatch[]): string {
     let emailBody = "New AutoX discovered:\n\n";
 
     for (let url of urls) {
-        emailBody += url.name + "\n" + url.url + "\n\n";
+
+        let registrationDate = "Oops, couldn't parse registration date... you won't get a push notification";
+        if (url.registrationDate) {
+            registrationDate = url.registrationDate?.toLocaleString('en-us', { timeZone: 'America/Los_Angeles' });
+        }
+
+        emailBody += url.name + "\n"
+            + url.url + "\n"
+            + "Registration: " + registrationDate + "\n\n";
     }
 
     console.log("Start email body -----------");
@@ -113,5 +144,22 @@ exports.handler = async (event = {}) => {
     });
 };
 
+const registrationRegex = /Registration will open on (\d{2}\/\d{2}\/\d{4}) at (\d:\d{2}) ([AaPp][Mm])/;
+function getRegistrationTimeFromHtml(html: string) {
+
+    const match = registrationRegex.exec(html);
+
+    if (match) {
+        console.log(JSON.stringify(match, null, 2));
+        const dateTimeString = match[1] + ' ' + match[2] + match[3].toUpperCase() + ' PST';
+        const dateTime = moment(dateTimeString, 'MM/DD/YYYY hh:mma ZZ');
+        console.log("Found registration date: " + dateTime.format());
+        return dateTime.toDate();
+    } else {
+        console.log("Could not find registration date/time");
+        return null;
+    }
+}
+
 // Uncomment this to call locally
-// exports.handler();
+exports.handler();
