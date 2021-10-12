@@ -1,4 +1,4 @@
-import { CloudWatchEventsClient, DeleteRuleCommand, PutRuleCommand, PutTargetsCommand } from "@aws-sdk/client-cloudwatch-events";
+import { CloudWatchEventsClient, DeleteRuleCommand, PutRuleCommand, PutTargetsCommand, RemoveTargetsCommand } from "@aws-sdk/client-cloudwatch-events";
 import { randomUUID } from "crypto";
 
 const REGION = process.env.REGION!;
@@ -13,11 +13,19 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     const timerId = event.timerId;
 
-    const deleteRule = new DeleteRuleCommand({
-        Name: timerId
-    });
+    // Must first delete targets
+    await events.send(new RemoveTargetsCommand({
+        Rule: timerId,
+        Ids: [
+            'target-' + timerId,
+            'cleanTarget-' + timerId
+        ],
+    }));
 
-    await events.send(deleteRule);
+    // Then delete rule
+    await events.send(new DeleteRuleCommand({
+        Name: timerId
+    }));
 
     console.log("Done --------------------");
 };
