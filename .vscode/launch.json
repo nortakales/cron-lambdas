@@ -26,7 +26,8 @@
                 "ENABLED": "true",
                 "REGION": "us-west-2",
                 "TABLE_NAME": "weather_alert_tracker"
-            }
+            },
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "node",
@@ -47,7 +48,8 @@
                 "TABLE_NAME": "autox_reminder_urls",
                 "ENABLED": "true",
                 "REGION": "us-west-2"
-            }
+            },
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "node",
@@ -60,7 +62,8 @@
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
-            "preLaunchTask": "${defaultBuildTask}"
+            "preLaunchTask": "${defaultBuildTask}",
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }
