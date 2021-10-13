@@ -6,20 +6,17 @@ import * as iam from '@aws-cdk/aws-iam';
 import { Schedule, Rule } from '@aws-cdk/aws-events'
 import { LambdaFunction } from '@aws-cdk/aws-events-targets'
 import * as config from '../../config/config.json'
-import * as actions from '@aws-cdk/aws-cloudwatch-actions';
-import * as sns from '@aws-cdk/aws-sns';
-import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
+import { DLQWithMonitor } from '../constructs/dlq-with-monitor';
 
 export class WeatherAlertCron extends cdk.Construct {
 
     constructor(scope: cdk.Construct, id: string) {
         super(scope, id);
 
-        const errorTopic = new sns.Topic(this, 'WeatherAlertErrorTopic', {
-            topicName: 'WeatherAlertErrorTopic',
-            displayName: 'Weather Alert Error Notification'
+        const dlqWithMonitor = new DLQWithMonitor(this, 'WeatherAlertLambdaFunction', {
+            notificationEmail: config.base.infrastructureAlertEmail,
+            topicDisplayName: 'WeatherAlert Errors'
         });
-        errorTopic.addSubscription(new subscriptions.EmailSubscription(config.base.infrastructureAlertEmail));
 
         const lambdaFunction = new nodejslambda.NodejsFunction(this, 'WeatherAlertLambdaFunction', {
             functionName: 'WeatherAlertCronLambda',
@@ -37,16 +34,12 @@ export class WeatherAlertCron extends cdk.Construct {
                 REGION: config.base.region,
                 TABLE_NAME: config.weatherAlert.trackingDynamoTableName,
             },
-            timeout: cdk.Duration.seconds(10)
+            timeout: cdk.Duration.seconds(10),
+            retryAttempts: 2,
+            deadLetterQueueEnabled: true,
+            deadLetterQueue: dlqWithMonitor.dlq
         });
-
-        const alarm = lambdaFunction.metricErrors().createAlarm(this, 'WeatherAlertErrorsMonitor', {
-            alarmName: 'WeatherAlertErrorsMonitor',
-            threshold: 1,
-            evaluationPeriods: 1,
-        });
-        alarm.addAlarmAction(new actions.SnsAction(errorTopic));
-
+        // Lambda must be able to send email through SES
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
             actions: ['ses:SendEmail'],
             resources: ['*'],
@@ -62,7 +55,6 @@ export class WeatherAlertCron extends cdk.Construct {
             removalPolicy: cdk.RemovalPolicy.RETAIN,
             tableName: config.weatherAlert.trackingDynamoTableName
         });
-
         dynamoTable.grantReadWriteData(lambdaFunction);
 
         const schedule = new Rule(this, 'WeatherAlertSchedule', {
@@ -71,7 +63,6 @@ export class WeatherAlertCron extends cdk.Construct {
             // https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
             schedule: Schedule.expression(config.autoxReminder.rate),
         });
-
         schedule.addTarget(new LambdaFunction(lambdaFunction));
     }
 }
