@@ -30,8 +30,8 @@ export class DLQWithMonitor extends cdk.Construct {
         props.alarmEvaluationPeriods = props.alarmEvaluationPeriods || 1;
         props.alarmComparisonOperator = props.alarmComparisonOperator || cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD;
 
-        const dlqId = idPrefix + '-DLQ';
-        const alarmId = dlqId + '-Monitor'
+        const dlqId = idPrefix + '-Cron-DLQ';
+        const alarmId = dlqId + '-Monitorz'
         const snsTopicId = alarmId + '-Topic';
 
         const snsTopic = new sns.Topic(this, snsTopicId, {
