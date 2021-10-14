@@ -7,6 +7,9 @@ import * as notifications from '@aws-cdk/aws-codestarnotifications';
 import * as sns from '@aws-cdk/aws-sns';
 import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
 import * as config from '../config/config.json'
+import { DLQWithMonitor } from './constructs/dlq-with-monitor';
+import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
+import * as lambda from '@aws-cdk/aws-lambda';
 
 export class CDKPipelineStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -46,11 +49,30 @@ export class CDKPipelineStack extends cdk.Stack {
         pipeline.addApplicationStage(deploy);
 
 
+        const dlqWithMonitor = new DLQWithMonitor(this, 'CronPipelineNotificationLambdaFunction', {
+            notificationEmail: config.base.infrastructureAlertEmail,
+            topicDisplayName: 'PipelineNotification Errors'
+        });
+
+        const pipelineNotificationLambda = new nodejslambda.NodejsFunction(this, 'CronPipelineNotificationLambdaFunction', {
+            functionName: 'CronPipelineNotificationLambda',
+            runtime: lambda.Runtime.NODEJS_14_X,
+            entry: __dirname + '/../lambda/pipeline/pipeline-notification-lambda.ts',
+            handler: 'handler',
+            environment: {
+                REGION: config.base.region
+            },
+            timeout: cdk.Duration.seconds(10),
+            retryAttempts: 2,
+            deadLetterQueueEnabled: true,
+            deadLetterQueue: dlqWithMonitor.dlq
+        });
+
         const pipelineTopic = new sns.Topic(this, 'CronLambdaPipelineNotificationTopic', {
             topicName: 'CronLambdaPipelineNotificationTopic',
             displayName: 'Cron Lambda Pipeline Notification'
         });
-        pipelineTopic.addSubscription(new subscriptions.EmailSubscription(config.base.infrastructureAlertEmail));
+        pipelineTopic.addSubscription(new subscriptions.LambdaSubscription(pipelineNotificationLambda));
 
         new notifications.NotificationRule(this, 'CronLambdaPipelineNotificationRule', {
             notificationRuleName: 'CronLambdaPipelineNotificationRule',
@@ -61,9 +83,7 @@ export class CDKPipelineStack extends cdk.Stack {
                 'codepipeline-pipeline-pipeline-execution-failed',
                 'codepipeline-pipeline-manual-approval-failed',
                 'codepipeline-pipeline-manual-approval-needed',
-
-                // Success was getting annoying
-                //'codepipeline-pipeline-pipeline-execution-succeeded'
+                'codepipeline-pipeline-pipeline-execution-succeeded'
             ],
             targets: [
                 pipelineTopic

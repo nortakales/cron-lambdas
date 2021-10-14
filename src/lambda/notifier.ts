@@ -7,6 +7,7 @@ const myUser = 'uith98yw3i8e36uyzykhn3byfnesm2';
 export enum NotificationApplication {
     WEATHER = 'az17zzuo6nboabno73d7isp5ifw1sw',
     AUTOX = 'a4pmfchdyea7wj47hwzzp6i8hz74ov',
+    AWS = 'a3bimswo7uzrvezxdjir1cfakpi6c5'
 }
 
 export async function sendPushNotification(application: NotificationApplication, title: string, message: string, url?: string) {
