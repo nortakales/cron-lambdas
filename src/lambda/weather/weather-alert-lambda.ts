@@ -1,5 +1,5 @@
 import { sendEmail } from '../emailer';
-import { sendPushNotification } from '../notifier';
+import { NotificationApplication, sendPushNotification } from '../notifier';
 import { BiDaily48HourWindAlert } from './alerts/bidaily-48-hour-wind-alert';
 import { Daily7DayWindAlert } from './alerts/daily-7-day-wind-alert';
 import { Alert, NotificationType } from './interfaces/alert-types';
@@ -130,7 +130,7 @@ exports.handler = async (event = {}) => {
     }
 
     if (hasPushAlert) {
-        await sendPushNotification("Weather Alert", pushAlertBody);
+        await sendPushNotification(NotificationApplication.WEATHER, "Weather Alert", pushAlertBody);
     }
 
     console.log("Complete");
