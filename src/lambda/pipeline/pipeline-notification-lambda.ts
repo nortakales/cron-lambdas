@@ -14,7 +14,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     let title;
     let body;
-    if (pipelineEvent?.detail?.state === "SUCCESS") {
+    if (pipelineEvent?.detail?.state === "SUCCEEDED") {
         title = "Pipeline Succeeded";
         body = pipelineEvent.detail.pipeline + " deployment succeeded";
     } else {
