@@ -7,6 +7,7 @@ export interface WeatherData {
     minutely: MinutelyConditions[];
     hourly: HourlyConditions[];
     daily: DailyConditions[];
+    alerts: AlertData[];
 }
 
 export interface MinutelyConditions {
@@ -90,4 +91,13 @@ export interface WeatherType {
     main: string;
     description: string;
     icon: string;
+}
+
+export interface AlertData {
+    sender_name: string;
+    event: string;
+    start: number;
+    end: number;
+    description: string;
+    tags: string[];
 }

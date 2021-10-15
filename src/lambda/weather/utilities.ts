@@ -38,3 +38,12 @@ export function toIsoString(date: Date) {
         dif + pad(tzo / 60) +
         ':' + pad(tzo % 60);
 }
+
+export function toReadablePacificDate(time: number) {
+    // If the time is less than a date 466 years from now, it is most likely in seconds
+    // Modify it to be in millis
+    if (time < 16343349350) {
+        time = time * 1000;
+    }
+    return new Date(time).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' })
+}

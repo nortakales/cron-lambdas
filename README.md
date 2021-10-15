@@ -30,5 +30,6 @@ TODO More reminders:
 * weekly forecast ? - this would really benefit from averaging across different sources
 
 TODO move all of this out of my main aws account
-TODO use DLQs for lambda, trigger monitors on DLQ, this seems like the only way to get alarms AFTER retries
-TODO some kind of push notification when pipeline has finished?
+TODO alerts for next few hours? rainfall and wind would be nice
+TODO API gateway that I can hit to generate an adhoc immediate report that doesn't update timestamps and will tell me if there are no alerts
+TODO some kind of method to make sure alerts are aligned to 7am/7pm

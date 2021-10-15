@@ -9,6 +9,8 @@ import { toIsoString } from './utilities';
 import { Duration } from "typed-duration";
 import * as DDB from '../dynamo';
 import { YearlyFirstFreezeAlert } from './alerts/yearly-first-freeze-alert';
+import { Daily7DayExtremeTemperatureAlert } from './alerts/daily-7-day-extreme-temperature-alert';
+import { Daily7DayNationalWeatherAlert } from './alerts/daily-7-day-national-weather-alert';
 
 const API_KEY = process.env.API_KEY!;
 const LATITUDE = process.env.LATITUDE!;
@@ -68,8 +70,10 @@ async function shouldRunAlert(alert: Alert) {
 
 const alerts: Alert[] = [
     new Daily7DayWindAlert(),
+    new Daily7DayExtremeTemperatureAlert(),
+    new Daily7DayNationalWeatherAlert(),
     new BiDaily48HourWindAlert(),
-    new YearlyFirstFreezeAlert()
+    new YearlyFirstFreezeAlert(),
 ];
 
 exports.handler = async (event = {}) => {
@@ -80,6 +84,7 @@ exports.handler = async (event = {}) => {
 
     console.log("Running...");
 
+    // https://api.openweathermap.org/data/2.5/onecall?lat=47.806994&lon=-122.192443&appid=c6eaff3ab2bec2990b0df6123e69b74e&lang=en&units=imperial
     const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${API_KEY}&lang=en&units=imperial`;
 
     const data = await httpsGet(url);

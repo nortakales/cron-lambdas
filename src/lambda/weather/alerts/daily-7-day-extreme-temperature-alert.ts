@@ -3,14 +3,14 @@ import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import { WeatherData } from "../interfaces/data";
 import { getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 
-export class Daily7DayWindAlert implements Alert {
+export class Daily7DayExtremeTemperatureAlert implements Alert {
 
     interval = Duration.days.of(1);
-    alertTitle = "7 Day Wind Alert";
-    alertKey = "daily-7-day-wind-alert";
+    alertTitle = "7 Day Extreme Temperature Alert";
+    alertKey = "daily-7-day-extreme-temperature-alert";
 
-    private readonly windSpeedThreshold = 25;
-    private readonly windGustThreshold = 25;
+    private readonly highTemp = 85;
+    private readonly lowTemp = 25;
 
     async process(weatherData: WeatherData) {
 
@@ -20,9 +20,15 @@ export class Daily7DayWindAlert implements Alert {
         let message = '';
 
         for (let dailyData of weatherData.daily) {
-            if (dailyData.wind_speed > this.windSpeedThreshold || dailyData.wind_gust > this.windGustThreshold) {
+            if (dailyData.temp.max > this.highTemp || dailyData.temp.min < this.lowTemp) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(dailyData.dt)}: wind speed of ${dailyData.wind_speed} mph and wind gust of ${dailyData.wind_gust} mph blowing ${getDirectionFromDegrees(dailyData.wind_deg)}\n`;
+
+                let tempText = "high of " + dailyData.temp.max + "°F";
+                if (dailyData.temp.min < this.lowTemp) {
+                    tempText = "low of " + dailyData.temp.min + "°F";
+                }
+
+                message += `${toReadablePacificDate(dailyData.dt)}: ${tempText}\n`;
             }
         }
 
