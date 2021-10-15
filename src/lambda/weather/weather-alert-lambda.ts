@@ -144,6 +144,8 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     }
 
     console.log("Complete");
+
+    return '{"message": "Success"}';
 };
 
 // Uncomment this to call locally
