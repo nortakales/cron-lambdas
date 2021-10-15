@@ -16,15 +16,17 @@ export class Daily7DayNationalWeatherAlert implements Alert {
         let hasAlert = false;
         let message = '';
 
-        for (let alertData of weatherData.alerts) {
-            hasAlert = true;
-            message += `
-                Sender: ${alertData.sender_name}
-                Event: ${alertData.event}
-                Duration: ${toReadablePacificDate(alertData.start * 1000)} to ${toReadablePacificDate(alertData.end * 1000)}
-                Event: ${alertData.description}
-                Tags: ${alertData.tags?.join(', ')}
-            `.trim() + "\n\n";
+        if (weatherData.alerts) {
+            for (let alertData of weatherData.alerts) {
+                hasAlert = true;
+                message += `
+                    Sender: ${alertData.sender_name}
+                    Event: ${alertData.event}
+                    Duration: ${toReadablePacificDate(alertData.start * 1000)} to ${toReadablePacificDate(alertData.end * 1000)}
+                    Event: ${alertData.description}
+                    Tags: ${alertData.tags?.join(', ')}
+                `.trim() + "\n\n";
+            }
         }
 
         if (!hasAlert) {
