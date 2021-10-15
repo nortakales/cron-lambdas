@@ -145,7 +145,11 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     console.log("Complete");
 
-    return '{"message": "Success"}';
+    return {
+        statusCode: 200,
+        headers: {},
+        body: "Success"
+    };
 };
 
 // Uncomment this to call locally
