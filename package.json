@@ -19,6 +19,7 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "@aws-cdk/aws-apigateway": "^1.126.0",
     "@aws-cdk/aws-cloudwatch": "^1.126.0",
     "@aws-cdk/aws-cloudwatch-actions": "^1.126.0",
     "@aws-cdk/aws-codepipeline": "^1.126.0",

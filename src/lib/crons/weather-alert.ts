@@ -10,6 +10,8 @@ import { DLQWithMonitor } from '../constructs/dlq-with-monitor';
 
 export class WeatherAlertCron extends cdk.Construct {
 
+    readonly lambda: lambda.Function;
+
     constructor(scope: cdk.Construct, id: string) {
         super(scope, id);
 
@@ -18,7 +20,7 @@ export class WeatherAlertCron extends cdk.Construct {
             topicDisplayName: 'WeatherAlert Errors'
         });
 
-        const lambdaFunction = new nodejslambda.NodejsFunction(this, 'WeatherAlertLambdaFunction', {
+        this.lambda = new nodejslambda.NodejsFunction(this, 'WeatherAlertLambdaFunction', {
             functionName: 'WeatherAlertCronLambda',
             runtime: lambda.Runtime.NODEJS_14_X,
             entry: __dirname + '/../../lambda/weather/weather-alert-lambda.ts',
@@ -40,7 +42,7 @@ export class WeatherAlertCron extends cdk.Construct {
             deadLetterQueue: dlqWithMonitor.dlq
         });
         // Lambda must be able to send email through SES
-        lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+        this.lambda.addToRolePolicy(new iam.PolicyStatement({
             actions: ['ses:SendEmail'],
             resources: ['*'],
             effect: iam.Effect.ALLOW,
@@ -55,7 +57,7 @@ export class WeatherAlertCron extends cdk.Construct {
             removalPolicy: cdk.RemovalPolicy.RETAIN,
             tableName: config.weatherAlert.trackingDynamoTableName
         });
-        dynamoTable.grantReadWriteData(lambdaFunction);
+        dynamoTable.grantReadWriteData(this.lambda);
 
         const schedule = new Rule(this, 'WeatherAlertSchedule', {
             ruleName: 'WeatherAlertSchedule',
@@ -63,6 +65,6 @@ export class WeatherAlertCron extends cdk.Construct {
             // https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
             schedule: Schedule.expression(config.autoxReminder.rate),
         });
-        schedule.addTarget(new LambdaFunction(lambdaFunction));
+        schedule.addTarget(new LambdaFunction(this.lambda));
     }
 }

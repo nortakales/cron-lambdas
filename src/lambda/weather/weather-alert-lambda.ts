@@ -76,7 +76,12 @@ const alerts: Alert[] = [
     new YearlyFirstFreezeAlert(),
 ];
 
-exports.handler = async (event = {}) => {
+exports.handler = async (event: any = {}, context: any = {}) => {
+
+    console.log("EVENT\n" + JSON.stringify(event, null, 2));
+    console.log("CONTEXT\n" + JSON.stringify(context, null, 2));
+    console.log("ENVIRONMENT VARIABLES\n" + JSON.stringify(process.env, null, 2));
+
     if (ENABLED !== 'true') {
         console.log("Weather Alert is not enabled, exiting...");
         return;
