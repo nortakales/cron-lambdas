@@ -82,7 +82,8 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
             urlMatch.registrationDate = getRegistrationTimeFromHtml(html);
 
             if (urlMatch.registrationDate !== null) {
-                const timerId = await createTimer(urlMatch.registrationDate, PUSH_NOTIFICATION_LAMBDA_ARN, urlMatch)
+                const notificationDate = getNotificationDate(urlMatch.registrationDate);
+                const timerId = await createTimer(notificationDate, PUSH_NOTIFICATION_LAMBDA_ARN, urlMatch)
                 urlMatch.id = timerId;
             }
 
@@ -161,5 +162,10 @@ function getRegistrationTimeFromHtml(html: string) {
     }
 }
 
+function getNotificationDate(registrationDate: Date) {
+    const fiveMinutesInMillis = 60 * 5 * 1000;
+    return new Date(registrationDate.getTime() - fiveMinutesInMillis);
+}
+
 // Uncomment this to call locally
-exports.handler();
+//exports.handler();
