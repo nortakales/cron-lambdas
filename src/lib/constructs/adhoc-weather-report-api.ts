@@ -13,12 +13,19 @@ export class AdhocWeatherReportAPI extends cdk.Construct {
     constructor(scope: cdk.Construct, id: string, lambda: lambda.Function) {
         super(scope, id);
 
-        const api = new apigateway.LambdaRestApi(this, id + "-AdhocAPI", {
-            handler: lambda,
+        const api = new apigateway.RestApi(this, id + "-AdhocAPI", {
             restApiName: "Adhoc Weather Report",
             description: "Generates an adhoc weather report.",
+
         });
 
+        const integration = new apigateway.LambdaIntegration(lambda, {
+            requestTemplates: {
+                "application/json": '{ "statusCode": "200" }'
+            }
+        });
+
+        api.root.addMethod("GET", integration);
 
 
 
