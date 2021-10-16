@@ -16,7 +16,11 @@ export class AdhocWeatherReportAPI extends cdk.Construct {
         const api = new apigateway.RestApi(this, id + "-AdhocAPI", {
             restApiName: "Adhoc Weather Report",
             description: "Generates an adhoc weather report.",
-
+            deployOptions: {
+                metricsEnabled: true,
+                loggingLevel: apigateway.MethodLoggingLevel.INFO,
+                dataTraceEnabled: true
+            }
         });
 
         const integration = new apigateway.LambdaIntegration(lambda, {
