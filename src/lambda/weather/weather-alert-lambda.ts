@@ -60,11 +60,6 @@ async function shouldRunAlert(alert: Alert) {
         console.log("No timestamp for alert <" + alert.alertKey + ">");
     }
 
-    if (runAlert) {
-        console.log("Updating timestamp for alert " + alert.alertKey + " to " + toIsoString(currentTime));
-        await updateLastTimestamp(alert.alertKey, toIsoString(currentTime));
-    }
-
     return runAlert;
 }
 
@@ -121,13 +116,22 @@ exports.handler = async (event: any = {}, context: any = {}) => {
                 hasPushAlert = true;
                 pushAlertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
             }
+
+            const currentTime = new Date();
+            console.log("Updating timestamp for alert " + alert.alertKey + " to " + toIsoString(currentTime));
+            await updateLastTimestamp(alert.alertKey, toIsoString(currentTime));
         }
     }
 
     if (!hasAlerts) {
         console.log("No alerts!");
         console.log("Complete");
-        return;
+
+        return {
+            statusCode: 200,
+            headers: {},
+            body: "Success"
+        };
     }
 
     if (hasEmailAlert) {
