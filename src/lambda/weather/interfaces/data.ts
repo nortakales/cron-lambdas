@@ -25,7 +25,7 @@ export interface DailyConditions extends BaseConditions {
 
     pop: number;
     rain: number;
-
+    snow: number;
 }
 export interface DailyFeelsLike {
     morn: number;

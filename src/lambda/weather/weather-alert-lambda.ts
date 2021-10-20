@@ -11,6 +11,7 @@ import * as DDB from '../dynamo';
 import { YearlyFirstFreezeAlert } from './alerts/yearly-first-freeze-alert';
 import { Daily7DayExtremeTemperatureAlert } from './alerts/daily-7-day-extreme-temperature-alert';
 import { Daily7DayNationalWeatherAlert } from './alerts/daily-7-day-national-weather-alert';
+import { Daily7DaySnowAlert } from './alerts/daily-7-day-snow-alert';
 
 const API_KEY = process.env.API_KEY!;
 const LATITUDE = process.env.LATITUDE!;
@@ -67,6 +68,7 @@ const alerts: Alert[] = [
     new Daily7DayWindAlert(),
     new Daily7DayExtremeTemperatureAlert(),
     new Daily7DayNationalWeatherAlert(),
+    new Daily7DaySnowAlert(),
     new BiDaily48HourWindAlert(),
     new YearlyFirstFreezeAlert(),
 ];

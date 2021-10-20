@@ -47,3 +47,7 @@ export function toReadablePacificDate(time: number) {
     }
     return new Date(time).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' })
 }
+
+export function mmToIn(mm: number) {
+    return mm / 25.4;
+}
