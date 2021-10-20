@@ -66,5 +66,20 @@ export class WeatherAlertCron extends cdk.Construct {
             schedule: Schedule.expression(config.autoxReminder.rate),
         });
         schedule.addTarget(new LambdaFunction(this.lambda));
+
+        const historyTable = new dynamodb.Table(this, 'WeatherAlertHistoryDynamoTable', {
+            partitionKey: {
+                name: 'date',
+                type: dynamodb.AttributeType.STRING
+            },
+            sortKey: {
+                name: 'source',
+                type: dynamodb.AttributeType.STRING
+            },
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+            removalPolicy: cdk.RemovalPolicy.RETAIN,
+            tableName: config.weatherAlert.historyDynamoTableName
+        });
+        historyTable.grantReadWriteData(this.lambda);
     }
 }
