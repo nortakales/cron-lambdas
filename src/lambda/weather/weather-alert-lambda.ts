@@ -83,7 +83,11 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     if (ENABLED !== 'true' || !adhoc) {
         console.log("Weather Alert is not enabled, exiting...");
-        return;
+        return {
+            statusCode: 200,
+            headers: {},
+            body: "Not enabled"
+        };
     }
 
     console.log(`Running as ${adhoc ? 'ADHOC' : 'REGULAR'} report...`);
@@ -180,7 +184,7 @@ async function processAdhocReport(weatherData: WeatherData) {
         if (alertData.hasAlert) {
             alertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
         } else {
-            alertBody += `${alert.alertTitle}\n\nNo alerts\n\n`;
+            alertBody += `${alert.alertTitle}\n\nNo alerts\n\n\n`;
         }
     }
 
