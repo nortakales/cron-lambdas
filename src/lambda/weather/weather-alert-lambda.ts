@@ -81,7 +81,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     const adhoc = isAdhocReport(event);
 
-    if (ENABLED !== 'true' || adhoc) {
+    if (ENABLED !== 'true' || !adhoc) {
         console.log("Weather Alert is not enabled, exiting...");
         return;
     }
