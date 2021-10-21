@@ -79,12 +79,14 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     console.log("CONTEXT\n" + JSON.stringify(context, null, 2));
     console.log("ENVIRONMENT VARIABLES\n" + JSON.stringify(process.env, null, 2));
 
-    if (ENABLED !== 'true') {
+    const adhoc = isAdhocReport(event);
+
+    if (ENABLED !== 'true' || adhoc) {
         console.log("Weather Alert is not enabled, exiting...");
         return;
     }
 
-    console.log("Running...");
+    console.log(`Running as ${adhoc ? 'ADHOC' : 'REGULAR'} report...`);
 
     // https://api.openweathermap.org/data/2.5/onecall?lat=47.806994&lon=-122.192443&appid=c6eaff3ab2bec2990b0df6123e69b74e&lang=en&units=imperial
     const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${API_KEY}&lang=en&units=imperial`;
@@ -92,6 +94,15 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     const data = await httpsGet(url);
     const weatherData: WeatherData = JSON.parse(data);
     //console.log(JSON.stringify(weatherData, null, 2));
+
+    if (adhoc) {
+        return await processAdhocReport(weatherData);
+    } else {
+        return await processRegularReport(weatherData);
+    }
+};
+
+async function processRegularReport(weatherData: WeatherData) {
 
     let hasAlerts = false;
     let hasEmailAlert = false;
@@ -156,7 +167,38 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         headers: {},
         body: "Success"
     };
-};
+}
+
+async function processAdhocReport(weatherData: WeatherData) {
+
+    let alertBody = '';
+
+    for (let alert of alerts) {
+
+        const alertData = await alert.process(weatherData);
+
+        if (alertData.hasAlert) {
+            alertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
+        } else {
+            alertBody += `${alert.alertTitle}\n\nNo alerts\n\n`;
+        }
+    }
+
+    console.log("Complete");
+
+    return {
+        statusCode: 200,
+        headers: {},
+        body: alertBody
+    };
+}
+
+function isAdhocReport(event: any) {
+    if (event?.queryStringParameters?.type === 'adhoc') {
+        return true;
+    }
+    return false;
+}
 
 // Uncomment this to call locally
 // exports.handler();
