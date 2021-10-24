@@ -25,10 +25,13 @@ export class BiDaily48HourWindAlert implements Alert {
                 hasAlert = true;
                 const currentDate = toReadablePacificDate(hourlyData.dt, Format.DATE_ONLY);
                 if (date !== currentDate) {
+                    if (date !== null) {
+                        message += "\n";
+                    }
                     date = currentDate;
                     message += date + "\n"
                 }
-                message += `${toReadablePacificDate(hourlyData.dt, Format.TIME_ONLY)}: ${hourlyData.wind_speed} mph / ${hourlyData.wind_gust} mph ${getDirectionFromDegrees(hourlyData.wind_deg)}\n`;
+                message += `${toReadablePacificDate(hourlyData.dt, Format.TIME_ONLY)}: ${hourlyData.wind_speed} mph / ${hourlyData.wind_gust} mph / ${getDirectionFromDegrees(hourlyData.wind_deg)}\n`;
             }
         }
 

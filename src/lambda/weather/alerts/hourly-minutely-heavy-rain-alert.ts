@@ -9,7 +9,7 @@ export class HourlyMinutelyHeavyRainAlert implements Alert {
     alertTitle = "1 Hour Rain Alert";
     alertKey = "1-hour-heavy-rain-alert";
 
-    private readonly rainThreshold = 2; // mm
+    private readonly rainThreshold = 3; // mm
 
     async process(weatherData: WeatherData) {
 
@@ -21,7 +21,7 @@ export class HourlyMinutelyHeavyRainAlert implements Alert {
         for (let minutelyData of weatherData.minutely) {
             if (minutelyData.precipitation > this.rainThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(minutelyData.dt, Format.TIME_ONLY)}: ${minutelyData.precipitation} mm of rain}\n`;
+                message += `${toReadablePacificDate(minutelyData.dt, Format.TIME_ONLY)}: ${minutelyData.precipitation} mm of rain\n`;
             }
         }
 

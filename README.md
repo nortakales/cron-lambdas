@@ -34,3 +34,5 @@ TODO alerts for next few hours? rainfall and wind would be nice
 TODO more weather sources
 TODO store weather history, alerts for new extremes
 TODO repeat yearly first freeze alert at least 3 total times
+TODO html formatting for notifications: https://pushover.net/api#html
+TODO customize notification sounds (weather, AWS and autox different, different failure sound for AWS)
