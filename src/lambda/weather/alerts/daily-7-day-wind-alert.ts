@@ -22,7 +22,7 @@ export class Daily7DayWindAlert implements Alert {
         for (let dailyData of weatherData.daily) {
             if (dailyData.wind_speed > this.windSpeedThreshold || dailyData.wind_gust > this.windGustThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(dailyData.dt, Format.DATE_ONLY)}: wind speed of ${dailyData.wind_speed} mph and wind gust of ${dailyData.wind_gust} mph blowing ${getDirectionFromDegrees(dailyData.wind_deg)}\n`;
+                message += `${toReadablePacificDate(dailyData.dt, Format.DATE_ONLY)}: ${dailyData.wind_speed} mph / ${dailyData.wind_gust} mph / ${getDirectionFromDegrees(dailyData.wind_deg)}\n`;
             }
         }
 
