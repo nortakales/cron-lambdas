@@ -31,5 +31,5 @@ TODO More reminders:
 
 TODO move all of this out of my main aws account
 TODO alerts for next few hours? rainfall and wind would be nice
-TODO API gateway that I can hit to generate an adhoc immediate report that doesn't update timestamps and will tell me if there are no alerts
-TODO some kind of method to make sure alerts are aligned to 7am/7pm
+TODO more weather sources
+TODO store weather history, alerts for new extremes
