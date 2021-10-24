@@ -20,11 +20,12 @@ export class Daily7DayNationalWeatherAlert implements Alert {
             for (let alertData of weatherData.alerts) {
                 hasAlert = true;
                 message += `
-                    Sender: ${alertData.sender_name}
-                    Event: ${alertData.event}
-                    Duration: ${toReadablePacificDate(alertData.start * 1000)} to ${toReadablePacificDate(alertData.end * 1000)}
-                    Event: ${alertData.description}
-                    Tags: ${alertData.tags?.join(', ')}
+Sender: ${alertData.sender_name}
+Event: ${alertData.event}
+Duration: ${toReadablePacificDate(alertData.start * 1000)} to ${toReadablePacificDate(alertData.end * 1000)}
+Tags: ${alertData.tags?.join(', ')}
+Description:
+${alertData.description}
                 `.trim() + "\n\n";
             }
         }
