@@ -39,13 +39,30 @@ export function toIsoString(date: Date) {
         ':' + pad(tzo % 60);
 }
 
-export function toReadablePacificDate(time: number) {
+export enum Format {
+    DATE_ONLY,
+    TIME_ONLY,
+    DATE_AND_TIME
+}
+
+export function toReadablePacificDate(time: number, format?: Format) {
     // If the time is less than a date 466 years from now, it is most likely in seconds
     // Modify it to be in millis
     if (time < 16343349350) {
         time = time * 1000;
     }
-    return new Date(time).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' })
+
+    switch (format as Format) {
+        case Format.DATE_ONLY:
+            return new Date(time).toLocaleDateString('en-us', { timeZone: 'America/Los_Angeles' });
+        case Format.TIME_ONLY:
+            return new Date(time).toLocaleTimeString('en-us', { timeZone: 'America/Los_Angeles' });
+        case Format.DATE_AND_TIME:
+        case undefined:
+        case Format.DATE_AND_TIME:
+        default:
+            return new Date(time).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' });
+    }
 }
 
 export function mmToIn(mm: number) {
