@@ -12,6 +12,7 @@ import { YearlyFirstFreezeAlert } from './alerts/yearly-first-freeze-alert';
 import { Daily7DayExtremeTemperatureAlert } from './alerts/daily-7-day-extreme-temperature-alert';
 import { Daily7DayNationalWeatherAlert } from './alerts/daily-7-day-national-weather-alert';
 import { Daily7DaySnowAlert } from './alerts/daily-7-day-snow-alert';
+import { HourlyMinutelyHeavyRainAlert } from './alerts/hourly-minutely-heavy-rain-alert';
 
 const API_KEY = process.env.API_KEY!;
 const LATITUDE = process.env.LATITUDE!;
@@ -71,6 +72,7 @@ const alerts: Alert[] = [
     new Daily7DaySnowAlert(),
     new BiDaily48HourWindAlert(),
     new YearlyFirstFreezeAlert(),
+    new HourlyMinutelyHeavyRainAlert(),
 ];
 
 exports.handler = async (event: any = {}, context: any = {}) => {
