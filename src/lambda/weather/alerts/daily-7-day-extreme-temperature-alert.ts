@@ -41,7 +41,7 @@ export class Daily7DayExtremeTemperatureAlert implements Alert {
         return {
             hasAlert: true,
             alertMessage: message,
-            notificationType: NotificationType.EMAIL
+            notificationType: NotificationType.EMAIL_AND_PUSH
         }
     }
 
