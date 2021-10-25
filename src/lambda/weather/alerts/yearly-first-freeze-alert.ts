@@ -10,7 +10,7 @@ export class YearlyFirstFreezeAlert implements Alert {
 
     interval = Duration.days.of(1);
     alertTitle = "Yearly First Freeze Alert";
-    alertKey = "yearly-first-freeze-alert";
+    alertKey = "yearly-first-freeze-alert-daily";
 
     private readonly freezeThreshold = 34;
 

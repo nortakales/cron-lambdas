@@ -5,9 +5,9 @@ import { Format, getDirectionFromDegrees, toReadablePacificDate } from "../utili
 
 export class BiDaily48HourWindAlert implements Alert {
 
-    interval = Duration.hours.of(12);
+    interval = Duration.hours.of(6);
     alertTitle = "48 Hour Wind Alert";
-    alertKey = "bidaily-48-hour-wind-alert";
+    alertKey = "48-hour-wind-alert-quadaily";
 
     private readonly windSpeedThreshold = 25;
     private readonly windGustThreshold = 25;

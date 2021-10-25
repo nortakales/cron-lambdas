@@ -7,7 +7,7 @@ export class Daily7DayExtremeTemperatureAlert implements Alert {
 
     interval = Duration.days.of(1);
     alertTitle = "7 Day Extreme Temperature Alert";
-    alertKey = "daily-7-day-extreme-temperature-alert";
+    alertKey = "7-day-extreme-temperature-alert-daily";
 
     private readonly highTemp = 85;
     private readonly lowTemp = 25;

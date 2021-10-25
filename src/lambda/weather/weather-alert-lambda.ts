@@ -1,7 +1,7 @@
 import { sendEmail } from '../emailer';
 import { NotificationApplication, sendPushNotification } from '../notifier';
-import { BiDaily48HourWindAlert } from './alerts/bidaily-48-hour-wind-alert';
-import { Daily7DayWindAlert } from './alerts/daily-7-day-wind-alert';
+import { BiDaily48HourWindAlert } from './alerts/48-hour-wind-alert';
+import { Daily7DayWindAlert } from './alerts/7-day-wind-alert';
 import { Alert, NotificationType } from './interfaces/alert-types';
 import { WeatherData } from './interfaces/data';
 import { httpsGet } from '../http';
@@ -9,10 +9,10 @@ import { toIsoString } from './utilities';
 import { Duration } from "typed-duration";
 import * as DDB from '../dynamo';
 import { YearlyFirstFreezeAlert } from './alerts/yearly-first-freeze-alert';
-import { Daily7DayExtremeTemperatureAlert } from './alerts/daily-7-day-extreme-temperature-alert';
-import { Daily7DayNationalWeatherAlert } from './alerts/daily-7-day-national-weather-alert';
-import { Daily7DaySnowAlert } from './alerts/daily-7-day-snow-alert';
-import { HourlyMinutelyHeavyRainAlert } from './alerts/hourly-minutely-heavy-rain-alert';
+import { Daily7DayExtremeTemperatureAlert } from './alerts/7-day-extreme-temperature-alert';
+import { Daily7DayNationalWeatherAlert } from './alerts/7-day-national-weather-alert';
+import { Daily7DaySnowAlert } from './alerts/7-day-snow-alert';
+import { HourlyMinutelyHeavyRainAlert } from './alerts/1-hour-heavy-rain-alert';
 
 const API_KEY = process.env.API_KEY!;
 const LATITUDE = process.env.LATITUDE!;

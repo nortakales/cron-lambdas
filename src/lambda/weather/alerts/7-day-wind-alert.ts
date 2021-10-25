@@ -1,15 +1,16 @@
 import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import { WeatherData } from "../interfaces/data";
-import { getDirectionFromDegrees, mmToIn, toReadablePacificDate } from "../utilities";
+import { Format, getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 
-export class Daily7DaySnowAlert implements Alert {
+export class Daily7DayWindAlert implements Alert {
 
     interval = Duration.days.of(1);
-    alertTitle = "7 Day Snow Alert";
-    alertKey = "daily-7-day-snow-alert";
+    alertTitle = "7 Day Wind Alert";
+    alertKey = "7-day-wind-alert-daily";
 
-    private readonly snowThreshold = 0;
+    private readonly windSpeedThreshold = 25;
+    private readonly windGustThreshold = 25;
 
     async process(weatherData: WeatherData) {
 
@@ -19,9 +20,9 @@ export class Daily7DaySnowAlert implements Alert {
         let message = '';
 
         for (let dailyData of weatherData.daily) {
-            if (dailyData.snow && dailyData.snow > this.snowThreshold) {
+            if (dailyData.wind_speed > this.windSpeedThreshold || dailyData.wind_gust > this.windGustThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(dailyData.dt)}: snow is coming! ${mmToIn(dailyData.snow)} inches\n`;
+                message += `${toReadablePacificDate(dailyData.dt, Format.DATE_ONLY)}: ${dailyData.wind_speed} mph / ${dailyData.wind_gust} mph / ${getDirectionFromDegrees(dailyData.wind_deg)}\n`;
             }
         }
 

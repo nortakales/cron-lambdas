@@ -7,7 +7,7 @@ export class Daily7DayNationalWeatherAlert implements Alert {
 
     interval = Duration.days.of(1);
     alertTitle = "National Weather Alert";
-    alertKey = "daily-7-day-national-weather-alert";
+    alertKey = "7-day-national-weather-alert-daily";
 
     async process(weatherData: WeatherData) {
 
