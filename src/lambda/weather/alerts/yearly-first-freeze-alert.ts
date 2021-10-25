@@ -2,7 +2,7 @@ import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import { WeatherData } from "../interfaces/data";
 import * as DDB from '../../dynamo';
-import { toIsoString, toReadablePacificDate } from "../utilities";
+import { Format, toIsoString, toReadablePacificDate } from "../utilities";
 
 const TABLE_NAME = process.env.TABLE_NAME!;
 
@@ -34,7 +34,7 @@ export class YearlyFirstFreezeAlert implements Alert {
         for (let dailyData of weatherData.daily) {
             if (dailyData.temp.min <= this.freezeThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(dailyData.dt)}: minimum temperature of ${dailyData.temp.min}\n`;
+                message += `${toReadablePacificDate(dailyData.dt, Format.DATE_ONLY)}: min temp of ${dailyData.temp.min}°F\n`;
             }
         }
 
