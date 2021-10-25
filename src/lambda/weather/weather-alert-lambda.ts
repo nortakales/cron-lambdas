@@ -129,11 +129,11 @@ async function processRegularReport(weatherData: WeatherData) {
             hasAlerts = true;
             if (alertData.notificationType === NotificationType.EMAIL || alertData.notificationType === NotificationType.EMAIL_AND_PUSH) {
                 hasEmailAlert = true;
-                emailAlertBody += `<b>${alert.alertTitle}</b>\n\n${alertData.alertMessage}\n\n`;
+                emailAlertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
             }
             if (alertData.notificationType === NotificationType.PUSH || alertData.notificationType === NotificationType.EMAIL_AND_PUSH) {
                 hasPushAlert = true;
-                pushAlertBody += `<b>${alert.alertTitle}</b>\n\n${alertData.alertMessage}\n\n`;
+                pushAlertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
             }
 
             const currentTime = new Date();
