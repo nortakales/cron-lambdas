@@ -6,7 +6,7 @@ export interface Alert {
     interval: TimeDuration
     alertTitle: string;
     alertKey: string;
-    process(weatherData: WeatherData): Promise<AlertData>
+    process(weatherData: WeatherData, adhoc?: boolean): Promise<AlertData>
 }
 
 export interface AlertData {

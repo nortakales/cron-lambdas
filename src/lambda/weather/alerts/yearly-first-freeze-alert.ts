@@ -6,6 +6,8 @@ import { toIsoString, toReadablePacificDate } from "../utilities";
 
 const TABLE_NAME = process.env.TABLE_NAME!;
 
+const MAX_NOTIFICATIONS_PER_YEAR = 3;
+
 export class YearlyFirstFreezeAlert implements Alert {
 
     interval = Duration.days.of(1);
@@ -14,7 +16,7 @@ export class YearlyFirstFreezeAlert implements Alert {
 
     private readonly freezeThreshold = 34;
 
-    async process(weatherData: WeatherData) {
+    async process(weatherData: WeatherData, adhoc: boolean = false) {
 
         console.log("Running " + this.alertTitle);
 
@@ -42,7 +44,7 @@ export class YearlyFirstFreezeAlert implements Alert {
             }
         }
 
-        await this.recordNotificationForThisSeason();
+        await this.recordNotificationForThisSeason(adhoc);
 
         return {
             hasAlert: true,
@@ -59,20 +61,35 @@ export class YearlyFirstFreezeAlert implements Alert {
             alertKey: this.alertKey + '-' + season
         });
 
-        if (item?.lastTimestamp) {
+        if (typeof item?.count === 'number' && item.count >= MAX_NOTIFICATIONS_PER_YEAR) {
             return false;
         }
 
         return true;
     }
 
-    async recordNotificationForThisSeason() {
+    async recordNotificationForThisSeason(adhoc: boolean) {
+
+        // Don't update the count if this is an adhoc report
+        if (adhoc !== undefined && adhoc === true) {
+            return;
+        }
 
         const season = this.getCurrentWinterSeason();
+        let count = 1;
+
+        const item = await DDB.get(TABLE_NAME, {
+            alertKey: this.alertKey + '-' + season
+        });
+
+        if (typeof item?.count === 'number') {
+            count = item.count + 1;
+        }
 
         await DDB.put(TABLE_NAME, {
             alertKey: this.alertKey + '-' + season,
-            lastTimestamp: toIsoString(new Date())
+            lastTimestamp: toIsoString(new Date()),
+            count: count
         })
     }
 
