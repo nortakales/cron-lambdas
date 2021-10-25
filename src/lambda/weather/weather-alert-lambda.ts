@@ -66,13 +66,13 @@ async function shouldRunAlert(alert: Alert) {
 }
 
 const alerts: Alert[] = [
-    new Daily7DayWindAlert(),
     new Daily7DayExtremeTemperatureAlert(),
     new Daily7DayNationalWeatherAlert(),
     new Daily7DaySnowAlert(),
-    new BiDaily48HourWindAlert(),
     new YearlyFirstFreezeAlert(),
     new HourlyMinutelyHeavyRainAlert(),
+    new Daily7DayWindAlert(),
+    new BiDaily48HourWindAlert(),
 ];
 
 exports.handler = async (event: any = {}, context: any = {}) => {
