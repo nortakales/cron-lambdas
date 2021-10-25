@@ -129,11 +129,11 @@ async function processRegularReport(weatherData: WeatherData) {
             hasAlerts = true;
             if (alertData.notificationType === NotificationType.EMAIL || alertData.notificationType === NotificationType.EMAIL_AND_PUSH) {
                 hasEmailAlert = true;
-                emailAlertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
+                emailAlertBody += `<b>${alert.alertTitle}</b>\n\n${alertData.alertMessage}\n\n`;
             }
             if (alertData.notificationType === NotificationType.PUSH || alertData.notificationType === NotificationType.EMAIL_AND_PUSH) {
                 hasPushAlert = true;
-                pushAlertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
+                pushAlertBody += `<b>${alert.alertTitle}</b>\n\n${alertData.alertMessage}\n\n`;
             }
 
             const currentTime = new Date();
@@ -184,9 +184,9 @@ async function processAdhocReport(weatherData: WeatherData) {
         const alertData = await alert.process(weatherData);
 
         if (alertData.hasAlert) {
-            alertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
+            alertBody += `<b>${alert.alertTitle}</b>\n\n${alertData.alertMessage}\n\n`;
         } else {
-            alertBody += `${alert.alertTitle}\n\nNo alerts\n\n\n`;
+            alertBody += `<b>${alert.alertTitle}</b>\n\nNo alerts\n\n\n`;
         }
     }
 
