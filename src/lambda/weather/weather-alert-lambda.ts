@@ -184,9 +184,9 @@ async function processAdhocReport(weatherData: WeatherData) {
         const alertData = await alert.process(weatherData);
 
         if (alertData.hasAlert) {
-            alertBody += `<b>${alert.alertTitle}</b>\n\n${alertData.alertMessage}\n\n`;
+            alertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
         } else {
-            alertBody += `<b>${alert.alertTitle}</b>\n\nNo alerts\n\n\n`;
+            alertBody += `${alert.alertTitle}\n\nNo alerts\n\n\n`;
         }
     }
 
