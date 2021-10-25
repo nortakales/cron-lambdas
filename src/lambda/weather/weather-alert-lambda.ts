@@ -1,5 +1,5 @@
 import { sendEmail } from '../emailer';
-import { NotificationApplication, sendPushNotification } from '../notifier';
+import { NotificationApplication, sendPushNotification, Sound } from '../notifier';
 import { BiDaily48HourWindAlert } from './alerts/48-hour-wind-alert';
 import { Daily7DayWindAlert } from './alerts/7-day-wind-alert';
 import { Alert, NotificationType } from './interfaces/alert-types';
@@ -163,7 +163,7 @@ async function processRegularReport(weatherData: WeatherData) {
     }
 
     if (hasPushAlert) {
-        await sendPushNotification(NotificationApplication.WEATHER, "Weather Alert", pushAlertBody);
+        await sendPushNotification(NotificationApplication.WEATHER, "Weather Alert", pushAlertBody, Sound.PUSHOVER);
     }
 
     console.log("Complete");

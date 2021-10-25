@@ -1,4 +1,4 @@
-import { NotificationApplication, sendPushNotification } from "../notifier";
+import { NotificationApplication, sendPushNotification, Sound } from "../notifier";
 
 exports.handler = async (event: any = {}, context: any = {}) => {
     console.log("Running...");
@@ -14,18 +14,20 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     let title;
     let body;
+    let sound;
     if (pipelineEvent?.detail?.state === "SUCCEEDED") {
         title = "Pipeline Succeeded";
         body = pipelineEvent.detail.pipeline + " deployment succeeded";
+        sound = Sound.INTERMISSION;
     } else {
         title = "Pipeline FAILED";
         body = "Pipeline: " + pipelineEvent.detail.pipeline + "\n" +
             "State: " + pipelineEvent.detail.state + "\n" +
             "Stage: " + pipelineEvent.detail.stage;
-
+        sound = Sound.MECHANICAL;
     }
 
-    await sendPushNotification(NotificationApplication.AWS, title, body);
+    await sendPushNotification(NotificationApplication.AWS, title, body, sound);
 
     console.log("Done");
 };

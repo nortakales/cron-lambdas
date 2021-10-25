@@ -1,4 +1,4 @@
-import { NotificationApplication, sendPushNotification } from "../notifier";
+import { NotificationApplication, sendPushNotification, Sound, UrlOptions } from "../notifier";
 
 exports.handler = async (event: any = {}, context: any = {}) => {
     console.log("Running...");
@@ -12,7 +12,12 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         event.url + '\n' +
         new Date(event.registrationDate).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' });
 
-    await sendPushNotification(NotificationApplication.AUTOX, "AutoX Alert", body, event.url);
+    const urlOptions: UrlOptions = {
+        url: event.url,
+        urlTitle: event.name
+    }
+
+    await sendPushNotification(NotificationApplication.AUTOX, "AutoX Alert", body, Sound.BUGLE, urlOptions);
 
     console.log("Done");
 };

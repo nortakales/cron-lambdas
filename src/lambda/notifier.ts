@@ -10,7 +10,19 @@ export enum NotificationApplication {
     AWS = 'a3bimswo7uzrvezxdjir1cfakpi6c5'
 }
 
-export async function sendPushNotification(application: NotificationApplication, title: string, message: string, url?: string) {
+export enum Sound {
+    PUSHOVER = 'pushover',
+    BUGLE = 'bugle',
+    MECHANICAL = 'mechanical',
+    INTERMISSION = 'intermission'
+}
+
+export interface UrlOptions {
+    url: string;
+    urlTitle: string;
+}
+
+export async function sendPushNotification(application: NotificationApplication, title: string, message: string, sound: Sound, url?: UrlOptions) {
 
     console.log("Sending push notification");
 
@@ -26,9 +38,10 @@ export async function sendPushNotification(application: NotificationApplication,
         // 'message' is required. All other values are optional.
         message: message,
         title: title,
-        sound: 'pushover',
+        sound: sound,
         priority: 0,
-        url: url
+        url: url?.url,
+        url_title: url?.urlTitle
     }
 
     const promise = new Promise<void>((resolve, reject) => {
