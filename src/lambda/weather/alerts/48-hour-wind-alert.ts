@@ -9,8 +9,8 @@ export class BiDaily48HourWindAlert implements Alert {
     alertTitle = "48 Hour Wind Alert";
     alertKey = "48-hour-wind-alert-quadaily";
 
-    private readonly windSpeedThreshold = 25;
-    private readonly windGustThreshold = 25;
+    private readonly windSpeedThreshold = 15;
+    private readonly windGustThreshold = 30;
 
     async process(weatherData: WeatherData) {
 
