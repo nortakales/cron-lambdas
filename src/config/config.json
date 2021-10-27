@@ -5,7 +5,7 @@
     },
     "autoxReminder": {
         "enabled": "true",
-        "rate": "rate(1 hour)",
+        "rate": "rate(30 minutes)",
         "dynamoTableName": "autox_reminder_urls",
         "fromEmail": "nortakales@gmail.com",
         "emailSubject": "Evergreen Autox Alert",

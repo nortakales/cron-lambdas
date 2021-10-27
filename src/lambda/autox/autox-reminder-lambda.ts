@@ -3,6 +3,7 @@ import { sendEmail } from '../emailer';
 import * as DDB from '../dynamo';
 import moment from 'moment';
 import { createTimer } from '../events';
+import { NotificationApplication, sendPushNotification, Sound, UrlOptions } from '../notifier';
 
 const EMAIL_LIST = process.env.EMAIL_LIST!;
 const SUBJECT = process.env.SUBJECT!;
@@ -12,11 +13,12 @@ const ENABLED = process.env.ENABLED!;
 const PUSH_NOTIFICATION_LAMBDA_ARN = process.env.PUSH_NOTIFICATION_LAMBDA_ARN!;
 
 interface UrlMatch {
-    fullMatch: string,
-    url: string,
-    name: string,
+    fullMatch: string
+    url: string
+    name: string
     id: string | null
     registrationDate: Date | null
+    registrationAlreadyOpen: boolean
 }
 
 async function getUrlFromDDB(url: string) {
@@ -25,13 +27,14 @@ async function getUrlFromDDB(url: string) {
     });
 }
 
-async function writeUrlToDDB(url: string, name: string, id: string | null, registrationDate: Date | null) {
+async function writeUrlToDDB(url: string, name: string, id: string | null, registrationDate: Date | null, registrationAlreadyOpen: boolean) {
     if (id && registrationDate) {
         await DDB.put(TABLE_NAME, {
             url: url,
             name: name,
             id: id,
-            registrationDate: registrationDate?.getTime()
+            registrationDate: registrationDate?.getTime(),
+            registrationAlreadyOpen: registrationAlreadyOpen
         });
     } else {
         await DDB.put(TABLE_NAME, {
@@ -58,7 +61,8 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
             url: url[1],
             name: url[2],
             id: null,
-            registrationDate: null
+            registrationDate: null,
+            registrationAlreadyOpen: false
         }
 
         if (processedUrls[urlMatch.url])
@@ -80,6 +84,7 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
             console.log("New Autox URL!");
 
             urlMatch.registrationDate = getRegistrationTimeFromHtml(html);
+            urlMatch.registrationAlreadyOpen = isRegistrationAlreadyOpen(html);
 
             if (urlMatch.registrationDate !== null) {
                 const notificationDate = getNotificationDate(urlMatch.registrationDate);
@@ -87,7 +92,7 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
                 urlMatch.id = timerId;
             }
 
-            await writeUrlToDDB(urlMatch.url, urlMatch.name, urlMatch.id, urlMatch.registrationDate);
+            await writeUrlToDDB(urlMatch.url, urlMatch.name, urlMatch.id, urlMatch.registrationDate, urlMatch.registrationAlreadyOpen);
 
             newUrls.push(urlMatch);
         }
@@ -105,6 +110,9 @@ function createEmailBody(urls: UrlMatch[]): string {
         let registrationDate = "Oops, couldn't parse registration date... you won't get a push notification";
         if (url.registrationDate) {
             registrationDate = url.registrationDate?.toLocaleString('en-us', { timeZone: 'America/Los_Angeles' });
+        }
+        if (url.registrationAlreadyOpen) {
+            registrationDate = "Registration is already open!";
         }
 
         emailBody += url.name + "\n"
@@ -135,6 +143,22 @@ exports.handler = async (event = {}) => {
         return;
     }
 
+    for (let urlMatch of newUrls) {
+        if (urlMatch.registrationAlreadyOpen) {
+
+            const body = 'New AutoX, and reg is open!\n' +
+                urlMatch.name + '\n' +
+                urlMatch.url;
+
+            const urlOptions: UrlOptions = {
+                url: urlMatch.url,
+                urlTitle: urlMatch.name
+            }
+
+            await sendPushNotification(NotificationApplication.AUTOX, "AutoX Alert", body, Sound.BUGLE, urlOptions);
+        }
+    }
+
     const emailBody = createEmailBody(newUrls);
 
     await sendEmail({
@@ -162,10 +186,18 @@ function getRegistrationTimeFromHtml(html: string) {
     }
 }
 
+function isRegistrationAlreadyOpen(html: string) {
+
+    if (html.match(/<form.*?post.*?action.*?\/events\/.*?>/)) {
+        return true;
+    }
+    return false;
+}
+
 function getNotificationDate(registrationDate: Date) {
     const fiveMinutesInMillis = 60 * 5 * 1000;
     return new Date(registrationDate.getTime() - fiveMinutesInMillis);
 }
 
 // Uncomment this to call locally
-//exports.handler();
+exports.handler();
