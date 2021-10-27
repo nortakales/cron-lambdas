@@ -200,4 +200,4 @@ function getNotificationDate(registrationDate: Date) {
 }
 
 // Uncomment this to call locally
-exports.handler();
+// exports.handler();
