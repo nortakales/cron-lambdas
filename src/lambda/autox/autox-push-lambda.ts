@@ -7,7 +7,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     console.log("CONTEXT\n" + JSON.stringify(context, null, 2));
     console.log("ENVIRONMENT VARIABLES\n" + JSON.stringify(process.env, null, 2));
 
-    const body = 'Registration is about to open!\n' +
+    const body = 'Registration is opening soon!\n' +
         event.name + '\n' +
         event.url + '\n' +
         new Date(event.registrationDate).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' });

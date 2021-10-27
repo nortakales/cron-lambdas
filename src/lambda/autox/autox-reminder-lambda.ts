@@ -16,7 +16,8 @@ interface UrlMatch {
     fullMatch: string
     url: string
     name: string
-    id: string | null
+    firstTimerId: string | null
+    secondTimerId: string | null
     registrationDate: Date | null
     registrationAlreadyOpen: boolean
 }
@@ -27,19 +28,21 @@ async function getUrlFromDDB(url: string) {
     });
 }
 
-async function writeUrlToDDB(url: string, name: string, id: string | null, registrationDate: Date | null, registrationAlreadyOpen: boolean) {
-    if (id && registrationDate) {
+async function writeUrlToDDB(urlMatch: UrlMatch) {
+    if (urlMatch.firstTimerId && urlMatch.secondTimerId && urlMatch.registrationDate) {
         await DDB.put(TABLE_NAME, {
-            url: url,
-            name: name,
-            id: id,
-            registrationDate: registrationDate?.getTime(),
-            registrationAlreadyOpen: registrationAlreadyOpen
+            url: urlMatch.url,
+            name: urlMatch.name,
+            firstTimerId: urlMatch.firstTimerId,
+            secondTimerId: urlMatch.secondTimerId,
+            registrationDate: urlMatch.registrationDate.getTime(),
+            registrationAlreadyOpen: urlMatch.registrationAlreadyOpen
         });
     } else {
         await DDB.put(TABLE_NAME, {
-            url: url,
-            name: name
+            url: urlMatch.url,
+            name: urlMatch.name,
+            registrationAlreadyOpen: urlMatch.registrationAlreadyOpen
         });
     }
 }
@@ -60,7 +63,8 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
             fullMatch: url[0],
             url: url[1],
             name: url[2],
-            id: null,
+            firstTimerId: null,
+            secondTimerId: null,
             registrationDate: null,
             registrationAlreadyOpen: false
         }
@@ -87,12 +91,16 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
             urlMatch.registrationAlreadyOpen = isRegistrationAlreadyOpen(html);
 
             if (urlMatch.registrationDate !== null) {
-                const notificationDate = getNotificationDate(urlMatch.registrationDate);
-                const timerId = await createTimer(notificationDate, PUSH_NOTIFICATION_LAMBDA_ARN, urlMatch)
-                urlMatch.id = timerId;
+                const firstNotificationDate = getFirstNotificationDate(urlMatch.registrationDate);
+                const firstTimerId = await createTimer(firstNotificationDate, PUSH_NOTIFICATION_LAMBDA_ARN, urlMatch)
+                urlMatch.firstTimerId = firstTimerId;
+
+                const secondNotificationDate = getSecondNotificationDate(urlMatch.registrationDate);
+                const secondTimerId = await createTimer(secondNotificationDate, PUSH_NOTIFICATION_LAMBDA_ARN, urlMatch)
+                urlMatch.secondTimerId = secondTimerId;
             }
 
-            await writeUrlToDDB(urlMatch.url, urlMatch.name, urlMatch.id, urlMatch.registrationDate, urlMatch.registrationAlreadyOpen);
+            await writeUrlToDDB(urlMatch);
 
             newUrls.push(urlMatch);
         }
@@ -103,7 +111,7 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
 
 function createEmailBody(urls: UrlMatch[]): string {
 
-    let emailBody = "New AutoX discovered:\n\n";
+    let emailBody = "New AutoX!\n\n";
 
     for (let url of urls) {
 
@@ -119,6 +127,11 @@ function createEmailBody(urls: UrlMatch[]): string {
             + url.url + "\n"
             + "Registration: " + registrationDate + "\n\n";
     }
+
+    emailBody += "\nIf you want push notifications to your phone 30 min and 5 min before registration actually opens:\n"
+        + "1. Download this app: https://pushover.net/\n"
+        + "2. Log in to the app and send me your \"user key\"\n"
+        + "3. You'll have a free 30 day trial, you have to pay a one time $5 fee (not to me, to the app) if you want notifications forever\n"
 
     console.log("Start email body -----------");
     console.log(emailBody);
@@ -194,7 +207,12 @@ function isRegistrationAlreadyOpen(html: string) {
     return false;
 }
 
-function getNotificationDate(registrationDate: Date) {
+function getFirstNotificationDate(registrationDate: Date) {
+    const thirtyMinutesInMillis = 60 * 30 * 1000;
+    return new Date(registrationDate.getTime() - thirtyMinutesInMillis);
+}
+
+function getSecondNotificationDate(registrationDate: Date) {
     const fiveMinutesInMillis = 60 * 5 * 1000;
     return new Date(registrationDate.getTime() - fiveMinutesInMillis);
 }
