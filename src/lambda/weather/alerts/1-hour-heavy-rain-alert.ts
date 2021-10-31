@@ -9,7 +9,7 @@ export class HourlyMinutelyHeavyRainAlert implements Alert {
     alertTitle = "1 Hour Rain Alert";
     alertKey = "1-hour-heavy-rain-alert";
 
-    private readonly rainThreshold = 3; // mm
+    private readonly rainThreshold = 4; // mm
 
     async process(weatherData: WeatherData) {
 
@@ -17,6 +17,13 @@ export class HourlyMinutelyHeavyRainAlert implements Alert {
 
         let hasAlert = false;
         let message = '';
+
+        if (!weatherData.minutely) {
+            console.log("Minute data was missing");
+            return {
+                hasAlert: false
+            }
+        }
 
         for (let minutelyData of weatherData.minutely) {
             if (minutelyData.precipitation > this.rainThreshold) {
