@@ -112,6 +112,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         console.log(JSON.stringify(error, null, 2));
         console.log("Dumping weather data:");
         console.log(data);
+        throw error;
     }
 };
 
