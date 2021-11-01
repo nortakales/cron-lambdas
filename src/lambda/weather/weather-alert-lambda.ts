@@ -97,14 +97,21 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     // https://api.openweathermap.org/data/2.5/onecall?lat=47.806994&lon=-122.192443&appid=c6eaff3ab2bec2990b0df6123e69b74e&lang=en&units=imperial
     const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${API_KEY}&lang=en&units=imperial`;
 
-    const data = await httpsGet(url);
-    const weatherData: WeatherData = JSON.parse(data);
-    //console.log(JSON.stringify(weatherData, null, 2));
+    let data;
+    try {
+        data = await httpsGet(url);
+        const weatherData: WeatherData = JSON.parse(data);
+        //console.log(JSON.stringify(weatherData, null, 2));
 
-    if (adhoc) {
-        return await processAdhocReport(weatherData);
-    } else {
-        return await processRegularReport(weatherData);
+        if (adhoc) {
+            return await processAdhocReport(weatherData);
+        } else {
+            return await processRegularReport(weatherData);
+        }
+    } catch (error) {
+        console.log(JSON.stringify(error, null, 2));
+        console.log("Dumping weather data:");
+        console.log(data);
     }
 };
 
