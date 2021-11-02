@@ -33,6 +33,7 @@
     "@aws-cdk/pipelines": "^1.126.0",
     "@aws-sdk/client-cloudwatch-events": "^3.36.0",
     "@aws-sdk/client-dynamodb": "^3.25.0",
+    "@aws-sdk/client-secrets-manager": "^3.39.0",
     "@aws-sdk/lib-dynamodb": "^3.25.0",
     "aws-sdk": "^2.964.0",
     "moment": "^2.29.1",

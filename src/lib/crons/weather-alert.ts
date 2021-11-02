@@ -29,7 +29,7 @@ export class WeatherAlertCron extends cdk.Construct {
                 EMAIL_LIST: config.weatherAlert.emailList.join(','),
                 FROM: config.weatherAlert.fromEmail,
                 SUBJECT: config.weatherAlert.emailSubject,
-                API_KEY: config.weatherAlert.apiKey,
+                API_KEY_SECRET_OPEN_WEATHER: config.weatherAlert.apiKeySecretOpenWeather,
                 LATITUDE: config.weatherAlert.latitude,
                 LONGITUDE: config.weatherAlert.longitude,
                 ENABLED: config.weatherAlert.enabled,

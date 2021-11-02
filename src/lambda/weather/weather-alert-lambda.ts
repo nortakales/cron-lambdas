@@ -8,13 +8,14 @@ import { httpsGet } from '../http';
 import { toIsoString } from './utilities';
 import { Duration } from "typed-duration";
 import * as DDB from '../dynamo';
+import * as KMS from '../secrets';
 import { YearlyFirstFreezeAlert } from './alerts/yearly-first-freeze-alert';
 import { Daily7DayExtremeTemperatureAlert } from './alerts/7-day-extreme-temperature-alert';
 import { Daily7DayNationalWeatherAlert } from './alerts/7-day-national-weather-alert';
 import { Daily7DaySnowAlert } from './alerts/7-day-snow-alert';
 import { HourlyMinutelyHeavyRainAlert } from './alerts/1-hour-heavy-rain-alert';
 
-const API_KEY = process.env.API_KEY!;
+const API_KEY_SECRET_OPEN_WEATHER = process.env.API_KEY_SECRET_OPEN_WEATHER!;
 const LATITUDE = process.env.LATITUDE!;
 const LONGITUDE = process.env.LONGITUDE!;
 const ENABLED = process.env.ENABLED!;
@@ -22,6 +23,7 @@ const TABLE_NAME = process.env.TABLE_NAME!;
 const EMAIL_LIST = process.env.EMAIL_LIST!;
 const SUBJECT = process.env.SUBJECT!;
 const FROM = process.env.FROM!;
+const REPORT_TYPE = process.env.REPORT_TYPE;
 
 
 async function getLastTimestamp(alertKey: string) {
@@ -94,8 +96,10 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     console.log(`Running as ${adhoc ? 'ADHOC' : 'REGULAR'} report...`);
 
+    const apiKey = await KMS.getSecret(API_KEY_SECRET_OPEN_WEATHER);
+
     // https://api.openweathermap.org/data/2.5/onecall?lat=47.806994&lon=-122.192443&appid=c6eaff3ab2bec2990b0df6123e69b74e&lang=en&units=imperial
-    const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${API_KEY}&lang=en&units=imperial`;
+    const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${apiKey}&lang=en&units=imperial`;
 
     let data;
     try {
@@ -208,6 +212,9 @@ async function processAdhocReport(weatherData: WeatherData) {
 }
 
 function isAdhocReport(event: any) {
+    if (REPORT_TYPE && REPORT_TYPE === 'adhoc') {
+        return true;
+    }
     if (event?.queryStringParameters?.type === 'adhoc') {
         return true;
     }
