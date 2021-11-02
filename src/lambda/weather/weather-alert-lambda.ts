@@ -96,7 +96,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     console.log(`Running as ${adhoc ? 'ADHOC' : 'REGULAR'} report...`);
 
-    const apiKey = await SM.getSecret(API_KEY_SECRET_OPEN_WEATHER);
+    const apiKey = await SM.getSecretString(API_KEY_SECRET_OPEN_WEATHER);
 
     // https://api.openweathermap.org/data/2.5/onecall?lat=47.806994&lon=-122.192443&appid=c6eaff3ab2bec2990b0df6123e69b74e&lang=en&units=imperial
     const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${apiKey}&lang=en&units=imperial`;

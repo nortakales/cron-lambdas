@@ -4,7 +4,7 @@ const REGION = process.env.REGION!;
 
 const client = new SecretsManagerClient({ region: REGION });
 
-export async function getSecret(secret: string) {
+export async function getSecretString(secret: string) {
 
     const command = new GetSecretValueCommand({
         SecretId: secret
@@ -12,4 +12,13 @@ export async function getSecret(secret: string) {
     const response = await client.send(command);
 
     return response.SecretString;
+}
+
+export async function getSecretObject(secret: string) {
+    const command = new GetSecretValueCommand({
+        SecretId: secret
+    });
+    const response = await client.send(command);
+
+    return JSON.parse(response.SecretString!);
 }

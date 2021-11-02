@@ -34,7 +34,8 @@ export class AutoxReminderCron extends cdk.Construct {
                 TABLE_NAME: config.autoxReminder.dynamoTableName,
                 ENABLED: config.autoxReminder.enabled,
                 REGION: config.base.region,
-                PUSH_NOTIFICATION_LAMBDA_ARN: config.autoxReminder.pushNotificationLambdaArn
+                PUSH_NOTIFICATION_LAMBDA_ARN: config.autoxReminder.pushNotificationLambdaArn,
+                PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey
             },
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,
@@ -90,7 +91,8 @@ export class AutoxReminderCron extends cdk.Construct {
                 SUBJECT: config.autoxReminder.emailSubject,
                 TABLE_NAME: config.autoxReminder.dynamoTableName,
                 ENABLED: config.autoxReminder.enabled,
-                REGION: config.base.region
+                REGION: config.base.region,
+                PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey
             },
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,

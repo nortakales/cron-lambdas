@@ -26,7 +26,8 @@
                 "ENABLED": "true",
                 "REGION": "us-west-2",
                 "TABLE_NAME": "weather_alert_tracker",
-                "REPORT_TYPE": "adhoc"
+                "REPORT_TYPE": "adhoc",
+                "PUSHOVER_CONFIG_SECRET_KEY": "pushover-users-groups-apps"
             },
             "internalConsoleOptions": "openOnSessionStart"
         },
@@ -49,7 +50,8 @@
                 "TABLE_NAME": "autox_reminder_urls",
                 "ENABLED": "true",
                 "REGION": "us-west-2",
-                "PUSH_NOTIFICATION_LAMBDA_ARN": "arn:aws:lambda:us-west-2:787068200846:function:AutoxPushLambdaFunction"
+                "PUSH_NOTIFICATION_LAMBDA_ARN": "arn:aws:lambda:us-west-2:787068200846:function:AutoxPushLambdaFunction",
+                "PUSHOVER_CONFIG_SECRET_KEY": "pushover-users-groups-apps"
             },
             "internalConsoleOptions": "openOnSessionStart"
         },

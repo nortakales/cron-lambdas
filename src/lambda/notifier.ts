@@ -1,13 +1,12 @@
-
+import * as SM from './secrets';
 const Push = require('pushover-notifications')
 
-const autoxGroup = 'ghsdv971ryphsg528qccwj2mjn6m61';
-const myUser = 'uith98yw3i8e36uyzykhn3byfnesm2';
+const PUSHOVER_CONFIG_SECRET_KEY = process.env.PUSHOVER_CONFIG_SECRET_KEY!;
 
 export enum NotificationApplication {
-    WEATHER = 'az17zzuo6nboabno73d7isp5ifw1sw',
-    AUTOX = 'a4pmfchdyea7wj47hwzzp6i8hz74ov',
-    AWS = 'a3bimswo7uzrvezxdjir1cfakpi6c5'
+    WEATHER = "WEATHER",
+    AUTOX = "AUTOX",
+    AWS = "AWS"
 }
 
 export enum Sound {
@@ -26,11 +25,13 @@ export async function sendPushNotification(application: NotificationApplication,
 
     console.log("Sending push notification");
 
-    const user = application === NotificationApplication.AUTOX ? autoxGroup : myUser;
+    const config = await SM.getSecretObject(PUSHOVER_CONFIG_SECRET_KEY);
+
+    const user = application === NotificationApplication.AUTOX ? config.autoxGroup : config.myUser;
 
     const pushService = new Push({
         user: user,
-        token: application,
+        token: config[application],
     })
 
     const notification = {

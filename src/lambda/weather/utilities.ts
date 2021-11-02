@@ -59,7 +59,6 @@ export function toReadablePacificDate(time: number, format?: Format) {
             return new Date(time).toLocaleTimeString('en-us', { timeZone: 'America/Los_Angeles' });
         case Format.DATE_AND_TIME:
         case undefined:
-        case Format.DATE_AND_TIME:
         default:
             return new Date(time).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' });
     }

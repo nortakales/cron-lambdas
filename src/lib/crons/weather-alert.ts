@@ -35,6 +35,7 @@ export class WeatherAlertCron extends cdk.Construct {
                 ENABLED: config.weatherAlert.enabled,
                 REGION: config.base.region,
                 TABLE_NAME: config.weatherAlert.trackingDynamoTableName,
+                PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey
             },
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,
