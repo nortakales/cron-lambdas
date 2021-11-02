@@ -48,6 +48,12 @@ export class AutoxReminderCron extends cdk.Construct {
             resources: ['*'],
             effect: iam.Effect.ALLOW,
         }));
+        // Lambda must be able to retrieve secrets
+        lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['secretsmanager:GetSecretValue'],
+            resources: ['*'],
+            effect: iam.Effect.ALLOW,
+        }));
 
         const dynamoTable = new dynamodb.Table(this, 'AutoxReminderDynamoTable', {
             partitionKey: {
@@ -103,5 +109,11 @@ export class AutoxReminderCron extends cdk.Construct {
         pushNotificationLambdaFunction.addPermission('CloudWatchEventsPermission', {
             principal: new iam.ServicePrincipal('events.amazonaws.com')
         });
+        // Lambda must be able to retrieve secrets
+        pushNotificationLambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['secretsmanager:GetSecretValue'],
+            resources: ['*'],
+            effect: iam.Effect.ALLOW,
+        }));
     }
 }

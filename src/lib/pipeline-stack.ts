@@ -10,6 +10,7 @@ import * as config from '../config/config.json'
 import { DLQWithMonitor } from './constructs/dlq-with-monitor';
 import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
 import * as lambda from '@aws-cdk/aws-lambda';
+import * as iam from '@aws-cdk/aws-iam';
 
 export class CDKPipelineStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -68,6 +69,12 @@ export class CDKPipelineStack extends cdk.Stack {
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq
         });
+        // Lambda must be able to retrieve secrets
+        pipelineNotificationLambda.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['secretsmanager:GetSecretValue'],
+            resources: ['*'],
+            effect: iam.Effect.ALLOW,
+        }));
 
         const pipelineTopic = new sns.Topic(this, 'CronLambdaPipelineNotificationTopic', {
             topicName: 'CronLambdaPipelineNotificationTopic',
