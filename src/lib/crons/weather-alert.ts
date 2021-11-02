@@ -47,6 +47,12 @@ export class WeatherAlertCron extends cdk.Construct {
             resources: ['*'],
             effect: iam.Effect.ALLOW,
         }));
+        // Lambda must be able to retrieve secrets
+        this.lambda.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['secretsmanager:GetSecretValue'],
+            resources: ['*'],
+            effect: iam.Effect.ALLOW,
+        }));
 
         const dynamoTable = new dynamodb.Table(this, 'WeatherAlertTrackingDynamoTable', {
             partitionKey: {

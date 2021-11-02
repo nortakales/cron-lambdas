@@ -8,7 +8,7 @@ import { httpsGet } from '../http';
 import { toIsoString } from './utilities';
 import { Duration } from "typed-duration";
 import * as DDB from '../dynamo';
-import * as KMS from '../secrets';
+import * as SM from '../secrets';
 import { YearlyFirstFreezeAlert } from './alerts/yearly-first-freeze-alert';
 import { Daily7DayExtremeTemperatureAlert } from './alerts/7-day-extreme-temperature-alert';
 import { Daily7DayNationalWeatherAlert } from './alerts/7-day-national-weather-alert';
@@ -96,7 +96,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     console.log(`Running as ${adhoc ? 'ADHOC' : 'REGULAR'} report...`);
 
-    const apiKey = await KMS.getSecret(API_KEY_SECRET_OPEN_WEATHER);
+    const apiKey = await SM.getSecret(API_KEY_SECRET_OPEN_WEATHER);
 
     // https://api.openweathermap.org/data/2.5/onecall?lat=47.806994&lon=-122.192443&appid=c6eaff3ab2bec2990b0df6123e69b74e&lang=en&units=imperial
     const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${apiKey}&lang=en&units=imperial`;
