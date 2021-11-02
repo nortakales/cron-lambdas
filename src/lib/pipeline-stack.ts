@@ -60,7 +60,8 @@ export class CDKPipelineStack extends cdk.Stack {
             entry: __dirname + '/../lambda/pipeline/pipeline-notification-lambda.ts',
             handler: 'handler',
             environment: {
-                REGION: config.base.region
+                REGION: config.base.region,
+                PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey
             },
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,
