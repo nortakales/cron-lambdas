@@ -60,7 +60,7 @@ export async function getAsCommonData() {
             visibility: hourly.visibility,
 
             pop: hourly.pop,
-            rain: hourly.rain['1h'],
+            rain: hourly.rain?.['1h'] || 0,
 
             pressure: hourly.pressure,
             humidity: hourly.humidity,
