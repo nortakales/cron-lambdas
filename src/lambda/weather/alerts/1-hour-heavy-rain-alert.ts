@@ -1,6 +1,6 @@
 import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
-import { WeatherData } from "../interfaces/data";
+import { WeatherData } from "../data-sources/common/common-data";
 import { Format, getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 
 export class HourlyMinutelyHeavyRainAlert implements Alert {
@@ -28,7 +28,7 @@ export class HourlyMinutelyHeavyRainAlert implements Alert {
         for (let minutelyData of weatherData.minutely) {
             if (minutelyData.precipitation > this.rainThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(minutelyData.dt, Format.TIME_ONLY)}: ${minutelyData.precipitation} mm of rain\n`;
+                message += `${toReadablePacificDate(minutelyData.datetime, Format.TIME_ONLY)}: ${minutelyData.precipitation} mm of rain\n`;
             }
         }
 

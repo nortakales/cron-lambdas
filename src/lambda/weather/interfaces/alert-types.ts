@@ -1,5 +1,5 @@
-import { WeatherData } from "./data";
 import { TimeDuration } from "typed-duration";
+import { WeatherData } from "../data-sources/common/common-data";
 
 
 export interface Alert {

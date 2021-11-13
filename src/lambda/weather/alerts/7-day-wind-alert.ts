@@ -1,6 +1,6 @@
 import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
-import { WeatherData } from "../interfaces/data";
+import { WeatherData } from "../data-sources/common/common-data";
 import { Format, getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 
 export class Daily7DayWindAlert implements Alert {
@@ -22,7 +22,7 @@ export class Daily7DayWindAlert implements Alert {
         for (let dailyData of weatherData.daily) {
             if (dailyData.wind_speed > this.windSpeedThreshold || dailyData.wind_gust > this.windGustThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(dailyData.dt, Format.DATE_ONLY)}: ${dailyData.wind_speed} mph / ${dailyData.wind_gust} mph / ${getDirectionFromDegrees(dailyData.wind_deg)}\n`;
+                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: ${dailyData.wind_speed} mph / ${dailyData.wind_gust} mph / ${getDirectionFromDegrees(dailyData.wind_deg)}\n`;
             }
         }
 

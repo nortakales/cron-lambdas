@@ -1,6 +1,6 @@
 import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
-import { WeatherData } from "../interfaces/data";
+import { WeatherData } from "../data-sources/common/common-data";
 import { Format, getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 
 export class BiDaily48HourWindAlert implements Alert {
@@ -23,7 +23,7 @@ export class BiDaily48HourWindAlert implements Alert {
         for (let hourlyData of weatherData.hourly) {
             if (hourlyData.wind_speed > this.windSpeedThreshold || hourlyData.wind_gust > this.windGustThreshold) {
                 hasAlert = true;
-                const currentDate = toReadablePacificDate(hourlyData.dt, Format.DATE_ONLY);
+                const currentDate = toReadablePacificDate(hourlyData.datetime, Format.DATE_ONLY);
                 if (date !== currentDate) {
                     if (date !== null) {
                         message += "\n";
@@ -31,7 +31,7 @@ export class BiDaily48HourWindAlert implements Alert {
                     date = currentDate;
                     message += date + "\n"
                 }
-                message += `${toReadablePacificDate(hourlyData.dt, Format.TIME_ONLY)}: ${hourlyData.wind_speed} mph / ${hourlyData.wind_gust} mph / ${getDirectionFromDegrees(hourlyData.wind_deg)}\n`;
+                message += `${toReadablePacificDate(hourlyData.datetime, Format.TIME_ONLY)}: ${hourlyData.wind_speed} mph / ${hourlyData.wind_gust} mph / ${getDirectionFromDegrees(hourlyData.wind_deg)}\n`;
             }
         }
 

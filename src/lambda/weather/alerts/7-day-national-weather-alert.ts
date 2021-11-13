@@ -1,6 +1,6 @@
 import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
-import { WeatherData } from "../interfaces/data";
+import { WeatherData } from "../data-sources/common/common-data";
 import { getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 
 export class Daily7DayNationalWeatherAlert implements Alert {

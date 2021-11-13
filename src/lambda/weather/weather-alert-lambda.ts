@@ -3,7 +3,7 @@ import { NotificationApplication, sendPushNotification, Sound } from '../notifie
 import { BiDaily48HourWindAlert } from './alerts/48-hour-wind-alert';
 import { Daily7DayWindAlert } from './alerts/7-day-wind-alert';
 import { Alert, NotificationType } from './interfaces/alert-types';
-import { WeatherData } from './interfaces/data';
+import { WeatherData } from "./data-sources/common/common-data";
 import { httpsGet } from '../http';
 import { toIsoString } from './utilities';
 import { Duration } from "typed-duration";
@@ -14,6 +14,7 @@ import { Daily7DayExtremeTemperatureAlert } from './alerts/7-day-extreme-tempera
 import { Daily7DayNationalWeatherAlert } from './alerts/7-day-national-weather-alert';
 import { Daily7DaySnowAlert } from './alerts/7-day-snow-alert';
 import { HourlyMinutelyHeavyRainAlert } from './alerts/1-hour-heavy-rain-alert';
+import * as openweather from './data-sources/openweather/opwenweather';
 
 const API_KEY_SECRET_OPEN_WEATHER = process.env.API_KEY_SECRET_OPEN_WEATHER!;
 const LATITUDE = process.env.LATITUDE!;
@@ -96,27 +97,12 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     console.log(`Running as ${adhoc ? 'ADHOC' : 'REGULAR'} report...`);
 
-    const apiKey = await SM.getSecretString(API_KEY_SECRET_OPEN_WEATHER);
+    const weatherData: WeatherData = await openweather.getAsCommonData();
 
-    // https://api.openweathermap.org/data/2.5/onecall?lat=47.806994&lon=-122.192443&appid=c6eaff3ab2bec2990b0df6123e69b74e&lang=en&units=imperial
-    const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${apiKey}&lang=en&units=imperial`;
-
-    let data;
-    try {
-        data = await httpsGet(url);
-        const weatherData: WeatherData = JSON.parse(data);
-        //console.log(JSON.stringify(weatherData, null, 2));
-
-        if (adhoc) {
-            return await processAdhocReport(weatherData);
-        } else {
-            return await processRegularReport(weatherData);
-        }
-    } catch (error) {
-        console.log(JSON.stringify(error, null, 2));
-        console.log("Dumping weather data:");
-        console.log(data);
-        throw error;
+    if (adhoc) {
+        return await processAdhocReport(weatherData);
+    } else {
+        return await processRegularReport(weatherData);
     }
 };
 
