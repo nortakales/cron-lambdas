@@ -1,13 +1,13 @@
 import * as HTTPS from 'https';
 
-export async function httpsGet(url: string): Promise<string> {
+export async function httpsGet(url: string, userAgent?: string): Promise<string> {
 
     console.log("Getting " + url);
 
     return new Promise(function (resolve, reject) {
 
         const options = {
-            headers: { 'User-Agent': 'Mozilla/5.0' }
+            headers: { 'User-Agent': userAgent || 'Mozilla/5.0' }
         };
 
         var request = HTTPS.get(url, options, (response) => {

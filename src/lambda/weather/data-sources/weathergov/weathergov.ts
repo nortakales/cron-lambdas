@@ -1,0 +1,173 @@
+import { httpsGet } from '../../../http';
+import { cToF, kmhToMph } from '../../utilities';
+import { WeatherGovData, WeatherGovProperty } from './weathergov-data';
+
+
+export async function getOpenWeatherData() {
+
+    const url = `https://api.weather.gov/gridpoints/SEW/130,76`;
+    const userAgent = '(Custom Weather App, nortakales@gmail.com)';
+
+    let data;
+    try {
+        data = await httpsGet(url, userAgent);
+        const weatherData: WeatherGovData = JSON.parse(data);
+        return weatherData;
+    } catch (error) {
+        console.log(JSON.stringify(error, null, 2));
+        console.log("Dumping weather data:");
+        console.log(data);
+        throw error;
+    }
+}
+
+export async function getAsCommonData() {
+    const data = await getOpenWeatherData();
+
+    const commonData = {
+        currentConditions: {
+            // These might noe be totally correct, but I don't use them anyways
+            temp: getValueInCorrectUnits(data.properties.temperature.uom, data.properties.temperature.values[0].value),
+            feels_like: getValueInCorrectUnits(data.properties.apparentTemperature.uom, data.properties.apparentTemperature.values[0].value),
+        },
+        minutely: [], // No minutely data from weather.gov
+        hourly: [], // Empty array, will fill this in
+        daily: [] // Empty array, will fill this in
+    }
+}
+
+interface HourlyData {
+    datetime: number
+    temperature?: number,
+    maxTemperature?: number,
+    minTemperature?: number,
+    apparentTemperature?: number,
+    windChill?: number,
+    dewpoint?: number,
+    relativeHumidity?: number,
+    skyCover?: number,
+    windDirection?: number,
+    windSpeed?: number,
+    windGust?: number,
+    probabilityOfPrecipitation?: number,
+    quantitativePrecipitation?: number,
+    snowfallAmount?: number
+}
+
+function convertToHourlyData(weatherData: WeatherGovData) {
+
+    const hourlyDatas: { [key: string]: HourlyData } = {};
+
+    const propertyMap: { [key: string]: WeatherGovProperty } = {
+        temperature: weatherData.properties.temperature,
+        maxTemperature: weatherData.properties.maxTemperature,
+        minTemperature: weatherData.properties.minTemperature,
+        apparentTemperature: weatherData.properties.apparentTemperature,
+        windChill: weatherData.properties.windChill,
+        dewpoint: weatherData.properties.dewpoint,
+        relativeHumidity: weatherData.properties.relativeHumidity,
+        skyCover: weatherData.properties.skyCover,
+        windDirection: weatherData.properties.windDirection,
+        windSpeed: weatherData.properties.windSpeed,
+        windGust: weatherData.properties.windGust,
+        probabilityOfPrecipitation: weatherData.properties.probabilityOfPrecipitation,
+        quantitativePrecipitation: weatherData.properties.quantitativePrecipitation,
+        snowfallAmount: weatherData.properties.snowfallAmount
+    }
+
+    for (let propertyName in propertyMap) {
+
+        const property = propertyMap[propertyName];
+
+        for (let value of property.values) {
+            const datetimes = convertTimePeriodToSequenceOfMillis(value.validTime);
+            for (let datetime of datetimes) {
+                let hourlyData = hourlyDatas[`${datetime}`];
+                if (hourlyData == null) {
+                    hourlyData = {
+                        datetime: datetime
+                    }
+                    hourlyDatas[`${datetime}`] = hourlyData;
+                }
+                hourlyData[propertyName as keyof HourlyData] = getValueInCorrectUnits(property.uom, value.value);
+            }
+        }
+    }
+
+    return Object.values(hourlyDatas).sort((first, second) => {
+        return first.datetime - second.datetime;
+    });
+}
+
+// Input format is like:
+// 2021-11-14T09:00:00+00:00/P1DT6H
+// 2021-11-14T09:00:00+00:00/PT6H
+function convertTimePeriodToSequenceOfMillis(timePeriod: string) {
+    const dateTime = timePeriod.split('/')[0];
+    const period = timePeriod.split('/')[1];
+    const numberOfHours = parsePeriodIntoNumberOfHours(period);
+    const sequenceOfMillis = [];
+    let datetime = new Date(dateTime).getTime();
+    for (let hour = 0; hour < numberOfHours; hour++) {
+        sequenceOfMillis.push(datetime);
+        datetime += (1000 * 60 * 60);
+    }
+    return sequenceOfMillis;
+}
+
+const daysRegex = /P(\d*)D/;
+const hoursRegex = /T(\d*)H/;
+function parsePeriodIntoNumberOfHours(period: string) {
+
+    let numberOfDays = 0;
+    let daysMatch;
+    if ((daysMatch = daysRegex.exec(period)) !== null) {
+        numberOfDays = +daysMatch[1];
+    }
+
+    let numberOfHours = 0;
+    let hoursMatch;
+    if ((hoursMatch = hoursRegex.exec(period)) !== null) {
+        numberOfHours = +hoursMatch[1];
+    }
+
+    return numberOfHours + 24 * numberOfDays;
+}
+
+
+function getValueInCorrectUnits(currentUnits: string, value: number) {
+    if (currentUnits === 'wmoUnit:degC') {
+        return cToF(value);
+    }
+    if (currentUnits === 'wmoUnit:km_h-1') {
+        return kmhToMph(value);
+    }
+    if (currentUnits === 'wmoUnit:degree_(angle)') {
+        return value;
+    }
+    if (currentUnits === 'wmoUnit:percent') {
+        return value;
+    }
+    if (currentUnits === 'wmoUnit:mm') {
+        return value;
+    }
+    throw new Error("Encountered a unit I wasn't anticipating: " + currentUnits);
+}
+
+
+export async function main() {
+    const data = await getOpenWeatherData();
+    //console.log(JSON.stringify(data, null, 2));
+    //console.log(JSON.stringify(convertToHourlyData(data), null, 2));
+    //console.log(JSON.stringify(convertToHourlyData(data).map(entry => { return entry.datetime }), null, 2));
+
+    // console.log(parsePeriodIntoNumberOfHours("P1DT6H"));
+    // console.log(parsePeriodIntoNumberOfHours("P1D"));
+    // console.log(parsePeriodIntoNumberOfHours("PT6H"));
+
+    // console.log(convertTimePeriodToSequenceOfMillis("2021-11-14T09:00:00+00:00/PT6H"));
+    // console.log(convertTimePeriodToSequenceOfMillis("2021-11-14T09:00:00+00:00/P1DT6H"));
+    // console.log(convertTimePeriodToSequenceOfMillis("2021-11-14T09:00:00+00:00/P1D"));
+}
+
+//main();
