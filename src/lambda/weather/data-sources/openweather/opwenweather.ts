@@ -111,7 +111,7 @@ export async function getAsCommonData() {
             wind_deg: daily.wind_deg,
             wind_gust: daily.wind_gust
         })),
-        alerts: openWeatherData.alerts.map(alert => ({
+        alerts: openWeatherData.alerts == null ? [] : openWeatherData.alerts.map(alert => ({
             sender_name: alert.sender_name,
             event: alert.event,
             start: alert.start,
