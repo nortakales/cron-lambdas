@@ -29,13 +29,15 @@ export class WeatherAlertCron extends cdk.Construct {
                 EMAIL_LIST: config.weatherAlert.emailList.join(','),
                 FROM: config.weatherAlert.fromEmail,
                 SUBJECT: config.weatherAlert.emailSubject,
-                API_KEY_SECRET_OPEN_WEATHER: config.weatherAlert.apiKeySecretOpenWeather,
                 LATITUDE: config.weatherAlert.latitude,
                 LONGITUDE: config.weatherAlert.longitude,
                 ENABLED: config.weatherAlert.enabled,
                 REGION: config.base.region,
                 TABLE_NAME: config.weatherAlert.trackingDynamoTableName,
-                PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey
+                PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey,
+                API_KEY_SECRET_OPEN_WEATHER: config.weatherAlert.apiKeySecretOpenWeather,
+                API_KEY_SECRET_TOMORROW_IO: config.weatherAlert.apiKeySecretTomorrowIo,
+                API_KEY_SECRET_VISUAL_CROSSING: config.weatherAlert.apiKeySecretVisualCrossing
             },
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,

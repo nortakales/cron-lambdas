@@ -29,10 +29,12 @@
         "emailList": [
             "nortakales@gmail.com"
         ],
-        "apiKeySecretOpenWeather": "openweathermap-apikey",
         "latitude": "47.806994",
         "longitude": "-122.192443",
         "trackingDynamoTableName": "weather_alert_tracker",
-        "historyDynamoTableName": "weather_alert_history"
+        "historyDynamoTableName": "weather_alert_history",
+        "apiKeySecretOpenWeather": "openweathermap-apikey",
+        "apiKeySecretTomorrowIo": "tomorrowio-apikey",
+        "apiKeySecretVisualCrossing": "visualcrossing-apikey"
     }
 }

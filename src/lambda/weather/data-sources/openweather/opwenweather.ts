@@ -2,6 +2,8 @@ import * as SM from '../../../secrets';
 import { httpsGet } from '../../../http';
 import { OpenWeatherData } from './openweather-data';
 import { WeatherData } from '../common/common-data';
+import { removeTimeFromEpochMillisForTimezone } from '../../utilities';
+import { mmToIn, mToMi } from '../../conversions';
 
 const API_KEY_SECRET_OPEN_WEATHER = process.env.API_KEY_SECRET_OPEN_WEATHER!;
 const LATITUDE = process.env.LATITUDE!;
@@ -45,11 +47,11 @@ export async function getAsCommonData() {
 
             temp: openWeatherData.current.temp,
             feels_like: openWeatherData.current.feels_like,
-            visibility: openWeatherData.current.visibility
+            visibility: mToMi(openWeatherData.current.visibility)
         },
         minutely: openWeatherData.minutely.map(minutely => ({
             datetime: minutely.dt,
-            precipitation: minutely.precipitation
+            precipitation: mmToIn(minutely.precipitation)
         })),
         hourly: openWeatherData.hourly.map(hourly => ({
             datetime: hourly.dt,
@@ -57,10 +59,11 @@ export async function getAsCommonData() {
             temp: hourly.temp,
             feels_like: hourly.feels_like,
 
-            visibility: hourly.visibility,
+            visibility: mToMi(hourly.visibility),
 
-            pop: hourly.pop,
-            rain: hourly.rain?.['1h'] || 0,
+            pop: hourly.pop * 100,
+            rain: mmToIn(hourly.rain?.['1h'] || 0),
+            snow: mmToIn(hourly.snow?.['1h'] || 0),
 
             pressure: hourly.pressure,
             humidity: hourly.humidity,
@@ -73,7 +76,7 @@ export async function getAsCommonData() {
             wind_gust: hourly.wind_gust
         })),
         daily: openWeatherData.daily.map(daily => ({
-            datetime: daily.dt,
+            datetime: removeTimeFromEpochMillisForTimezone(daily.dt),
 
             sunrise: daily.sunrise,
             sunset: daily.sunset,
@@ -97,9 +100,9 @@ export async function getAsCommonData() {
                 night: daily.feels_like.night
             },
 
-            pop: daily.pop,
-            rain: daily.rain,
-            snow: daily.snow,
+            pop: daily.pop * 100,
+            rain: mToMi(daily.rain),
+            snow: mToMi(daily.snow),
 
             pressure: daily.pressure,
             humidity: daily.humidity,

@@ -33,3 +33,4 @@ TODO move all of this out of my main aws account
 TODO more weather sources
 TODO store weather history, alerts for new extremes
 TODO move keys to AWS KMS
+TODO ditch the overall Lambda errors alarm in favor of DLQ alarms

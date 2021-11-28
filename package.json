@@ -38,6 +38,7 @@
     "aws-sdk": "^2.964.0",
     "moment": "^2.29.1",
     "pushover-notifications": "^1.2.2",
+    "query-string": "^7.0.1",
     "typed-duration": "^1.0.13"
   }
 }

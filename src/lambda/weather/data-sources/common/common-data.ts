@@ -1,31 +1,31 @@
 export interface WeatherData {
     current: CurrentConditions;
-    minutely: MinutelyConditions[];
+    minutely?: MinutelyConditions[];
     hourly: HourlyConditions[];
     daily: DailyConditions[];
-    alerts: AlertData[];
+    alerts?: AlertData[];
 }
 
 export interface MinutelyConditions {
-    datetime: number;
-    precipitation: number;
+    datetime: number; // seconds
+    precipitation: number; // mm
 }
 
 export interface DailyConditions extends BaseConditions {
 
-    sunrise: number;
-    sunset: number;
+    sunrise?: number;
+    sunset?: number;
 
-    moonrise: number;
-    moonset: number;
-    moon_phase: number;
+    moonrise?: number;
+    moonset?: number;
+    moon_phase?: number;
 
     temp: DailyTemperature;
-    feels_like: DailyFeelsLike;
+    feels_like?: DailyFeelsLike;
 
-    pop: number;
-    rain: number;
-    snow: number;
+    pop: number; // % 0 to 100, max for the day
+    rain: number; // inches, total for the day
+    snow?: number; // inches, total for the day
 }
 export interface DailyFeelsLike {
     morn: number;
@@ -35,54 +35,55 @@ export interface DailyFeelsLike {
 }
 
 export interface DailyTemperature {
-    min: number;
-    max: number;
-    morn: number;
-    day: number;
-    eve: number;
-    night: number;
+    min: number; // F
+    max: number; // F
+    morn?: number;
+    day?: number;
+    eve?: number;
+    night?: number;
 }
 
 export interface BaseConditions {
-    // datetime epoch in seconds
-    datetime: number;
 
-    pressure: number;
-    humidity: number;
-    dew_point: number;
+    datetime: number; // seconds
+
+    pressure: number; // hPa
+    humidity: number; // % 0 to 100
+    dew_point: number; // F
     uvi: number;
-    clouds: number;
+    clouds: number; // % 0 to 100
 
-    wind_speed: number;
-    wind_deg: number;
-    wind_gust: number;
+    wind_speed: number; // mph
+    wind_deg: number; // angle
+    wind_gust: number; // mph
 
 }
 
 export interface CurrentConditions extends BaseConditions {
 
-    temp: number;
-    feels_like: number;
+    temp: number; // F
+    feels_like: number; // F
 
-    visibility: number;
+    visibility: number; // miles
 }
 
 export interface HourlyConditions extends BaseConditions {
 
-    temp: number;
-    feels_like: number;
+    temp: number; // F
+    feels_like: number; // F
 
-    visibility: number;
+    visibility: number; // miles
 
-    pop: number;
-    rain: number
+    pop: number; // % 0 to 100
+    rain: number // inches
+    snow: number // inches
 }
 
 export interface AlertData {
     sender_name: string;
     event: string;
-    start: number;
-    end: number;
+    start: number; // seconds
+    end: number; // seconds
     description: string;
     tags: string[];
 }

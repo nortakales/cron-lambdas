@@ -1,5 +1,7 @@
 import { httpsGet } from '../../../http';
-import { cToF, kmhToMph } from '../../utilities';
+import { cToF, kmhToMph, mmToIn } from '../../conversions';
+import { AngleAndSpeed, averageAngle, Format, removeTimeFromEpochMillisForTimezone, toReadablePacificDate } from '../../utilities';
+import { WeatherData } from '../common/common-data';
 import { WeatherGovData, WeatherGovProperty } from './weathergov-data';
 
 
@@ -25,15 +27,88 @@ export async function getAsCommonData() {
     const data = await getOpenWeatherData();
 
     const commonData = {
-        currentConditions: {
-            // These might noe be totally correct, but I don't use them anyways
-            temp: getValueInCorrectUnits(data.properties.temperature.uom, data.properties.temperature.values[0].value),
-            feels_like: getValueInCorrectUnits(data.properties.apparentTemperature.uom, data.properties.apparentTemperature.values[0].value),
-        },
-        minutely: [], // No minutely data from weather.gov
-        hourly: [], // Empty array, will fill this in
-        daily: [] // Empty array, will fill this in
+        hourly: [] as any, // Empty array, will fill this in
+        daily: [] as any, // Empty array, will fill this in
     }
+
+    const allHourlyData = convertToHourlyData(data);
+
+    let currentDay;
+    let currentDayTimestamp: number;
+    let dailyMaxTemp = 0; // max
+    let dailyMinTemp = 999; // min
+    let dailyPop = 0; // max
+    let dailyRain = 0; // sum
+    let dailySnow = 0; // sum
+    let dailyWindSpeed = 0; // max
+    let dailyWindVectors: AngleAndSpeed[] = []; // avg
+    let dailyWindGust = 0; // max
+
+    for (let hourlyData of allHourlyData) {
+
+        const day = toReadablePacificDate(hourlyData.datetime, Format.DATE_ONLY);
+        if (day !== currentDay) {
+            if (currentDay != null) {
+
+                commonData.daily.push({
+                    datetime: removeTimeFromEpochMillisForTimezone(currentDayTimestamp!),
+                    temp: {
+                        min: dailyMinTemp,
+                        max: dailyMaxTemp
+                    },
+                    pop: dailyPop,
+                    rain: dailyRain,
+                    snow: dailySnow,
+                    wind_speed: dailyWindSpeed,
+                    wind_deg: averageAngle(dailyWindVectors),
+                    wind_gust: dailyWindGust
+                });
+
+
+                dailyMaxTemp = 0; // max
+                dailyMinTemp = 999; // min
+                dailyPop = 0; // max
+                dailyRain = 0; // sum
+                dailySnow = 0; // sum
+                dailyWindSpeed = 0; // max
+                dailyWindVectors = []; // avg
+                dailyWindGust = 0; // max
+            }
+            currentDay = day;
+            currentDayTimestamp = hourlyData.datetime;
+        }
+
+
+        dailyMaxTemp = Math.max(dailyMaxTemp, hourlyData.temperature || 0);
+        dailyMinTemp = Math.min(dailyMinTemp, hourlyData.temperature || 0);
+        dailyPop = Math.max(dailyPop, hourlyData.probabilityOfPrecipitation || 0);
+        dailyRain += hourlyData.quantitativePrecipitation || 0;
+        dailySnow += hourlyData.snowfallAmount || 0;
+        dailyWindSpeed = Math.max(dailyWindSpeed, hourlyData.windSpeed || 0);
+        if (hourlyData.windDirection) {
+            dailyWindVectors.push({
+                angle: hourlyData.windDirection,
+                speed: hourlyData.windSpeed
+            });
+        }
+        dailyWindGust = Math.max(dailyWindGust, hourlyData.windGust || 0);
+
+        // Take of hourly
+        commonData.hourly.push({
+            datetime: hourlyData.datetime / 1000, // Don't need millis
+            wind_speed: hourlyData.windSpeed,
+            wind_deg: hourlyData.windDirection,
+            wind_gust: hourlyData.windGust,
+            temp: hourlyData.temperature,
+            feels_like: hourlyData.apparentTemperature,
+            pop: hourlyData.probabilityOfPrecipitation,
+            rain: hourlyData.quantitativePrecipitation,
+            snow: hourlyData.snowfallAmount
+        });
+
+    }
+
+    return commonData as unknown as WeatherData;
 }
 
 interface HourlyData {
@@ -43,6 +118,7 @@ interface HourlyData {
     minTemperature?: number,
     apparentTemperature?: number,
     windChill?: number,
+    heatIndex?: number,
     dewpoint?: number,
     relativeHumidity?: number,
     skyCover?: number,
@@ -51,7 +127,8 @@ interface HourlyData {
     windGust?: number,
     probabilityOfPrecipitation?: number,
     quantitativePrecipitation?: number,
-    snowfallAmount?: number
+    snowfallAmount?: number,
+    iceAccumulation?: number
 }
 
 function convertToHourlyData(weatherData: WeatherGovData) {
@@ -64,6 +141,7 @@ function convertToHourlyData(weatherData: WeatherGovData) {
         minTemperature: weatherData.properties.minTemperature,
         apparentTemperature: weatherData.properties.apparentTemperature,
         windChill: weatherData.properties.windChill,
+        heatIndex: weatherData.properties.heatIndex,
         dewpoint: weatherData.properties.dewpoint,
         relativeHumidity: weatherData.properties.relativeHumidity,
         skyCover: weatherData.properties.skyCover,
@@ -72,7 +150,8 @@ function convertToHourlyData(weatherData: WeatherGovData) {
         windGust: weatherData.properties.windGust,
         probabilityOfPrecipitation: weatherData.properties.probabilityOfPrecipitation,
         quantitativePrecipitation: weatherData.properties.quantitativePrecipitation,
-        snowfallAmount: weatherData.properties.snowfallAmount
+        snowfallAmount: weatherData.properties.snowfallAmount,
+        iceAccumulation: weatherData.properties.iceAccumulation
     }
 
     for (let propertyName in propertyMap) {
@@ -80,6 +159,7 @@ function convertToHourlyData(weatherData: WeatherGovData) {
         const property = propertyMap[propertyName];
 
         for (let value of property.values) {
+
             const datetimes = convertTimePeriodToSequenceOfMillis(value.validTime);
             for (let datetime of datetimes) {
                 let hourlyData = hourlyDatas[`${datetime}`];
@@ -149,7 +229,7 @@ function getValueInCorrectUnits(currentUnits: string, value: number) {
         return value;
     }
     if (currentUnits === 'wmoUnit:mm') {
-        return value;
+        return mmToIn(value);
     }
     throw new Error("Encountered a unit I wasn't anticipating: " + currentUnits);
 }

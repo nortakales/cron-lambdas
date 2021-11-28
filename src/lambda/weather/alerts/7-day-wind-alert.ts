@@ -9,8 +9,8 @@ export class Daily7DayWindAlert implements Alert {
     alertTitle = "7 Day Wind Alert";
     alertKey = "7-day-wind-alert-daily";
 
-    private readonly windSpeedThreshold = 12.5;
-    private readonly windGustThreshold = 25;
+    private readonly windSpeedThreshold = 15;
+    private readonly windGustThreshold = 30;
 
     async process(weatherData: WeatherData) {
 

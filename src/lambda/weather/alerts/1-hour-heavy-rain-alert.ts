@@ -9,7 +9,7 @@ export class HourlyMinutelyHeavyRainAlert implements Alert {
     alertTitle = "1 Hour Rain Alert";
     alertKey = "1-hour-heavy-rain-alert";
 
-    private readonly rainThreshold = 4; // mm
+    private readonly rainThreshold = 0.2; // inches - this amount in 1 minute would be huge
 
     async process(weatherData: WeatherData) {
 

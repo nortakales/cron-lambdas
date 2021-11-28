@@ -20,14 +20,16 @@
                 "EMAIL_LIST": "nortakales@gmail.com",
                 "SUBJECT": "Test Weather Alert",
                 "FROM": "nortakales@gmail.com",
-                "API_KEY_SECRET_OPEN_WEATHER": "openweathermap-apikey",
                 "LATITUDE": "47.806994",
                 "LONGITUDE": "-122.192443",
                 "ENABLED": "true",
                 "REGION": "us-west-2",
                 "TABLE_NAME": "weather_alert_tracker",
                 "REPORT_TYPE": "adhoc",
-                "PUSHOVER_CONFIG_SECRET_KEY": "pushover-users-groups-apps"
+                "PUSHOVER_CONFIG_SECRET_KEY": "pushover-users-groups-apps",
+                "API_KEY_SECRET_OPEN_WEATHER": "openweathermap-apikey",
+                "API_KEY_SECRET_TOMORROW_IO": "tomorrowio-apikey",
+                "API_KEY_SECRET_VISUAL_CROSSING": "visualcrossing-apikey",
             },
             "internalConsoleOptions": "openOnSessionStart"
         },
@@ -67,7 +69,15 @@
                 "${workspaceFolder}/**/*.js"
             ],
             "preLaunchTask": "${defaultBuildTask}",
-            "internalConsoleOptions": "openOnSessionStart"
+            "internalConsoleOptions": "openOnSessionStart",
+            "env": {
+                "API_KEY_SECRET_OPEN_WEATHER": "openweathermap-apikey",
+                "API_KEY_SECRET_TOMORROW_IO": "tomorrowio-apikey",
+                "API_KEY_SECRET_VISUAL_CROSSING": "visualcrossing-apikey",
+                "LATITUDE": "47.806994",
+                "LONGITUDE": "-122.192443",
+                "REGION": "us-west-2"
+            },
         }
     ]
 }

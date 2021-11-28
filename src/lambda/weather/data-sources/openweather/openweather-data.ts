@@ -11,8 +11,8 @@ export interface OpenWeatherData {
 }
 
 export interface MinutelyConditions {
-    dt: number;
-    precipitation: number;
+    dt: number; // seconds
+    precipitation: number; // mm
 }
 
 export interface DailyConditions extends BaseConditions {
@@ -20,12 +20,12 @@ export interface DailyConditions extends BaseConditions {
     moonset: number;
     moon_phase: number;
 
-    temp: DailyTemperature;
-    feels_like: DailyFeelsLike;
+    temp: DailyTemperature; // F
+    feels_like: DailyFeelsLike; // F
 
-    pop: number;
-    rain: number;
-    snow: number;
+    pop: number; // % 0 to 1.0
+    rain: number; // mm
+    snow: number; // mm
 }
 export interface DailyFeelsLike {
     morn: number;
@@ -35,8 +35,8 @@ export interface DailyFeelsLike {
 }
 
 export interface DailyTemperature {
-    min: number;
-    max: number;
+    min: number; // F
+    max: number; // F
     morn: number;
     day: number;
     eve: number;
@@ -44,46 +44,45 @@ export interface DailyTemperature {
 }
 
 export interface BaseConditions {
-    // datetime epoch in seconds
-    dt: number;
+    dt: number; // seconds
     sunrise: number;
     sunset: number;
 
-    pressure: number;
-    humidity: number;
-    dew_point: number;
+    pressure: number; // hPa
+    humidity: number; // % 0 to 100
+    dew_point: number; // F
     uvi: number;
-    clouds: number;
+    clouds: number; // % 0 to 100
 
-    wind_speed: number;
-    wind_deg: number;
-    wind_gust: number;
+    wind_speed: number; // mph
+    wind_deg: number; // angle
+    wind_gust: number; // mph
 
     weather: WeatherType;
 }
 
 export interface CurrentConditions extends BaseConditions {
 
-    temp: number;
-    feels_like: number;
+    temp: number; // F
+    feels_like: number; // F
 
-    visibility: number;
+    visibility: number; // meters
 }
 
 export interface HourlyConditions extends BaseConditions {
 
-    temp: number;
-    feels_like: number;
+    temp: number; // F
+    feels_like: number; // F
 
+    visibility: number; // meters
 
-    visibility: number;
-
-    pop: number;
-    rain: RainHistogram
+    pop: number; // % 0 to 1
+    rain: PrecipitationHistogram
+    snow: PrecipitationHistogram
 }
 
-export interface RainHistogram {
-    '1h': number;
+export interface PrecipitationHistogram {
+    '1h': number; // mm for the previous hour
 }
 
 export interface WeatherType {

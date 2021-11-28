@@ -1,8 +1,15 @@
 import * as HTTPS from 'https';
 
-export async function httpsGet(url: string, userAgent?: string): Promise<string> {
+const RETRYABLE_CODES = [
+    500,
+    502,
+    503,
+    504
+]
 
-    console.log("Getting " + url);
+export async function httpsGet(url: string, userAgent?: string, attempts: number = 3): Promise<string> {
+
+    console.log(`Getting this URL with ${attempts} attempts left: ${url}`);
 
     return new Promise(function (resolve, reject) {
 
@@ -12,21 +19,36 @@ export async function httpsGet(url: string, userAgent?: string): Promise<string>
 
         var request = HTTPS.get(url, options, (response) => {
 
-            if (response?.statusCode === undefined ||
-                response.statusCode < 200 ||
+            if (response?.statusCode === undefined) {
+                return reject(new Error('https get had no status code!'));
+            }
+
+            if (RETRYABLE_CODES.includes(response.statusCode) && attempts > 1) {
+                console.log(`Received statusCode=${response.statusCode}, will retry`);
+                return httpsGet(url, userAgent, attempts--);
+            }
+
+            let errorMessage = '';
+            switch (response.statusCode) {
+                case 429:
+                    errorMessage = ' Too many requests!';
+                    break;
+            }
+
+            if (response.statusCode < 200 ||
                 response.statusCode >= 300) {
-                return reject(new Error('statusCode=' + response.statusCode));
+                return reject(new Error('statusCode=' + response.statusCode + errorMessage));
             }
 
             let data = '';
 
             response.on('data', (chunk) => {
-                console.log("Retrieving data");
+                //console.log("Retrieving data");
                 data += chunk;
             });
 
             response.on('end', () => {
-                console.log("Ended data transfer");
+                //console.log("Ended data transfer");
                 resolve(data);
             });
 
