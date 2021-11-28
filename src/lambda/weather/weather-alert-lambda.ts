@@ -14,18 +14,14 @@ import { Daily7DayExtremeTemperatureAlert } from './alerts/7-day-extreme-tempera
 import { Daily7DayNationalWeatherAlert } from './alerts/7-day-national-weather-alert';
 import { Daily7DaySnowAlert } from './alerts/7-day-snow-alert';
 import { HourlyMinutelyHeavyRainAlert } from './alerts/1-hour-heavy-rain-alert';
-import * as openweather from './data-sources/openweather/opwenweather';
+import * as openweather from './data-sources/openweather/openweather-api';
 
-const API_KEY_SECRET_OPEN_WEATHER = process.env.API_KEY_SECRET_OPEN_WEATHER!;
-const LATITUDE = process.env.LATITUDE!;
-const LONGITUDE = process.env.LONGITUDE!;
 const ENABLED = process.env.ENABLED!;
 const TABLE_NAME = process.env.TABLE_NAME!;
 const EMAIL_LIST = process.env.EMAIL_LIST!;
 const SUBJECT = process.env.SUBJECT!;
 const FROM = process.env.FROM!;
 const REPORT_TYPE = process.env.REPORT_TYPE;
-
 
 async function getLastTimestamp(alertKey: string) {
     return await DDB.get(TABLE_NAME, {

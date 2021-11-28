@@ -1,7 +1,7 @@
 import { Format, toReadablePacificDate } from "../../utilities";
 import { WeatherData } from "../common/common-data";
-import * as openweather from "../openweather/opwenweather";
-import * as weathergov from "../weathergov/weathergov";
+import * as openweather from "../openweather/openweather-api";
+import * as weathergov from "../weathergov/weathergov-api";
 import * as tomorrowio from "../tomorrowio/tomorrowio-api";
 import * as visualcrossing from "../visualcrossing/visualcrossing-api";
 import { AggregatedProperty, AggregatedWeatherData, DailyConditions, HourlyConditions } from "./aggregate-data";
