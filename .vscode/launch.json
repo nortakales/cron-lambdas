@@ -25,7 +25,7 @@
                 "ENABLED": "true",
                 "REGION": "us-west-2",
                 "TABLE_NAME": "weather_alert_tracker",
-                "REPORT_TYPE": "adhoc",
+                "REPORT_TYPE": "normal",
                 "PUSHOVER_CONFIG_SECRET_KEY": "pushover-users-groups-apps",
                 "API_KEY_SECRET_OPEN_WEATHER": "openweathermap-apikey",
                 "API_KEY_SECRET_TOMORROW_IO": "tomorrowio-apikey",

@@ -21,8 +21,8 @@ export function getDirectionFromDegrees(degrees: number) {
     return "Invalid direction";
 }
 
-export function toIsoString(date: Date) {
-    var tzo = -date.getTimezoneOffset(), // TODO This relies on local time.. need to modify it to use specific timezone!
+export function toSystemLocalIsoString(date: Date) {
+    var tzo = -date.getTimezoneOffset(), // This relies on local (system) time!
         dif = tzo >= 0 ? '+' : '-',
         pad = function (num: number) {
             var norm = Math.floor(Math.abs(num));
@@ -37,6 +37,14 @@ export function toIsoString(date: Date) {
         ':' + pad(date.getSeconds()) +
         dif + pad(tzo / 60) +
         ':' + pad(tzo % 60);
+}
+
+export function toPacificIsoString(date: Date) {
+    return date.toLocaleString('sv', { timeZone: 'America/Los_Angeles', timeZoneName: 'short' })
+        // TODO this could be more generic
+        .replace(' GMT−8', '-08:00')
+        .replace(' GMT-7', '-07:00')
+        .replace(' ', 'T');
 }
 
 export enum Format {
@@ -54,20 +62,15 @@ export function toReadablePacificDate(time: number, format?: Format) {
 
     switch (format as Format) {
         case Format.DATE_ONLY:
-            return new Date(time).toLocaleDateString('en-us', { timeZone: 'America/Los_Angeles' }) + ` <${time}>`;
+            return new Date(time).toLocaleDateString('en-us', { timeZone: 'America/Los_Angeles' });
         case Format.TIME_ONLY:
-            return new Date(time).toLocaleTimeString('en-us', { timeZone: 'America/Los_Angeles' }) + ` <${time}>`;
+            return new Date(time).toLocaleTimeString('en-us', { timeZone: 'America/Los_Angeles' });
         case Format.DATE_AND_TIME:
         case undefined:
         default:
-            return new Date(time).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' }) + ` <${time}>`;
+            return new Date(time).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' });
     }
 }
-
-// console.log(toReadablePacificDate(1638298800, Format.DATE_ONLY));
-// console.log(toReadablePacificDate(1638298800, Format.TIME_ONLY));
-// console.log(toReadablePacificDate(1638298800, Format.DATE_AND_TIME));
-// console.log(toReadablePacificDate(1638298800));
 
 
 export interface AngleAndSpeed {
@@ -183,9 +186,9 @@ export function removeTimeFromEpochMillisForTimezone(datetime: number) {
     }
 
     const dateObject = new Date(datetime);
-    const localIsoString = toIsoString(dateObject);
+    const pacificIsoString = toPacificIsoString(dateObject);
     //console.log(localIsoString);
-    const droppedTimeLocalIsoString = localIsoString.replace(/T\d{2}:\d{2}:\d{2}/, 'T00:00:00');
+    const droppedTimeLocalIsoString = pacificIsoString.replace(/T\d{2}:\d{2}:\d{2}/, 'T00:00:00');
     //console.log(droppedTimeLocalIsoString);
     const newDateObject = new Date(droppedTimeLocalIsoString);
     //console.log(newDateObject.getTime());
@@ -202,6 +205,3 @@ export function round(number: number, decimal: number) {
     const modifier = Math.pow(10, decimal);
     return Math.round((number + Number.EPSILON) * modifier) / modifier;
 }
-
-
-//removeTimeFromEpochMillisForTimezone(1637394001123);

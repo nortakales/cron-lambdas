@@ -4,8 +4,7 @@ import { BiDaily48HourWindAlert } from './alerts/48-hour-wind-alert';
 import { Daily7DayWindAlert } from './alerts/7-day-wind-alert';
 import { Alert, NotificationType } from './interfaces/alert-types';
 import { WeatherData } from "./data-sources/common/common-data";
-import { httpsGet } from '../http';
-import { toIsoString } from './utilities';
+import { toPacificIsoString } from './utilities';
 import { Duration } from "typed-duration";
 import * as DDB from '../dynamo';
 import * as SM from '../secrets';
@@ -50,8 +49,8 @@ async function shouldRunAlert(alert: Alert) {
 
         let timeComparison = Duration.milliseconds.from(alert.interval) - Duration.milliseconds.from(allowableOffset);
 
-        console.log("Last alert time: " + lastAlertTime.getTime() + " / " + toIsoString(lastAlertTime));
-        console.log("Current time: " + currentTime.getTime() + " / " + toIsoString(currentTime));
+        console.log("Last alert time: " + lastAlertTime.getTime() + " / " + toPacificIsoString(lastAlertTime));
+        console.log("Current time: " + currentTime.getTime() + " / " + toPacificIsoString(currentTime));
 
         if (currentTime.getTime() - lastAlertTime.getTime() < timeComparison) {
             console.log("Not enough time has passed to run " + alert.alertKey);
@@ -131,8 +130,8 @@ async function processRegularReport(weatherData: WeatherData) {
             }
 
             const currentTime = new Date();
-            console.log("Updating timestamp for alert " + alert.alertKey + " to " + toIsoString(currentTime));
-            await updateLastTimestamp(alert.alertKey, toIsoString(currentTime));
+            console.log("Updating timestamp for alert " + alert.alertKey + " to " + toPacificIsoString(currentTime));
+            await updateLastTimestamp(alert.alertKey, toPacificIsoString(currentTime));
         }
     }
 
