@@ -40,11 +40,17 @@ export function toSystemLocalIsoString(date: Date) {
 }
 
 export function toPacificIsoString(date: Date) {
-    return date.toLocaleString('sv', { timeZone: 'America/Los_Angeles', timeZoneName: 'short' })
+    let unpadded = date.toLocaleString('sv', { timeZone: 'America/Los_Angeles', timeZoneName: 'short' })
         // TODO this could be more generic
         .replace(' GMT−8', '-08:00')
         .replace(' GMT-7', '-07:00')
         .replace(' ', 'T');
+
+    // TODO clean up this function - it has caused so many problems
+    if (/T\d:/.test(unpadded)) {
+        unpadded = unpadded.replace('T', 'T0');
+    }
+    return unpadded;
 }
 
 export enum Format {
