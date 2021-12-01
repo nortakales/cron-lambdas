@@ -54,15 +54,20 @@ export function toReadablePacificDate(time: number, format?: Format) {
 
     switch (format as Format) {
         case Format.DATE_ONLY:
-            return new Date(time).toLocaleDateString('en-us', { timeZone: 'America/Los_Angeles' });
+            return new Date(time).toLocaleDateString('en-us', { timeZone: 'America/Los_Angeles' }) + ` <${time}>`;
         case Format.TIME_ONLY:
-            return new Date(time).toLocaleTimeString('en-us', { timeZone: 'America/Los_Angeles' });
+            return new Date(time).toLocaleTimeString('en-us', { timeZone: 'America/Los_Angeles' }) + ` <${time}>`;
         case Format.DATE_AND_TIME:
         case undefined:
         default:
-            return new Date(time).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' });
+            return new Date(time).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' }) + ` <${time}>`;
     }
 }
+
+console.log(toReadablePacificDate(1638298800, Format.DATE_ONLY));
+console.log(toReadablePacificDate(1638298800, Format.TIME_ONLY));
+console.log(toReadablePacificDate(1638298800, Format.DATE_AND_TIME));
+console.log(toReadablePacificDate(1638298800));
 
 
 export interface AngleAndSpeed {
