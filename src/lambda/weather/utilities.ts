@@ -64,10 +64,10 @@ export function toReadablePacificDate(time: number, format?: Format) {
     }
 }
 
-console.log(toReadablePacificDate(1638298800, Format.DATE_ONLY));
-console.log(toReadablePacificDate(1638298800, Format.TIME_ONLY));
-console.log(toReadablePacificDate(1638298800, Format.DATE_AND_TIME));
-console.log(toReadablePacificDate(1638298800));
+// console.log(toReadablePacificDate(1638298800, Format.DATE_ONLY));
+// console.log(toReadablePacificDate(1638298800, Format.TIME_ONLY));
+// console.log(toReadablePacificDate(1638298800, Format.DATE_AND_TIME));
+// console.log(toReadablePacificDate(1638298800));
 
 
 export interface AngleAndSpeed {
@@ -191,5 +191,17 @@ export function removeTimeFromEpochMillisForTimezone(datetime: number) {
     //console.log(newDateObject.getTime());
     return newDateObject.getTime();
 }
+
+export function round(number: number, decimal: number) {
+    if (decimal === 0) {
+        return Math.round(number);
+    }
+    if (decimal < 0 || decimal > 5) {
+        throw new Error("Incorrect rounding decimal: " + decimal);
+    }
+    const modifier = Math.pow(10, decimal);
+    return Math.round((number + Number.EPSILON) * modifier) / modifier;
+}
+
 
 //removeTimeFromEpochMillisForTimezone(1637394001123);

@@ -1,7 +1,7 @@
 import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import { WeatherData } from "../data-sources/common/common-data";
-import { getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
+import { Format, getDirectionFromDegrees, round, toReadablePacificDate } from "../utilities";
 
 export class Daily7DaySnowAlert implements Alert {
 
@@ -19,9 +19,9 @@ export class Daily7DaySnowAlert implements Alert {
         let message = '';
 
         for (let dailyData of weatherData.daily) {
-            if (dailyData.snow && dailyData.snow > this.snowThreshold) {
+            if (dailyData.snow && round(dailyData.snow, 1) > this.snowThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(dailyData.datetime)}: snow is coming! ${dailyData.snow} inches\n`;
+                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: snow is coming! ${round(dailyData.snow, 1)} inches\n`;
             }
         }
 
