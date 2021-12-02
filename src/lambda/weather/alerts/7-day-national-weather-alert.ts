@@ -25,7 +25,7 @@ Event: ${alertData.event}
 Duration: ${toReadablePacificDate(alertData.start * 1000)} to ${toReadablePacificDate(alertData.end * 1000)}
 Tags: ${alertData.tags?.join(', ')}
 Description:
-${alertData.description}
+${alertData.description?.substring(0, 200)}...
                 `.trim() + "\n\n";
             }
         }
