@@ -60,6 +60,27 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "New Comics",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/lambda/comics/new-comics-lambda.ts",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "${defaultBuildTask}",
+            "env": {
+                "EMAIL_LIST": "nortakales@gmail.com",
+                "SUBJECT": "New Comics",
+                "FROM": "nortakales@gmail.com",
+                "ENABLED": "true",
+                "REGION": "us-west-2"
+            },
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Current File",
             "skipFiles": [
                 "<node_internals>/**"

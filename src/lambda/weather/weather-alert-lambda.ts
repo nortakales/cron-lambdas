@@ -151,7 +151,7 @@ async function processRegularReport(weatherData: WeatherData) {
             toAddresses: EMAIL_LIST.split(','),
             fromAddress: FROM,
             subject: SUBJECT,
-            body: emailAlertBody
+            textBody: emailAlertBody
         });
     }
 

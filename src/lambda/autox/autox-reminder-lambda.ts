@@ -178,7 +178,7 @@ exports.handler = async (event = {}) => {
         toAddresses: EMAIL_LIST.split(','),
         fromAddress: FROM,
         subject: SUBJECT,
-        body: emailBody
+        textBody: emailBody
     });
 };
 

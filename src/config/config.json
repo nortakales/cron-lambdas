@@ -36,5 +36,14 @@
         "apiKeySecretOpenWeather": "openweathermap-apikey",
         "apiKeySecretTomorrowIo": "tomorrowio-apikey",
         "apiKeySecretVisualCrossing": "visualcrossing-apikey"
+    },
+    "newComics": {
+        "enabled": "true",
+        "rate": "cron(0 18 ? * WED *)",
+        "fromEmail": "nortakales@gmail.com",
+        "emailSubject": "New Comics",
+        "emailList": [
+            "nortakales@gmail.com"
+        ]
     }
 }

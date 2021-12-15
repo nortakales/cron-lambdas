@@ -34,3 +34,10 @@ TODO more weather sources
 TODO store weather history, alerts for new extremes
 TODO move keys to AWS KMS
 TODO ditch the overall Lambda errors alarm in favor of DLQ alarms
+
+
+New ideas:
+
+* weekly comic book reminder !!
+  * https://leagueofcomicgeeks.com/comics/new-comics
+  * https://api.shortboxed.com/
