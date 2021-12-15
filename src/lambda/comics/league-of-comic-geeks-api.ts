@@ -7,9 +7,9 @@ const baseComicUrl = "https://leagueofcomicgeeks.com";
 export async function getNewComics() {
 
     const html = await httpsGet("https://leagueofcomicgeeks.com/comics/new-comics", userAgent);
-    const rootzzz = dom.parse(html);
+    const root = dom.parse(html);
 
-    const comicList = rootzzz.querySelectorAll("#comic-list-issues > li");
+    const comicList = root.querySelectorAll("#comic-list-issues > li");
 
     let newComics: Comic[] = [];
 

@@ -35,7 +35,10 @@ export class NewComicsCron extends cdk.Construct {
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
-            deadLetterQueue: dlqWithMonitor.dlq
+            deadLetterQueue: dlqWithMonitor.dlq,
+            bundling: {
+                nodeModules: ['node-html-parser']
+            }
         });
         // Lambda must be able to send email through SES
         this.lambda.addToRolePolicy(new iam.PolicyStatement({
