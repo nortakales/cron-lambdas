@@ -1,5 +1,5 @@
 import { httpsGet } from '../http';
-import { parse } from 'node-html-parser';
+import * as dom from 'node-html-parser';
 
 const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36";
 const baseComicUrl = "https://leagueofcomicgeeks.com";
@@ -7,7 +7,7 @@ const baseComicUrl = "https://leagueofcomicgeeks.com";
 export async function getNewComics() {
 
     const html = await httpsGet("https://leagueofcomicgeeks.com/comics/new-comics", userAgent);
-    const root = parse(html);
+    const root = dom.parse(html);
 
     const comicList = root.querySelectorAll("#comic-list-issues > li");
 
