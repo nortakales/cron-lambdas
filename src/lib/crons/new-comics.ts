@@ -8,7 +8,7 @@ import { LambdaFunction } from '@aws-cdk/aws-events-targets'
 import * as config from '../../config/config.json'
 import { DLQWithMonitor } from '../constructs/dlq-with-monitor';
 
-export class WeatherAlertCron extends cdk.Construct {
+export class NewComicsCron extends cdk.Construct {
 
     readonly lambda: lambda.Function;
 
