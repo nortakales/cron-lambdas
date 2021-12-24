@@ -1,7 +1,7 @@
 import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import { WeatherData } from "../data-sources/common/common-data";
-import { getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
+import { Format, getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 
 export class Daily7DayExtremeTemperatureAlert implements Alert {
 
@@ -28,7 +28,7 @@ export class Daily7DayExtremeTemperatureAlert implements Alert {
                     tempText = "low of " + dailyData.temp.min + "°F";
                 }
 
-                message += `${toReadablePacificDate(dailyData.datetime)}: ${tempText}\n`;
+                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: ${tempText}\n`;
             }
         }
 
