@@ -101,8 +101,8 @@ export async function getAsCommonData() {
             },
 
             pop: daily.pop * 100,
-            rain: mToMi(daily.rain),
-            snow: mToMi(daily.snow),
+            rain: mmToIn(daily.rain),
+            snow: mmToIn(daily.snow),
 
             pressure: daily.pressure,
             humidity: daily.humidity,

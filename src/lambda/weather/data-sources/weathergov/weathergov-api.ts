@@ -131,6 +131,12 @@ interface HourlyData {
     iceAccumulation?: number
 }
 
+const propertiesThatAreSumsForPeriod = [
+    'quantitativePrecipitation',
+    'snowfallAmount',
+    'iceAccumulation'
+]
+
 function convertToHourlyData(weatherData: WeatherGovData) {
 
     const hourlyDatas: { [key: string]: HourlyData } = {};
@@ -169,7 +175,11 @@ function convertToHourlyData(weatherData: WeatherGovData) {
                     }
                     hourlyDatas[`${datetime}`] = hourlyData;
                 }
-                hourlyData[propertyName as keyof HourlyData] = getValueInCorrectUnits(property.uom, value.value);
+                let hourlyValue = getValueInCorrectUnits(property.uom, value.value);
+                if (propertiesThatAreSumsForPeriod.includes(propertyName)) {
+                    hourlyValue = hourlyValue / datetimes.length;
+                }
+                hourlyData[propertyName as keyof HourlyData] = hourlyValue;
             }
         }
     }

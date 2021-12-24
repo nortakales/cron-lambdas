@@ -19,9 +19,9 @@ export interface WeatherGovProperties {
     windSpeed: WeatherGovProperty, // kmh
     windGust: WeatherGovProperty, // kmh
     probabilityOfPrecipitation: WeatherGovProperty, // % 0 to 100
-    quantitativePrecipitation: WeatherGovProperty, // mm TODO: it is not clear if this is the sum for the 6h period or per hour
-    snowfallAmount: WeatherGovProperty, // mm TODO: it is not clear if this is the sum for the 6h period or per hour
-    iceAccumulation: WeatherGovProperty, // mm TODO: it is not clear if this is the sum for the 6h period or per hour
+    quantitativePrecipitation: WeatherGovProperty, // mm TODO: it is not clear if this is the sum for the 6h period or per hour, after looking at data I *think* it is sum
+    snowfallAmount: WeatherGovProperty, // mm TODO: it is not clear if this is the sum for the 6h period or per hour, after looking at data I *think* it is sum
+    iceAccumulation: WeatherGovProperty, // mm TODO: it is not clear if this is the sum for the 6h period or per hour, after looking at data I *think* it is sum
 }
 
 export interface WeatherGovProperty {

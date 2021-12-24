@@ -28,7 +28,7 @@ export class HourlyMinutelyHeavyRainAlert implements Alert {
         for (let minutelyData of weatherData.minutely) {
             if (minutelyData.precipitation > this.rainThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(minutelyData.datetime, Format.TIME_ONLY)}: ${minutelyData.precipitation} mm of rain\n`;
+                message += `${toReadablePacificDate(minutelyData.datetime, Format.TIME_ONLY)}: ${minutelyData.precipitation} in of rain\n`;
             }
         }
 

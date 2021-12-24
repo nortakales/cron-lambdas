@@ -100,9 +100,10 @@ export class AggregatedProperty {
         }
         let dataPoints = "";
         for (let point in this.data) {
-            dataPoints += ` | ${point} ${this.data[point].toFixed(1)}`
+            dataPoints += `${point} ${this.data[point].toFixed(2)}, `
         }
+        dataPoints = dataPoints.replace(/, $/, '');
 
-        return `${this.average.toFixed(1)} ± ${this.std.toFixed(1)}${dataPoints}`;
+        return `${this.average.toFixed(2)} ± ${this.std.toFixed(2)} [${dataPoints}]`;
     }
 }

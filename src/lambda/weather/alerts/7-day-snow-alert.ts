@@ -37,5 +37,4 @@ export class Daily7DaySnowAlert implements Alert {
             notificationType: NotificationType.EMAIL_AND_PUSH
         }
     }
-
 }
