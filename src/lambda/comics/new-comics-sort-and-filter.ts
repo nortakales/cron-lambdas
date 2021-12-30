@@ -5,7 +5,10 @@ const KEYWORDS_TO_ALWAYS_INCLUDE = [
     "Star Wars",
     "Firefly",
     "Battlestar",
-    "Conan"
+    "Conan",
+    "Stranger Things",
+    "Manifest Destiny",
+    "Chew"
 ]
 
 const PUBLISHERS_TO_EXCLUDE = [
@@ -34,7 +37,19 @@ const PUBLISHERS_TO_EXCLUDE = [
     "PaperFilms",
     "Rebellion",
     "Scout Comics",
-    "Star Fruit Books"
+    "Star Fruit Books",
+    "ARH Comix",
+    "Acme Ink",
+    "Black Josei Press",
+    "Black Mask Studios",
+    "BroadSword Comics",
+    "Heavy Metal",
+    "Kenzer & Company",
+    "Papercutz",
+    "Parody Press",
+    "Shueisha",
+    "Source Point Press",
+    "Warrant Publishing"
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
@@ -78,6 +93,14 @@ const SERIES_TO_EXCLUDE = [
     "Barbarella",
     "Black Panther",
     "Venom",
+    "Exciting Comics",
+    "Gold Digger",
+    "Power Rangers",
+    "Power Rangers Universe",
+    "Action Comics",
+    "Justice League",
+    "The Flash",
+
 ]
 function removeNumber(title: string) {
     return title.replace(/\s#\d+$/, '');
