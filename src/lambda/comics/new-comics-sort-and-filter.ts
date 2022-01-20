@@ -54,7 +54,11 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Egmont",
     "Blood Moon Comics",
     "Blue Juice Comics",
-    "TwoMorrows"
+    "TwoMorrows",
+    "Advent Comics",
+    "King Features Comics",
+    "Milestone",
+    "Silver Sprocket",
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
@@ -114,8 +118,10 @@ const SERIES_TO_EXCLUDE = [
     "Mighty Morphin",
     "Vampiverse",
     "Savage Dragon",
-    "Fantastic Four"
-
+    "Fantastic Four",
+    "Green Lantern",
+    "Looney Tunes",
+    "She-Hulk"
 ]
 function removeNumber(title: string) {
     return title.replace(/\s#\d+$/, '');
