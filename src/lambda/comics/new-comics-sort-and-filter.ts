@@ -8,7 +8,8 @@ const KEYWORDS_TO_ALWAYS_INCLUDE = [
     "Conan",
     "Stranger Things",
     "Manifest Destiny",
-    "Chew"
+    "Chew",
+    "Saga"
 ]
 
 const PUBLISHERS_TO_EXCLUDE = [
@@ -59,6 +60,14 @@ const PUBLISHERS_TO_EXCLUDE = [
     "King Features Comics",
     "Milestone",
     "Silver Sprocket",
+    "BlackBox Comics",
+    "Bliss On Tap Publishing",
+    "Boundless Comics",
+    "Coffin Comics",
+    "Comic Shop News",
+    "ComixTribe",
+    "Humanoids",
+    "Keenspot"
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
