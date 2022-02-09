@@ -9,7 +9,12 @@ const KEYWORDS_TO_ALWAYS_INCLUDE = [
     "Stranger Things",
     "Manifest Destiny",
     "Chew",
-    "Saga"
+    "Saga",
+    "Amory Wars",
+    "Hellboy",
+    "B.P.R.D",
+    "BPRD",
+    "TMNT"
 ]
 
 const PUBLISHERS_TO_EXCLUDE = [
@@ -67,7 +72,11 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Comic Shop News",
     "ComixTribe",
     "Humanoids",
-    "Keenspot"
+    "Keenspot",
+    "Albatross Funnybooks",
+    "AC Comics",
+    "Bad Kids Press",
+    "Strangers Fanzine"
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
@@ -130,7 +139,8 @@ const SERIES_TO_EXCLUDE = [
     "Fantastic Four",
     "Green Lantern",
     "Looney Tunes",
-    "She-Hulk"
+    "She-Hulk",
+    "Young Animal"
 ]
 function removeNumber(title: string) {
     return title.replace(/\s#\d+$/, '');
