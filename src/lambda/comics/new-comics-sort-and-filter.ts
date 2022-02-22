@@ -76,7 +76,8 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Albatross Funnybooks",
     "AC Comics",
     "Bad Kids Press",
-    "Strangers Fanzine"
+    "Strangers Fanzine",
+    "Floating World Comics"
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
