@@ -87,8 +87,9 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
 
             console.log("New Autox URL!");
 
-            urlMatch.registrationDate = getRegistrationTimeFromHtml(html);
-            urlMatch.registrationAlreadyOpen = isRegistrationAlreadyOpen(html);
+            const autoxPageHtml = await httpsGet(urlMatch.url);
+            urlMatch.registrationDate = getRegistrationTimeFromHtml(autoxPageHtml);
+            urlMatch.registrationAlreadyOpen = isRegistrationAlreadyOpen(autoxPageHtml);
 
             if (urlMatch.registrationDate !== null) {
                 const firstNotificationDate = getFirstNotificationDate(urlMatch.registrationDate);
@@ -182,7 +183,7 @@ exports.handler = async (event = {}) => {
     });
 };
 
-const registrationRegex = /Registration will open on (\d{2}\/\d{2}\/\d{4}) at (\d:\d{2}) ([AaPp][Mm])/;
+const registrationRegex = /[Rr]egistration.{0,20}open.{0,20}(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4})(?: at)? (\d{1,2}:\d{2}) ([AaPp][Mm])/;
 function getRegistrationTimeFromHtml(html: string) {
 
     const match = registrationRegex.exec(html);
@@ -201,7 +202,7 @@ function getRegistrationTimeFromHtml(html: string) {
 
 function isRegistrationAlreadyOpen(html: string) {
 
-    if (html.match(/<form.*?post.*?action.*?\/events\/.*?>/)) {
+    if (html.match(/<form[^>]*?post[^>]*?action[^>]*?\/events\/[^>]*?>/)) {
         return true;
     }
     return false;
