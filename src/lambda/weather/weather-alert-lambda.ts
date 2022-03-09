@@ -95,7 +95,9 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     const weatherData: WeatherData = await openweather.getAsCommonData();
 
     if (adhoc) {
-        return await processAdhocReport(weatherData);
+        const report = await processAdhocReport(weatherData);
+        //console.log(report.body);
+        return report;
     } else {
         return await processRegularReport(weatherData);
     }

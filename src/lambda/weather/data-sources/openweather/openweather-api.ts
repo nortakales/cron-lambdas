@@ -76,6 +76,7 @@ export async function getAsCommonData() {
             wind_gust: hourly.wind_gust
         })),
         daily: openWeatherData.daily.map(daily => ({
+            // In March, this was -8 at noon, and -8 at 1PM for DST crossover
             datetime: removeTimeFromEpochMillisForTimezone(daily.dt),
 
             sunrise: daily.sunrise,

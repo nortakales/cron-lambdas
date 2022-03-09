@@ -42,7 +42,9 @@ export function toSystemLocalIsoString(date: Date) {
 export function toPacificIsoString(date: Date) {
     let unpadded = date.toLocaleString('sv', { timeZone: 'America/Los_Angeles', timeZoneName: 'short' })
         // TODO this could be more generic
-        .replace(' GMT−8', '-08:00')
+        .replace(' GMT−8', '-08:00') // U+2212
+        .replace(' GMT−7', '-07:00') // U+2212
+        .replace(' GMT-8', '-08:00')
         .replace(' GMT-7', '-07:00')
         .replace(' ', 'T');
 
@@ -185,6 +187,8 @@ function averageAngleV4(anglesAndSpeeds: AngleAndSpeed[]) {
 
 export function removeTimeFromEpochMillisForTimezone(datetime: number) {
 
+    // TODO There is still a bug where a day gets repeated at the DST crossover
+
     // If the time is less than a date 466 years from now, it is most likely in seconds
     // Modify it to be in millis
     if (datetime < 16343349350) {
@@ -193,7 +197,7 @@ export function removeTimeFromEpochMillisForTimezone(datetime: number) {
 
     const dateObject = new Date(datetime);
     const pacificIsoString = toPacificIsoString(dateObject);
-    //console.log(localIsoString);
+    //console.log(pacificIsoString);
     const droppedTimeLocalIsoString = pacificIsoString.replace(/T\d{2}:\d{2}:\d{2}/, 'T00:00:00');
     //console.log(droppedTimeLocalIsoString);
     const newDateObject = new Date(droppedTimeLocalIsoString);
