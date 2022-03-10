@@ -54,6 +54,12 @@ export class AutoxReminderCron extends cdk.Construct {
             resources: ['*'],
             effect: iam.Effect.ALLOW,
         }));
+        // Lambda must be able to create Cloudwatch rules and add targets
+        lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['events:PutRule', 'events:PutTarget'],
+            resources: ['arn:aws:events:*:*:rule/*'],
+            effect: iam.Effect.ALLOW,
+        }));
 
         const dynamoTable = new dynamodb.Table(this, 'AutoxReminderDynamoTable', {
             partitionKey: {
