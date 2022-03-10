@@ -56,7 +56,7 @@ export class AutoxReminderCron extends cdk.Construct {
         }));
         // Lambda must be able to create Cloudwatch rules and add targets
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
-            actions: ['events:PutRule', 'events:PutTarget'],
+            actions: ['events:PutRule', 'events:PutTargets'],
             resources: ['arn:aws:events:*:*:rule/*'],
             effect: iam.Effect.ALLOW,
         }));
