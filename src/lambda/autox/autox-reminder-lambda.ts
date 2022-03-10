@@ -129,7 +129,8 @@ function createEmailBody(urls: UrlMatch[]): string {
             + "Registration: " + registrationDate + "\n\n";
     }
 
-    emailBody += "\nIf you want push notifications to your phone 30 min and 5 min before registration actually opens:\n"
+    emailBody += "\n\n\nApologies if you ever receive multiple emails for the same AutoX event. I'm still working out some bugs. Subsequent emails should be trusted over earlier ones."
+        + "\n\n\nIf you want push notifications to your phone 30 min and 5 min before registration actually opens:\n"
         + "1. Download this app: https://pushover.net/\n"
         + "2. Log in to the app and send me your \"user key\"\n"
         + "3. You'll have a free 30 day trial, you have to pay a one time $5 fee (not to me, to the app) if you want notifications forever\n"
