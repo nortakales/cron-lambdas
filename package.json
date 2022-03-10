@@ -37,6 +37,7 @@
     "@aws-sdk/lib-dynamodb": "^3.25.0",
     "aws-sdk": "^2.964.0",
     "moment": "^2.29.1",
+    "moment-timezone": "^0.5.34",
     "node-html-parser": "^5.1.0",
     "pushover-notifications": "^1.2.2",
     "query-string": "^7.0.1",

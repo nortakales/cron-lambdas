@@ -1,7 +1,7 @@
 import { httpsGet } from '../http';
 import { sendEmail } from '../emailer';
 import * as DDB from '../dynamo';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { createTimer } from '../events';
 import { NotificationApplication, sendPushNotification, Sound, UrlOptions } from '../notifier';
 
@@ -190,8 +190,8 @@ function getRegistrationTimeFromHtml(html: string) {
 
     if (match) {
         console.log(JSON.stringify(match, null, 2));
-        const dateTimeString = match[1] + ' ' + match[2] + match[3].toUpperCase() + ' PST';
-        const dateTime = moment(dateTimeString, 'MM/DD/YYYY hh:mma ZZ');
+        const dateTimeString = match[1] + ' ' + match[2] + match[3].toUpperCase();
+        const dateTime = moment.tz(dateTimeString, 'MM/DD/YYYY hh:mma', 'America/Los_Angeles');
         console.log("Found registration date: " + dateTime.format());
         return dateTime.toDate();
     } else {
