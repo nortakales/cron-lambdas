@@ -49,10 +49,11 @@ export async function getAsCommonData() {
             feels_like: openWeatherData.current.feels_like,
             visibility: mToMi(openWeatherData.current.visibility)
         },
-        minutely: openWeatherData.minutely.map(minutely => ({
+        // Minutely data may not be present if there is no rain
+        minutely: openWeatherData.minutely ? openWeatherData.minutely.map(minutely => ({
             datetime: minutely.dt,
             precipitation: mmToIn(minutely.precipitation)
-        })),
+        })) : [],
         hourly: openWeatherData.hourly.map(hourly => ({
             datetime: hourly.dt,
 
