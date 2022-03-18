@@ -1,10 +1,9 @@
-import { CloudWatchEventsClient, DeleteRuleCommand, PutRuleCommand, PutTargetsCommand, RemoveTargetsCommand } from "@aws-sdk/client-cloudwatch-events";
-import { randomUUID } from "crypto";
 import zlib from 'zlib';
+import { sendEmail } from "../emailer";
 
 const REGION = process.env.REGION!;
-
-//const events = new CloudWatchEventsClient({ region: REGION });
+const EMAIL_LIST = process.env.EMAIL_LIST!;
+const FROM = process.env.FROM!;
 
 exports.handler = async (event: any = {}, context: any = {}) => {
     console.log("Running --------------------");
@@ -15,15 +14,31 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     if (event.awslogs && event.awslogs.data) {
         const zippedPayload = Buffer.from(event.awslogs.data, 'base64');
         const jsonPayload = zlib.unzipSync(zippedPayload).toString()
+        const payload = JSON.parse(jsonPayload);
 
-        console.log(JSON.stringify(JSON.parse(jsonPayload), null, 2));
+        // This is quite a lot to log
+        // console.log(JSON.stringify(JSON.parse(jsonPayload), null, 2));
+        console.log("Log Group: " + payload.logGroup);
+        console.log("Log Stream: " + payload.logStream);
 
-        // const logevents = JSON.parse(zlib.unzipSync(jsonPayload).toString()).logEvents;
+        let emailBody = "Error Logs\n";
+        emailBody += "\nLog Group: " + payload.logGroup;
+        emailBody += "\nLog Stream: " + payload.logStream;
+        emailBody += "\nLogs:\n";
 
-        // for (const logevent of logevents) {
-        //     const log = JSON.parse(logevent.message);
-        //     console.log(log);
-        // }
+        for (const logEvent of payload.logevents) {
+            emailBody += "\n"
+            emailBody += logEvent.message;
+        }
+
+        await sendEmail({
+            toAddresses: EMAIL_LIST.split(','),
+            fromAddress: FROM,
+            subject: "Errors in " + payload.logGroup,
+            textBody: emailBody
+        });
+    } else {
+        throw new Error("event.awslogs.data was not present");
     }
 
     console.log("Done --------------------");

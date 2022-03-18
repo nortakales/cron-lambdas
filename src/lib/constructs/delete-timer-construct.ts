@@ -2,10 +2,9 @@ import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
 import * as iam from '@aws-cdk/aws-iam';
-
 import * as config from '../../config/config.json'
 import { DLQWithMonitor } from './dlq-with-monitor';
-import { ComparisonOperator } from '@aws-cdk/aws-cloudwatch';
+import * as logs from '@aws-cdk/aws-logs';
 
 export class DeleteTimerConstruct extends cdk.Construct {
 
@@ -28,7 +27,8 @@ export class DeleteTimerConstruct extends cdk.Construct {
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
-            deadLetterQueue: dlqWithMonitor.dlq
+            deadLetterQueue: dlqWithMonitor.dlq,
+            logRetention: logs.RetentionDays.ONE_YEAR
         });
 
         // Make sure EventBridge can call this Lambda

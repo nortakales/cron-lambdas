@@ -1,12 +1,12 @@
 import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
-import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as iam from '@aws-cdk/aws-iam';
 import { Schedule, Rule } from '@aws-cdk/aws-events'
 import { LambdaFunction } from '@aws-cdk/aws-events-targets'
 import * as config from '../../config/config.json'
 import { DLQWithMonitor } from '../constructs/dlq-with-monitor';
+import * as logs from '@aws-cdk/aws-logs';
 
 export class NewComicsCron extends cdk.Construct {
 
@@ -36,6 +36,7 @@ export class NewComicsCron extends cdk.Construct {
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
+            logRetention: logs.RetentionDays.ONE_YEAR,
             bundling: {
                 nodeModules: ['node-html-parser']
             }

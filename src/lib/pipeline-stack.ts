@@ -11,6 +11,7 @@ import { DLQWithMonitor } from './constructs/dlq-with-monitor';
 import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as iam from '@aws-cdk/aws-iam';
+import * as logs from '@aws-cdk/aws-logs';
 
 export class CDKPipelineStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -43,7 +44,7 @@ export class CDKPipelineStack extends cdk.Stack {
                 cloudAssemblyArtifact,
                 installCommand: 'npm i -g npm@7 && npm ci', // Upgrading to npm 7 is necessary or npm ci fails
                 buildCommand: 'npm run build'
-            })
+            }),
         });
 
         const deploy = new DeployCronLambdaStage(this, 'DeployCronLambdaStage');
@@ -67,7 +68,8 @@ export class CDKPipelineStack extends cdk.Stack {
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
-            deadLetterQueue: dlqWithMonitor.dlq
+            deadLetterQueue: dlqWithMonitor.dlq,
+            logRetention: logs.RetentionDays.ONE_YEAR
         });
         // Lambda must be able to retrieve secrets
         pipelineNotificationLambda.addToRolePolicy(new iam.PolicyStatement({

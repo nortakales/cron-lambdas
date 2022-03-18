@@ -10,7 +10,6 @@ import { DLQWithMonitor } from '../constructs/dlq-with-monitor';
 import * as destinations from '@aws-cdk/aws-logs-destinations';
 import * as logs from '@aws-cdk/aws-logs';
 
-
 export class WeatherAlertCron extends cdk.Construct {
 
     readonly lambda: lambda.Function;
@@ -45,7 +44,8 @@ export class WeatherAlertCron extends cdk.Construct {
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
-            deadLetterQueue: dlqWithMonitor.dlq
+            deadLetterQueue: dlqWithMonitor.dlq,
+            logRetention: logs.RetentionDays.TWO_YEARS
         });
         // Lambda must be able to send email through SES
         this.lambda.addToRolePolicy(new iam.PolicyStatement({

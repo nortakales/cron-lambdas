@@ -28,23 +28,23 @@ export class ErrorLogNotifier extends cdk.Construct {
             entry: __dirname + '/../../lambda/utility-lambda/error-log-notifier.ts',
             handler: 'handler',
             environment: {
-                EMAIL_LIST: config.weatherAlert.emailList.join(','),
-                FROM: config.weatherAlert.fromEmail,
-                SUBJECT: config.weatherAlert.emailSubject,
-                LATITUDE: config.weatherAlert.latitude,
-                LONGITUDE: config.weatherAlert.longitude,
-                ENABLED: config.weatherAlert.enabled,
-                REGION: config.base.region,
-                TABLE_NAME: config.weatherAlert.trackingDynamoTableName,
-                PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey,
-                API_KEY_SECRET_OPEN_WEATHER: config.weatherAlert.apiKeySecretOpenWeather,
-                API_KEY_SECRET_TOMORROW_IO: config.weatherAlert.apiKeySecretTomorrowIo,
-                API_KEY_SECRET_VISUAL_CROSSING: config.weatherAlert.apiKeySecretVisualCrossing
+                EMAIL_LIST: config.base.infrastructureAlertEmail,
+                FROM: config.base.infrastructureAlertEmail,
+                REGION: config.base.region
             },
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
-            deadLetterQueue: dlqWithMonitor.dlq
+            deadLetterQueue: dlqWithMonitor.dlq,
+            logRetention: logs.RetentionDays.ONE_YEAR
         });
+
+        // Lambda must be able to send email through SES
+        this.lambda.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['ses:SendEmail'],
+            resources: ['*'],
+            effect: iam.Effect.ALLOW,
+        }));
+
     }
 }

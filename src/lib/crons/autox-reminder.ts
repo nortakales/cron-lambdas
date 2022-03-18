@@ -3,14 +3,11 @@ import * as lambda from '@aws-cdk/aws-lambda';
 import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as iam from '@aws-cdk/aws-iam';
-import { Schedule, Rule } from '@aws-cdk/aws-events'
-import { LambdaFunction } from '@aws-cdk/aws-events-targets'
-import * as config from '../../config/config.json'
-import * as actions from '@aws-cdk/aws-cloudwatch-actions';
-import * as sns from '@aws-cdk/aws-sns';
-import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
+import { Schedule, Rule } from '@aws-cdk/aws-events';
+import { LambdaFunction } from '@aws-cdk/aws-events-targets';
+import * as config from '../../config/config.json';
 import { DLQWithMonitor } from '../constructs/dlq-with-monitor';
-import { ComparisonOperator } from '@aws-cdk/aws-cloudwatch';
+import * as logs from '@aws-cdk/aws-logs';
 
 export class AutoxReminderCron extends cdk.Construct {
 
@@ -40,7 +37,8 @@ export class AutoxReminderCron extends cdk.Construct {
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
-            deadLetterQueue: dlqWithMonitor.dlq
+            deadLetterQueue: dlqWithMonitor.dlq,
+            logRetention: logs.RetentionDays.ONE_YEAR
         });
         // Lambda must be able to send email through SES
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
@@ -109,7 +107,8 @@ export class AutoxReminderCron extends cdk.Construct {
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
-            deadLetterQueue: dlqWithMonitorForPush.dlq
+            deadLetterQueue: dlqWithMonitorForPush.dlq,
+            logRetention: logs.RetentionDays.ONE_YEAR
         });
         // Cloudwatch must be able to invoke this Lambda
         pushNotificationLambdaFunction.addPermission('CloudWatchEventsPermission', {
