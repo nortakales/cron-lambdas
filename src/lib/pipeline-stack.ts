@@ -1,8 +1,6 @@
 import * as cdk from '@aws-cdk/core';
-import * as codepipeline from '@aws-cdk/aws-codepipeline';
-import * as codepipeline_actions from '@aws-cdk/aws-codepipeline-actions';
 import { DeployCronLambdaStage } from './deploy-cron-lambda-stage';
-import { SimpleSynthAction, CdkPipeline, CodePipeline, ShellStep, CodePipelineSource } from "@aws-cdk/pipelines";
+import { CodePipeline, ShellStep, CodePipelineSource } from "@aws-cdk/pipelines";
 import * as notifications from '@aws-cdk/aws-codestarnotifications';
 import * as sns from '@aws-cdk/aws-sns';
 import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
@@ -12,19 +10,10 @@ import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as iam from '@aws-cdk/aws-iam';
 import * as logs from '@aws-cdk/aws-logs';
-import { Pipeline } from '@aws-cdk/aws-codepipeline';
 
 export class CDKPipelineStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
-
-        // Defines the artifact representing the sourcecode
-        const sourceArtifact = new codepipeline.Artifact();
-        // Defines the artifact representing the cloud assembly 
-        // (cloudformation template + all other assets)
-        const cloudAssemblyArtifact = new codepipeline.Artifact();
-
-        const githubAuth = cdk.SecretValue.secretsManager('cdk-token');
 
         const githubSource = CodePipelineSource.gitHub('nortakales/cron-lambdas', 'main', {
             authentication: cdk.SecretValue.secretsManager('cdk-token'),
@@ -46,31 +35,9 @@ export class CDKPipelineStack extends cdk.Stack {
             selfMutation: true
         });
 
-        // const pipeline = new CdkPipeline(this, 'CronLambdasCDKPipeline', {
-        //     pipelineName: 'CronLambdasCDKPipeline',
-        //     cloudAssemblyArtifact,
-
-        //     // Generates the source artifact from the repo we created in the last step
-        //     sourceAction: new codepipeline_actions.GitHubSourceAction({
-        //         actionName: 'GitHub',
-        //         output: sourceArtifact,
-        //         oauthToken: githubAuth,
-        //         owner: "nortakales",
-        //         repo: "cron-lambdas",
-        //         branch: "main"
-        //     }),
-
-        //     synthAction: SimpleSynthAction.standardNpmSynth({
-        //         sourceArtifact,
-        //         cloudAssemblyArtifact,
-        //         installCommand: 'npm i -g npm@7 && npm ci', // Upgrading to npm 7 is necessary or npm ci fails
-        //         buildCommand: 'npm run build'
-        //     }),
-        // });
-
         const deploy = new DeployCronLambdaStage(this, 'DeployCronLambdaStage');
-        //pipeline.addApplicationStage(deploy);
         pipeline.addStage(deploy);
+
         pipeline.buildPipeline();
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'CronPipelineNotificationLambdaFunction', {
