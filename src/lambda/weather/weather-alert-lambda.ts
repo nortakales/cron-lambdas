@@ -7,13 +7,13 @@ import { WeatherData } from "./data-sources/common/common-data";
 import { toPacificIsoString } from './utilities';
 import { Duration } from "typed-duration";
 import * as DDB from '../dynamo';
-import * as SM from '../secrets';
 import { YearlyFirstFreezeAlert } from './alerts/yearly-first-freeze-alert';
 import { Daily7DayExtremeTemperatureAlert } from './alerts/7-day-extreme-temperature-alert';
 import { Daily7DayNationalWeatherAlert } from './alerts/7-day-national-weather-alert';
 import { Daily7DaySnowAlert } from './alerts/7-day-snow-alert';
 import { HourlyMinutelyHeavyRainAlert } from './alerts/1-hour-heavy-rain-alert';
 import * as openweather from './data-sources/openweather/openweather-api';
+import { startLambdaLog } from '../utilities/logging';
 
 const ENABLED = process.env.ENABLED!;
 const TABLE_NAME = process.env.TABLE_NAME!;
@@ -74,10 +74,7 @@ const alerts: Alert[] = [
 ];
 
 exports.handler = async (event: any = {}, context: any = {}) => {
-
-    console.log("EVENT\n" + JSON.stringify(event, null, 2));
-    console.log("CONTEXT\n" + JSON.stringify(context, null, 2));
-    console.log("ENVIRONMENT VARIABLES\n" + JSON.stringify(process.env, null, 2));
+    startLambdaLog(event, context, process.env);
 
     const adhoc = isAdhocReport(event);
 

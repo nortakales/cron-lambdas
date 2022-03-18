@@ -4,6 +4,7 @@ import * as DDB from '../dynamo';
 import moment from 'moment-timezone';
 import { createTimer } from '../events';
 import { NotificationApplication, sendPushNotification, Sound, UrlOptions } from '../notifier';
+import { startLambdaLog } from '../utilities/logging';
 
 const EMAIL_LIST = process.env.EMAIL_LIST!;
 const SUBJECT = process.env.SUBJECT!;
@@ -142,7 +143,9 @@ function createEmailBody(urls: UrlMatch[]): string {
     return emailBody;
 }
 
-exports.handler = async (event = {}) => {
+exports.handler = async (event: any = {}, context: any = {}) => {
+    startLambdaLog(event, context, process.env);
+
     if (ENABLED !== 'true') {
         console.log("Autox Reminder is not enabled, exiting...");
         return;

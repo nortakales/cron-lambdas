@@ -1,15 +1,13 @@
 import { CloudWatchEventsClient, DeleteRuleCommand, PutRuleCommand, PutTargetsCommand, RemoveTargetsCommand } from "@aws-sdk/client-cloudwatch-events";
 import { randomUUID } from "crypto";
+import { startLambdaLog } from "../utilities/logging";
 
 const REGION = process.env.REGION!;
 
 const events = new CloudWatchEventsClient({ region: REGION });
 
 exports.handler = async (event: any = {}, context: any = {}) => {
-    console.log("Running --------------------");
-    console.log("EVENT\n" + JSON.stringify(event, null, 2));
-    console.log("CONTEXT\n" + JSON.stringify(context, null, 2));
-    console.log("ENVIRONMENT VARIABLES\n" + JSON.stringify(process.env, null, 2));
+    startLambdaLog(event, context, process.env);
 
     const timerId = event.timerId;
 
@@ -27,6 +25,4 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     await events.send(new DeleteRuleCommand({
         Name: timerId
     }));
-
-    console.log("Done --------------------");
 };

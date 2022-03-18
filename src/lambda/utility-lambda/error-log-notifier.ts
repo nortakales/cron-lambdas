@@ -1,15 +1,13 @@
 import zlib from 'zlib';
 import { sendEmail } from "../emailer";
+import { startLambdaLog } from '../utilities/logging';
 
 const REGION = process.env.REGION!;
 const EMAIL_LIST = process.env.EMAIL_LIST!;
 const FROM = process.env.FROM!;
 
 exports.handler = async (event: any = {}, context: any = {}) => {
-    console.log("Running --------------------");
-    console.log("EVENT\n" + JSON.stringify(event, null, 2));
-    console.log("CONTEXT\n" + JSON.stringify(context, null, 2));
-    console.log("ENVIRONMENT VARIABLES\n" + JSON.stringify(process.env, null, 2));
+    startLambdaLog(event, context, process.env);
 
     if (event.awslogs && event.awslogs.data) {
         const zippedPayload = Buffer.from(event.awslogs.data, 'base64');
@@ -40,9 +38,4 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     } else {
         throw new Error("event.awslogs.data was not present");
     }
-
-    console.log("Done --------------------");
 };
-
-
-// TODO check log retention oin ALL lambdas !!!

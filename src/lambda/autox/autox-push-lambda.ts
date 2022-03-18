@@ -1,11 +1,8 @@
 import { NotificationApplication, sendPushNotification, Sound, UrlOptions } from "../notifier";
+import { startLambdaLog } from "../utilities/logging";
 
 exports.handler = async (event: any = {}, context: any = {}) => {
-    console.log("Running...");
-
-    console.log("EVENT\n" + JSON.stringify(event, null, 2));
-    console.log("CONTEXT\n" + JSON.stringify(context, null, 2));
-    console.log("ENVIRONMENT VARIABLES\n" + JSON.stringify(process.env, null, 2));
+    startLambdaLog(event, context, process.env);
 
     const body = 'Registration is opening soon!\n' +
         event.name + '\n' +
@@ -18,8 +15,6 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     }
 
     await sendPushNotification(NotificationApplication.AUTOX, "AutoX Alert", body, Sound.BUGLE, urlOptions);
-
-    console.log("Done");
 };
 
 // exports.handler({
