@@ -70,7 +70,7 @@ export class CDKPipelineStack extends cdk.Stack {
         }));
 
         // Special notififer for the pipeline vs. the rest of the infra
-        const errorLogNotifier = new ErrorLogNotifier(this, "PipelineErrorLogNotifier");
+        const errorLogNotifier = new ErrorLogNotifier(this, "PipelineErrorLogNotifier", "Pipeline");
         // Stream logs to the error notifier
         pipelineNotificationLambda.logGroup.addSubscriptionFilter('CronLambdasCDKPipelineLogSubscription', {
             destination: new destinations.LambdaDestination(errorLogNotifier.lambda),

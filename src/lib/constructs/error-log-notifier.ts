@@ -15,15 +15,15 @@ export class ErrorLogNotifier extends cdk.Construct {
 
     readonly lambda: lambda.Function;
 
-    constructor(scope: cdk.Construct, id: string) {
+    constructor(scope: cdk.Construct, id: string, prefix: string) {
         super(scope, id);
 
-        const dlqWithMonitor = new DLQWithMonitor(this, 'ErrorLogNotifierLambda', {
+        const dlqWithMonitor = new DLQWithMonitor(this, prefix + 'ErrorLogNotifierLambda', {
             notificationEmail: config.base.infrastructureAlertEmail,
-            topicDisplayName: 'ErrorLogNotifier Errors'
+            topicDisplayName: prefix + 'ErrorLogNotifier Errors'
         });
-        this.lambda = new nodejslambda.NodejsFunction(this, 'ErrorLogNotifierLambda', {
-            functionName: 'ErrorLogNotifierLambda',
+        this.lambda = new nodejslambda.NodejsFunction(this, prefix + 'ErrorLogNotifierLambda', {
+            functionName: prefix + 'ErrorLogNotifierLambda',
             runtime: lambda.Runtime.NODEJS_14_X,
             entry: __dirname + '/../../lambda/utility-lambda/error-log-notifier.ts',
             handler: 'handler',

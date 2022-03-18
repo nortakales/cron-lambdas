@@ -11,7 +11,7 @@ export class CronLambdaStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        const errorLogNotifier = new ErrorLogNotifier(this, "ErrorLogNotifier");
+        const errorLogNotifier = new ErrorLogNotifier(this, "ErrorLogNotifier", "Main");
 
         const weatherAlertCron = new WeatherAlertCron(this, "WeatherAlertCron", errorLogNotifier.lambda);
         new AutoxReminderCron(this, "AutoxReminderCron", errorLogNotifier.lambda);
