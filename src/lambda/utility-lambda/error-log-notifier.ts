@@ -26,7 +26,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         emailBody += "\nLog Stream: " + payload.logStream;
         emailBody += "\nLogs:\n";
 
-        for (const logEvent of payload.logevents) {
+        for (const logEvent of payload.logEvents) {
             emailBody += "\n"
             emailBody += logEvent.message;
         }
