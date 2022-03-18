@@ -5,10 +5,11 @@ import * as iam from '@aws-cdk/aws-iam';
 import * as config from '../../config/config.json'
 import { DLQWithMonitor } from './dlq-with-monitor';
 import * as logs from '@aws-cdk/aws-logs';
+import * as destinations from '@aws-cdk/aws-logs-destinations';
 
 export class DeleteTimerConstruct extends cdk.Construct {
 
-    constructor(scope: cdk.Construct, id: string) {
+    constructor(scope: cdk.Construct, id: string, errorLogNotifierLambda: lambda.Function) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'DeleteTimerLambdaFunction', {
@@ -42,5 +43,11 @@ export class DeleteTimerConstruct extends cdk.Construct {
             actions: ['events:*'],
             resources: ['arn:aws:events:*:*:rule/*']
         }));
+
+        // Stream logs to the error notifier
+        lambdaFunction.logGroup.addSubscriptionFilter('DeleteTimerLambdaFunctionLogSubscription', {
+            destination: new destinations.LambdaDestination(errorLogNotifierLambda),
+            filterPattern: logs.FilterPattern.anyTerm('ERROR')
+        });
     }
 }

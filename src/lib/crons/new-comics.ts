@@ -6,13 +6,14 @@ import { Schedule, Rule } from '@aws-cdk/aws-events'
 import { LambdaFunction } from '@aws-cdk/aws-events-targets'
 import * as config from '../../config/config.json'
 import { DLQWithMonitor } from '../constructs/dlq-with-monitor';
+import * as destinations from '@aws-cdk/aws-logs-destinations';
 import * as logs from '@aws-cdk/aws-logs';
 
 export class NewComicsCron extends cdk.Construct {
 
     readonly lambda: lambda.Function;
 
-    constructor(scope: cdk.Construct, id: string) {
+    constructor(scope: cdk.Construct, id: string, errorLogNotifierLambda: lambda.Function) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'NewComicsLambdaFunction', {
@@ -53,6 +54,11 @@ export class NewComicsCron extends cdk.Construct {
             resources: ['*'],
             effect: iam.Effect.ALLOW,
         }));
+        // Stream logs to the error notifier
+        this.lambda.logGroup.addSubscriptionFilter('NewComicsLambdaFunctionLogSubscription', {
+            destination: new destinations.LambdaDestination(errorLogNotifierLambda),
+            filterPattern: logs.FilterPattern.anyTerm('ERROR')
+        });
 
         const schedule = new Rule(this, 'NewComicsSchedule', {
             ruleName: 'NewComicsSchedule',

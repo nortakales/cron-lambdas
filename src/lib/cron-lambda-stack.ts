@@ -14,10 +14,10 @@ export class CronLambdaStack extends cdk.Stack {
         const errorLogNotifier = new ErrorLogNotifier(this, "ErrorLogNotifier");
 
         const weatherAlertCron = new WeatherAlertCron(this, "WeatherAlertCron", errorLogNotifier.lambda);
-        new AutoxReminderCron(this, "AutoxReminderCron");
-        new NewComicsCron(this, "NewComicsCron");
+        new AutoxReminderCron(this, "AutoxReminderCron", errorLogNotifier.lambda);
+        new NewComicsCron(this, "NewComicsCron", errorLogNotifier.lambda);
 
-        new DeleteTimerConstruct(this, 'DeleteTimerConstruct');
+        new DeleteTimerConstruct(this, 'DeleteTimerConstruct', errorLogNotifier.lambda);
         new AdhocWeatherReportAPI(this, 'AdhocWeatherAPI', weatherAlertCron.lambda);
     }
 }

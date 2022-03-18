@@ -7,11 +7,12 @@ import { Schedule, Rule } from '@aws-cdk/aws-events';
 import { LambdaFunction } from '@aws-cdk/aws-events-targets';
 import * as config from '../../config/config.json';
 import { DLQWithMonitor } from '../constructs/dlq-with-monitor';
+import * as destinations from '@aws-cdk/aws-logs-destinations';
 import * as logs from '@aws-cdk/aws-logs';
 
 export class AutoxReminderCron extends cdk.Construct {
 
-    constructor(scope: cdk.Construct, id: string) {
+    constructor(scope: cdk.Construct, id: string, errorLogNotifierLambda: lambda.Function) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'AutoxReminderLambdaFunction', {
@@ -58,6 +59,11 @@ export class AutoxReminderCron extends cdk.Construct {
             resources: ['arn:aws:events:*:*:rule/*'],
             effect: iam.Effect.ALLOW,
         }));
+        // Stream logs to the error notifier
+        lambdaFunction.logGroup.addSubscriptionFilter('AutoxReminderLambdaFunctionLogSubscription', {
+            destination: new destinations.LambdaDestination(errorLogNotifierLambda),
+            filterPattern: logs.FilterPattern.anyTerm('ERROR')
+        });
 
         const dynamoTable = new dynamodb.Table(this, 'AutoxReminderDynamoTable', {
             partitionKey: {
@@ -120,5 +126,10 @@ export class AutoxReminderCron extends cdk.Construct {
             resources: ['*'],
             effect: iam.Effect.ALLOW,
         }));
+        // Stream logs to the error notifier
+        pushNotificationLambdaFunction.logGroup.addSubscriptionFilter('AutoxPushLambdaFunctionLogSubscription', {
+            destination: new destinations.LambdaDestination(errorLogNotifierLambda),
+            filterPattern: logs.FilterPattern.anyTerm('ERROR')
+        });
     }
 }
