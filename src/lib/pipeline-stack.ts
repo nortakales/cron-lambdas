@@ -9,6 +9,8 @@ import { DLQWithMonitor } from './constructs/dlq-with-monitor';
 import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as iam from '@aws-cdk/aws-iam';
+import { ErrorLogNotifier } from './constructs/error-log-notifier';
+import * as destinations from '@aws-cdk/aws-logs-destinations';
 import * as logs from '@aws-cdk/aws-logs';
 
 export class CDKPipelineStack extends cdk.Stack {
@@ -66,6 +68,14 @@ export class CDKPipelineStack extends cdk.Stack {
             resources: ['*'],
             effect: iam.Effect.ALLOW,
         }));
+
+        // Special notififer for the pipeline vs. the rest of the infra
+        const errorLogNotifier = new ErrorLogNotifier(this, "PipelineErrorLogNotifier");
+        // Stream logs to the error notifier
+        pipelineNotificationLambda.logGroup.addSubscriptionFilter('CronLambdasCDKPipelineLogSubscription', {
+            destination: new destinations.LambdaDestination(errorLogNotifier.lambda),
+            filterPattern: logs.FilterPattern.anyTerm('ERROR')
+        });
 
         const pipelineTopic = new sns.Topic(this, 'CronLambdaPipelineNotificationTopic', {
             topicName: 'CronLambdaPipelineNotificationTopic',
