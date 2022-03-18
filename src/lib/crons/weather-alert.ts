@@ -63,7 +63,7 @@ export class WeatherAlertCron extends cdk.Construct {
         // Stream logs to the error notifier
         this.lambda.logGroup.addSubscriptionFilter('WeatherAlertLambdaFunctionLogSubscription', {
             destination: new destinations.LambdaDestination(errorLogNotifierLambda),
-            filterPattern: logs.FilterPattern.allEvents()
+            filterPattern: logs.FilterPattern.anyTerm('ERROR')
         });
 
         const dynamoTable = new dynamodb.Table(this, 'WeatherAlertTrackingDynamoTable', {
