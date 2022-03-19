@@ -1,19 +1,20 @@
-import * as cdk from '@aws-cdk/core';
-import * as lambda from '@aws-cdk/aws-lambda';
-import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
-import * as iam from '@aws-cdk/aws-iam';
-import { Schedule, Rule } from '@aws-cdk/aws-events'
-import { LambdaFunction } from '@aws-cdk/aws-events-targets'
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as nodejslambda from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import { Schedule, Rule } from 'aws-cdk-lib/aws-events'
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import * as config from '../../config/config.json'
 import { DLQWithMonitor } from '../constructs/dlq-with-monitor';
-import * as destinations from '@aws-cdk/aws-logs-destinations';
-import * as logs from '@aws-cdk/aws-logs';
+import * as destinations from 'aws-cdk-lib/aws-logs-destinations';
+import * as logs from 'aws-cdk-lib/aws-logs';
+import { Construct } from 'constructs';
 
-export class NewComicsCron extends cdk.Construct {
+export class NewComicsCron extends Construct {
 
     readonly lambda: lambda.Function;
 
-    constructor(scope: cdk.Construct, id: string, errorLogNotifierLambda: lambda.Function) {
+    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'NewComicsLambdaFunction', {

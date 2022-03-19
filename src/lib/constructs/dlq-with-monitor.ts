@@ -1,12 +1,10 @@
-import * as cdk from '@aws-cdk/core';
-import * as lambda from '@aws-cdk/aws-lambda';
-import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
-import * as iam from '@aws-cdk/aws-iam';
-import * as sqs from '@aws-cdk/aws-sqs';
-import * as sns from '@aws-cdk/aws-sns';
-import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
-import * as actions from '@aws-cdk/aws-cloudwatch-actions';
-import * as cloudwatch from '@aws-cdk/aws-cloudwatch';
+import * as cdk from 'aws-cdk-lib';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
+import * as actions from 'aws-cdk-lib/aws-cloudwatch-actions';
+import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
+import { Construct } from 'constructs';
 
 export interface DLQWithMonitorProps {
     notificationEmail: string;
@@ -17,11 +15,11 @@ export interface DLQWithMonitorProps {
     alarmComparisonOperator?: cloudwatch.ComparisonOperator;
 }
 
-export class DLQWithMonitor extends cdk.Construct {
+export class DLQWithMonitor extends Construct {
 
     readonly dlq: sqs.Queue;
 
-    constructor(scope: cdk.Construct, idPrefix: string, props: DLQWithMonitorProps) {
+    constructor(scope: Construct, idPrefix: string, props: DLQWithMonitorProps) {
         super(scope, idPrefix + '-DLQWithMonitor');
 
         // Use defaults if needed

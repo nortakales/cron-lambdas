@@ -1,5 +1,6 @@
 import { CronLambdaStack } from './cron-lambda-stack';
-import { Stage, Construct, StageProps } from '@aws-cdk/core';
+import { Stage, StageProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 
 export class DeployCronLambdaStage extends Stage {
     constructor(scope: Construct, id: string, props?: StageProps) {

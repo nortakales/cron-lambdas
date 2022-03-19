@@ -1,20 +1,21 @@
-import * as cdk from '@aws-cdk/core';
+import * as cdk from 'aws-cdk-lib';
 import { DeployCronLambdaStage } from './deploy-cron-lambda-stage';
-import { CodePipeline, ShellStep, CodePipelineSource } from "@aws-cdk/pipelines";
-import * as notifications from '@aws-cdk/aws-codestarnotifications';
-import * as sns from '@aws-cdk/aws-sns';
-import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
+import { CodePipeline, ShellStep, CodePipelineSource } from "aws-cdk-lib/pipelines";
+import * as notifications from 'aws-cdk-lib/aws-codestarnotifications';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as config from '../config/config.json'
 import { DLQWithMonitor } from './constructs/dlq-with-monitor';
-import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
-import * as lambda from '@aws-cdk/aws-lambda';
-import * as iam from '@aws-cdk/aws-iam';
+import * as nodejslambda from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { ErrorLogNotifier } from './constructs/error-log-notifier';
-import * as destinations from '@aws-cdk/aws-logs-destinations';
-import * as logs from '@aws-cdk/aws-logs';
+import * as destinations from 'aws-cdk-lib/aws-logs-destinations';
+import * as logs from 'aws-cdk-lib/aws-logs';
+import { Construct } from 'constructs';
 
 export class CDKPipelineStack extends cdk.Stack {
-    constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
         const githubSource = CodePipelineSource.gitHub('nortakales/cron-lambdas', 'main', {

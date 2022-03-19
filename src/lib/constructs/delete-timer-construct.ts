@@ -1,15 +1,17 @@
-import * as cdk from '@aws-cdk/core';
-import * as lambda from '@aws-cdk/aws-lambda';
-import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
-import * as iam from '@aws-cdk/aws-iam';
+
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as nodejslambda from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as config from '../../config/config.json'
 import { DLQWithMonitor } from './dlq-with-monitor';
-import * as logs from '@aws-cdk/aws-logs';
-import * as destinations from '@aws-cdk/aws-logs-destinations';
+import * as logs from 'aws-cdk-lib/aws-logs';
+import * as destinations from 'aws-cdk-lib/aws-logs-destinations';
+import { Construct } from 'constructs';
+import { Duration } from 'aws-cdk-lib';
 
-export class DeleteTimerConstruct extends cdk.Construct {
+export class DeleteTimerConstruct extends Construct {
 
-    constructor(scope: cdk.Construct, id: string, errorLogNotifierLambda: lambda.Function) {
+    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'DeleteTimerLambdaFunction', {
@@ -25,7 +27,7 @@ export class DeleteTimerConstruct extends cdk.Construct {
             environment: {
                 REGION: config.base.region
             },
-            timeout: cdk.Duration.seconds(10),
+            timeout: Duration.seconds(10),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,

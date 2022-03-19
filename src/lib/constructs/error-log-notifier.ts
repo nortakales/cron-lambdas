@@ -1,21 +1,18 @@
-import * as cdk from '@aws-cdk/core';
-import * as lambda from '@aws-cdk/aws-lambda';
-import * as nodejslambda from '@aws-cdk/aws-lambda-nodejs';
-import * as dynamodb from '@aws-cdk/aws-dynamodb';
-import * as iam from '@aws-cdk/aws-iam';
-import { Schedule, Rule } from '@aws-cdk/aws-events'
-import { LambdaFunction } from '@aws-cdk/aws-events-targets'
+import * as cdk from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as nodejslambda from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as config from '../../config/config.json'
 import { DLQWithMonitor } from '../constructs/dlq-with-monitor';
-import * as destinations from '@aws-cdk/aws-logs-destinations';
-import * as logs from '@aws-cdk/aws-logs';
+import * as logs from 'aws-cdk-lib/aws-logs';
+import { Construct } from 'constructs';
 
 
-export class ErrorLogNotifier extends cdk.Construct {
+export class ErrorLogNotifier extends Construct {
 
     readonly lambda: lambda.Function;
 
-    constructor(scope: cdk.Construct, id: string, prefix: string) {
+    constructor(scope: Construct, id: string, prefix: string) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, prefix + 'ErrorLogNotifierLambda', {
