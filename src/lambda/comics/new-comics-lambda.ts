@@ -1,4 +1,5 @@
 import { sendEmail } from "../emailer";
+import { startLambdaLog } from "../utilities/logging";
 import { getFilteredAndSortedComics } from "./new-comics-sort-and-filter";
 
 const ENABLED = process.env.ENABLED!;
@@ -7,10 +8,7 @@ const SUBJECT = process.env.SUBJECT!;
 const FROM = process.env.FROM!;
 
 exports.handler = async (event: any = {}, context: any = {}) => {
-
-    console.log("EVENT\n" + JSON.stringify(event, null, 2));
-    console.log("CONTEXT\n" + JSON.stringify(context, null, 2));
-    console.log("ENVIRONMENT VARIABLES\n" + JSON.stringify(process.env, null, 2));
+    startLambdaLog(event, context, process.env);
 
     if (ENABLED !== 'true') {
         console.log("New Comics is not enabled, exiting...");
