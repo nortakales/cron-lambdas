@@ -82,7 +82,9 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Cutaway Comics",
     "Fantagraphics Books",
     "Merc Magazine",
-    "Domino Books"
+    "Domino Books",
+    "Sitcomics",
+    "UDON"
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
