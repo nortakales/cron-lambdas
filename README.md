@@ -1,3 +1,8 @@
+# TODO migrate this to some main readme for all packages
+
+Install AWS CLI: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+Many instructions in imessage node app readme
+
 # Lambda Crons
 
 ## AutoX Reminder

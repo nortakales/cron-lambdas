@@ -6,6 +6,7 @@ import { AdhocWeatherReportAPI } from './constructs/adhoc-weather-report-api';
 import { NewComicsCron } from './crons/new-comics';
 import { ErrorLogNotifier } from './constructs/error-log-notifier';
 import { Construct } from 'constructs';
+import { ProductTrackerCron } from './crons/product-tracker';
 
 export class CronLambdaStack extends cdk.Stack {
 
@@ -17,6 +18,7 @@ export class CronLambdaStack extends cdk.Stack {
         const weatherAlertCron = new WeatherAlertCron(this, "WeatherAlertCron", errorLogNotifier.lambda);
         new AutoxReminderCron(this, "AutoxReminderCron", errorLogNotifier.lambda);
         new NewComicsCron(this, "NewComicsCron", errorLogNotifier.lambda);
+        new ProductTrackerCron(this, "ProductTrackerCron", errorLogNotifier.lambda);
 
         new DeleteTimerConstruct(this, 'DeleteTimerConstruct', errorLogNotifier.lambda);
         new AdhocWeatherReportAPI(this, 'AdhocWeatherAPI', weatherAlertCron.lambda);

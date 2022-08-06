@@ -45,5 +45,16 @@
         "emailList": [
             "nortakales@gmail.com"
         ]
+    },
+    "productTracker": {
+        "enabled": "true",
+        "rate": "cron(0 18 ? * WED *)",
+        "productsDynamoTableName": "products",
+        "productHistoryDynamoTableName": "product_history",
+        "fromEmail": "nortakales@gmail.com",
+        "emailSubject": "Product Tracker",
+        "emailList": [
+            "nortakales@gmail.com"
+        ]
     }
 }
