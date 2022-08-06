@@ -99,10 +99,5 @@ export class ProductTrackerCron extends Construct {
             schedule: Schedule.expression(config.productTracker.rate),
         });
         schedule.addTarget(new LambdaFunction(lambdaFunction));
-
-        const dlqWithMonitorForPush = new DLQWithMonitor(this, 'AutoxPushLambdaFunction', {
-            notificationEmail: config.base.infrastructureAlertEmail,
-            topicDisplayName: 'AutoxPush Errors',
-        });
     }
 }
