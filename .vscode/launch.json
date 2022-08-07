@@ -81,6 +81,29 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Product Tracker",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/lambda/product/product-tracker-lambda.ts",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "${defaultBuildTask}",
+            "env": {
+                "EMAIL_LIST": "nortakales@gmail.com",
+                "SUBJECT": "Product Tracker - Test",
+                "FROM": "nortakales@gmail.com",
+                "ENABLED": "true",
+                "REGION": "us-west-2",
+                "PRODUCT_TABLE_NAME": "products",
+                "PRODUCT_HISTORY_TABLE_NAME": "product_history"
+            },
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Current File",
             "skipFiles": [
                 "<node_internals>/**"

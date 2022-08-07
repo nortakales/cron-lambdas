@@ -45,3 +45,14 @@ export async function put(table: string, item: { [key: string]: any }) {
 
     });
 }
+
+export async function scan(table: string) {
+
+    // TODO support pagination
+
+    const output = await DDB.scan({
+        TableName: table
+    });
+
+    return output.Items;
+}

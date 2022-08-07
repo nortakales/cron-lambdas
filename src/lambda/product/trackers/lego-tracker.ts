@@ -4,7 +4,7 @@ import { parse, HTMLElement } from 'node-html-parser';
 
 const BASE_URL = 'https://www.lego.com/en-us/product/';
 
-async function getLatestProductData(product: Product): Promise<Product> {
+export async function getLatestProductData(product: Product): Promise<Product> {
 
     const html = await httpsGet(BASE_URL + product.urlKey);
     const dom = parse(html);
@@ -23,7 +23,8 @@ async function getLatestProductData(product: Product): Promise<Product> {
         addToCartButton,
         status,
         tags,
-        promotion
+        promotion,
+        url: BASE_URL + product.urlKey
     } as Product;
 }
 
@@ -66,4 +67,4 @@ async function test() {
 }
 
 // Uncomment to test
-test();
+//test();

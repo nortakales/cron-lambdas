@@ -1,7 +1,8 @@
 export interface Product {
     title: string
     website: Website
-    urlKey: string
+    urlKey: string,
+    url?: string,
     price?: string
     addToCartButton?: string
     status?: string
