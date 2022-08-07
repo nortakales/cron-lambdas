@@ -48,7 +48,7 @@
     },
     "productTracker": {
         "enabled": "true",
-        "rate": "cron(0 18 ? * WED *)",
+        "rate": "cron(0 18 ? * * *)",
         "productsDynamoTableName": "products",
         "productHistoryDynamoTableName": "product_history",
         "fromEmail": "nortakales@gmail.com",
