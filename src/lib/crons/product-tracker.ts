@@ -40,7 +40,10 @@ export class ProductTrackerCron extends Construct {
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
-            logRetention: logs.RetentionDays.ONE_YEAR
+            logRetention: logs.RetentionDays.ONE_YEAR,
+            bundling: {
+                nodeModules: ['node-html-parser']
+            }
         });
         // Lambda must be able to send email through SES
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
