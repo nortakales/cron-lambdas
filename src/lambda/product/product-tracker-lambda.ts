@@ -1,7 +1,7 @@
-import { scan } from "../dynamo";
+import { put, scan } from "../dynamo";
 import { sendEmail } from "../emailer";
 import { startLambdaLog } from "../utilities/logging";
-import { Product, Website } from "./product";
+import { areDifferent, generateDiffText, generateText, Product, Website } from "./product";
 import { getLatestProductData } from "./trackers/lego-tracker";
 
 const ENABLED = process.env.ENABLED!;
@@ -32,7 +32,8 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         };
     }
 
-    let emailBody = '';
+    let diffBody = '';
+    let sameBody = '';
 
     for (const product of products) {
         console.log("Looking up latest details for product:");
@@ -43,13 +44,13 @@ exports.handler = async (event: any = {}, context: any = {}) => {
                 newProduct = await getLatestProductData(product);
                 break;
         }
-        emailBody += `<b><a href="${newProduct.url}">${newProduct.title}</a></b><br>
-        Price: ${newProduct.price ? newProduct.price : ''}<br>
-        Status: ${newProduct.status ? newProduct.status : ''}<br>
-        Promotion: ${newProduct.promotion ? newProduct.promotion : ''}<br>
-        Add to Cart: ${newProduct.addToCartButton ? newProduct.addToCartButton : ''}<br>
-        Tags: ${newProduct.tags ? newProduct.tags : ''}<br>
-        <br>`;
+        if (areDifferent(product, newProduct)) {
+            diffBody += generateDiffText(product, newProduct) + '<br><br>';
+            await put(PRODUCT_TABLE_NAME, newProduct);
+            // TODO save history
+        } else {
+            sameBody += generateText(newProduct) + '<br><br>';
+        }
     }
 
     // TODO
@@ -61,6 +62,11 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     // make updates to current product
     // accumulate notifications into email based on diff
     // send email
+
+    const emailBody = `<h1>Changes</h1>
+    ${diffBody ? diffBody : 'None'}<br>
+    <h1>Summary</h1>
+    ${sameBody ? sameBody : 'None'}`;
 
     await sendEmail({
         toAddresses: EMAIL_LIST.split(','),

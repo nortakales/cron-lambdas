@@ -42,7 +42,6 @@ export async function put(table: string, item: { [key: string]: any }) {
     await DDB.put({
         TableName: table,
         Item: item,
-
     });
 }
 
