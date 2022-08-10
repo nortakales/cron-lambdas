@@ -19,15 +19,19 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         return failureResponse("Missing table")
     }
 
-    switch (operation) {
-        case "PUT":
-            await put(payload);
-            break;
-        case "DELETE":
-            await del(payload);
-            break;
-        default:
-            return failureResponse("Unknown operation: " + operation);
+    try {
+        switch (operation) {
+            case "PUT":
+                await put(payload);
+                break;
+            case "DELETE":
+                await del(payload);
+                break;
+            default:
+                return failureResponse("Unknown operation: " + operation);
+        }
+    } catch (e) {
+        return failureResponse((e as Error).message);
     }
 
     return {
@@ -47,21 +51,17 @@ function failureResponse(message: string) {
 }
 
 async function put(event: any) {
-    const itemAsString = event.item as string;
-    if (!itemAsString) {
-        console.error("Missing event.item");
+    if (!event.item) {
+        throw new Error("Missing item");
     }
-    const item = JSON.parse(itemAsString);
-    await DDB.put(event.table, item);
+    await DDB.put(event.table, event.item);
 }
 
 async function del(event: any) {
-    const keyAsString = event.item as string;
-    if (!keyAsString) {
-        console.error("Missing event.key");
+    if (!event.key) {
+        throw new Error("Missing key");
     }
-    const key = JSON.parse(keyAsString);
-    await DDB.del(event.table, key);
+    await DDB.del(event.table, event.key);
 }
 
 // Uncomment this to call locally
