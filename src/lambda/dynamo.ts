@@ -47,6 +47,8 @@ export async function put(table: string, item: { [key: string]: any }) {
 
 export async function scan(table: string) {
 
+    console.log("Scanning DDB table: " + table);
+
     // TODO support pagination
 
     const output = await DDB.scan({
@@ -54,4 +56,14 @@ export async function scan(table: string) {
     });
 
     return output.Items;
+}
+
+export async function del(table: string, key: { [key: string]: any }) {
+
+    console.log("Deleting from DDB: " + JSON.stringify(key));
+
+    await DDB.delete({
+        TableName: table,
+        Key: key
+    });
 }

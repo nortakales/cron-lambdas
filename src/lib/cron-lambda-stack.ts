@@ -7,6 +7,7 @@ import { NewComicsCron } from './crons/new-comics';
 import { ErrorLogNotifier } from './constructs/error-log-notifier';
 import { Construct } from 'constructs';
 import { ProductTrackerCron } from './crons/product-tracker';
+import { DynamoDBAccessAPI } from './constructs/dynamodb-access-api';
 
 export class CronLambdaStack extends cdk.Stack {
 
@@ -22,5 +23,6 @@ export class CronLambdaStack extends cdk.Stack {
 
         new DeleteTimerConstruct(this, 'DeleteTimerConstruct', errorLogNotifier.lambda);
         new AdhocWeatherReportAPI(this, 'AdhocWeatherAPI', weatherAlertCron.lambda);
+        new DynamoDBAccessAPI(this, 'DynamoDBAccessAPI', errorLogNotifier.lambda);
     }
 }
