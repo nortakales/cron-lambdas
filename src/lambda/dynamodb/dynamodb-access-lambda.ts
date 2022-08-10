@@ -3,26 +3,31 @@ import { startLambdaLog } from "../utilities/logging";
 
 exports.handler = async (event: any = {}, context: any = {}) => {
     startLambdaLog(event, context, process.env);
+    const body = event.body;
+    if (!body) {
+        return failureResponse("Missing body");
+    }
+    const payload = JSON.parse(event.body);
 
-    const operation = event.operation as string;
-    const table = event.table as string;
+    const operation = payload.operation as string;
+    const table = payload.table as string;
 
     if (!operation) {
-        console.error("Missing event.operation");
+        return failureResponse("Missing operation");
     }
     if (!table) {
-        console.error("Missing event.table");
+        return failureResponse("Missing table")
     }
 
     switch (operation) {
         case "PUT":
-            await put(event);
+            await put(payload);
             break;
         case "DELETE":
-            await del(event);
+            await del(payload);
             break;
         default:
-            console.error("Unknown operation: " + operation);
+            return failureResponse("Unknown operation: " + operation);
     }
 
     return {
@@ -31,6 +36,15 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         body: "Success"
     };
 };
+
+function failureResponse(message: string) {
+    console.error(message);
+    return {
+        statusCode: 400,
+        headers: {},
+        body: message
+    };
+}
 
 async function put(event: any) {
     const itemAsString = event.item as string;
@@ -51,4 +65,4 @@ async function del(event: any) {
 }
 
 // Uncomment this to call locally
-exports.handler();
+// exports.handler();
