@@ -42,7 +42,7 @@ export async function query(table: string, indexName: string, hashKeyName: strin
         ':hkey': hashKey,
     };
     if (rangeKeyName && rangeKey) {
-        keyConditionExpression += ` and ${rangeKeyName} :rkey`;
+        keyConditionExpression += ` and ${rangeKeyName} = :rkey`;
         keyConditionExpressionValues[rangeKeyName] = rangeKey;
     }
 
