@@ -79,6 +79,17 @@ export class ProductTrackerCron extends Construct {
             tableName: config.productTracker.productsDynamoTableName
         });
         productsTable.grantReadWriteData(lambdaFunction);
+        productsTable.addGlobalSecondaryIndex({
+            indexName: 'urlKey-index',
+            partitionKey: {
+                name: 'urlKey',
+                type: dynamodb.AttributeType.STRING
+            },
+            sortKey: {
+                name: 'website',
+                type: dynamodb.AttributeType.STRING
+            }
+        });
 
         const productHistoryTable = new dynamodb.Table(this, 'ProductTrackerProductHistoryDynamoTable', {
             partitionKey: {
