@@ -17,6 +17,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
                 return failureResponse("Unknown httpMethod: " + event.httpMethod);
         }
     } catch (e) {
+        console.error(e);
         return failureResponse((e as Error).message);
     }
 

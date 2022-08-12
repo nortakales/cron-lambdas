@@ -52,7 +52,7 @@ export class DynamoDBAccessAPI extends Construct {
         const integration = new apigateway.LambdaIntegration(lambdaFunction, {
             requestTemplates: {
                 "application/json": '{ "statusCode": "200" }'
-            }
+            } // TODO is this even needed? what does it do?
         });
 
         api.root.addMethod("POST", integration);
