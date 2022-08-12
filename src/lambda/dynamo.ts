@@ -43,7 +43,7 @@ export async function query(table: string, indexName: string, hashKeyName: strin
     };
     if (rangeKeyName && rangeKey) {
         keyConditionExpression += ` and ${rangeKeyName} = :rkey`;
-        keyConditionExpressionValues[rangeKeyName] = rangeKey;
+        keyConditionExpressionValues[':rkey'] = rangeKey;
     }
 
     const query = {
