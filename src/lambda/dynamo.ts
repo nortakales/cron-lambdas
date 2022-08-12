@@ -35,6 +35,35 @@ export async function get(table: string, key: { [key: string]: any }) {
     return item.Item;
 }
 
+export async function query(table: string, indexName: string, hashKeyName: string, hashKey: string, rangeKeyName?: string, rangeKey?: string) {
+
+    let keyConditionExpression = `${hashKeyName} = :hkey`;
+    let keyConditionExpressionValues: { [key: string]: string } = {
+        ':hkey': hashKey,
+    };
+    if (rangeKeyName && rangeKey) {
+        keyConditionExpression += ` and ${rangeKeyName} :rkey`;
+        keyConditionExpressionValues[rangeKeyName] = rangeKey;
+    }
+
+    const query = {
+        TableName: table,
+        IndexName: indexName,
+        KeyConditionExpression: keyConditionExpression,
+        ExpressionAttributeValues: keyConditionExpressionValues
+    };
+
+    const item = await DDB.query(query);
+
+    if (item.Items !== undefined) {
+        console.log("Found in DDB: " + JSON.stringify(item.Items));
+    } else {
+        console.log("Did not find DDB item(s) for query " + JSON.stringify(query));
+    }
+
+    return item.Items;
+}
+
 export async function put(table: string, item: { [key: string]: any }) {
 
     console.log("Writing to DDB: " + JSON.stringify(item));
