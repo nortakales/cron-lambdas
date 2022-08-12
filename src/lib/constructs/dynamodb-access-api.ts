@@ -56,5 +56,6 @@ export class DynamoDBAccessAPI extends Construct {
         });
 
         api.root.addMethod("POST", integration);
+        api.root.addMethod("GET", integration);
     }
 }

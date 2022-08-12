@@ -7,7 +7,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     if (!body) {
         return failureResponse("Missing body");
     }
-    const payload = JSON.parse(event.body);
+    const payload = JSON.parse(body);
 
     const operation = payload.operation as string;
     const table = payload.table as string;
