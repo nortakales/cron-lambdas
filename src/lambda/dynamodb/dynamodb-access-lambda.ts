@@ -50,7 +50,8 @@ async function httpGet_query(event: any) {
     required(hashKeyName, "event.queryStringParameters.hashKeyName");
     required(hashKey, "event.queryStringParameters.hashKey");
 
-    const items = DDB.query(table, indexName, hashKeyName, hashKey, rangeKeyName, rangeKey);
+    console.log(`Running query: ${table}, ${indexName}, ${hashKeyName}, ${hashKey}, ${rangeKeyName}, ${rangeKey}`);
+    const items = await DDB.query(table, indexName, hashKeyName, hashKey, rangeKeyName, rangeKey);
 
     return {
         statusCode: 200,
