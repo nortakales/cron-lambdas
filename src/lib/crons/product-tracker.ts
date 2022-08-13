@@ -37,6 +37,7 @@ export class ProductTrackerCron extends Construct {
                 PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey
             },
             timeout: cdk.Duration.minutes(5),
+            memorySize: 512,
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
