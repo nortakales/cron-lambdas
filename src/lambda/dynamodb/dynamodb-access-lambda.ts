@@ -30,8 +30,7 @@ async function httpGet(event: any) {
 
     switch (event.queryStringParameters.operation) {
         case "QUERY":
-            await httpGet_query(event);
-            break;
+            return await httpGet_query(event);
         default:
             throw new Error("Unknown operation for httpGet: " + event.queryStringParameters.operation);
     }
