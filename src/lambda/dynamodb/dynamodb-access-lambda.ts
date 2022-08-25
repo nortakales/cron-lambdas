@@ -31,6 +31,8 @@ async function httpGet(event: any) {
     switch (event.queryStringParameters.operation) {
         case "QUERY":
             return await httpGet_query(event);
+        case "DELETE":
+            return await httpGet_delete(event);
         default:
             throw new Error("Unknown operation for httpGet: " + event.queryStringParameters.operation);
     }
@@ -56,6 +58,33 @@ async function httpGet_query(event: any) {
         statusCode: 200,
         headers: {},
         body: JSON.stringify(items)
+    };
+}
+
+async function httpGet_delete(event: any) {
+    const params = event.queryStringParameters;
+    const table = params.table as string;
+    const hashKeyName = params.hashKeyName as string;
+    const hashKey = params.hashKey as string;
+    const rangeKeyName = params.rangeKeyName as string;
+    const rangeKey = params.rangeKey as string;
+    required(table, "event.queryStringParameters.table");
+    required(hashKeyName, "event.queryStringParameters.hashKeyName");
+    required(hashKey, "event.queryStringParameters.hashKey");
+
+    var item: { [key: string]: string } = {};
+    item[hashKeyName] = hashKey;
+    if (rangeKeyName && rangeKey) {
+        item[rangeKeyName] = rangeKey;
+    }
+
+    console.log(`Running delete: ${table}, ${hashKeyName}, ${hashKey}, ${rangeKeyName}, ${rangeKey}`);
+    await DDB.del(table, item);
+
+    return {
+        statusCode: 200,
+        headers: {},
+        body: 'Success'
     };
 }
 
