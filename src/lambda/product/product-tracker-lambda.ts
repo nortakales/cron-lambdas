@@ -83,4 +83,4 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 };
 
 // Uncomment this to call locally
-exports.handler();
+// exports.handler();
