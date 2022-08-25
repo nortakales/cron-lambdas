@@ -32,7 +32,7 @@ export function generateDiffText(oldProduct: Product, newProduct: Product) {
 
     let text = `<b><a href="${newProduct.url}">${newProduct.title}</a>`;
     if (oldProduct.title !== newProduct.title) {
-        text += ` <del>${oldProduct.title}</del>`;
+        text += ` <del style="color:red">${oldProduct.title}</del>`;
     }
     if (oldProduct.url !== newProduct.url) {
         text += ` (new URL)`;
@@ -40,27 +40,27 @@ export function generateDiffText(oldProduct: Product, newProduct: Product) {
 
     text += `<br>Price: ${newProduct.price ? newProduct.price : ''}`;
     if (oldProduct.price !== newProduct.price) {
-        text += ` <del>${oldProduct.price ? oldProduct.price : 'None'}</del>`;
+        text += ` <del style="color:red">${oldProduct.price ? oldProduct.price : 'None'}</del>`;
     }
 
     text += `<br>Status: ${newProduct.status ? newProduct.status : ''}`;
     if (oldProduct.status !== newProduct.status) {
-        text += ` <del>${oldProduct.status ? oldProduct.status : 'None'}</del>`;
+        text += ` <del style="color:red">${oldProduct.status ? oldProduct.status : 'None'}</del>`;
     }
 
     text += `<br>Promotion: ${newProduct.promotion ? newProduct.promotion : ''}`;
     if (oldProduct.promotion !== newProduct.promotion) {
-        text += ` <del>${oldProduct.promotion ? oldProduct.promotion : 'None'}</del>`;
+        text += ` <del style="color:red">${oldProduct.promotion ? oldProduct.promotion : 'None'}</del>`;
     }
 
     text += `<br>Add to Cart: ${newProduct.addToCartButton ? newProduct.addToCartButton : ''}`;
     if (oldProduct.addToCartButton !== newProduct.addToCartButton) {
-        text += ` <del>${oldProduct.addToCartButton ? oldProduct.addToCartButton : 'None'}</del>`;
+        text += ` <del style="color:red">${oldProduct.addToCartButton ? oldProduct.addToCartButton : 'None'}</del>`;
     }
 
     text += `<br>Tags: ${newProduct.tags ? newProduct.tags : ''}`;
     if (!arrayEquals(oldProduct.tags, newProduct.tags)) {
-        text += ` <del>${oldProduct.tags ? oldProduct.tags : 'None'}</del>`;
+        text += ` <del style="color:red">${oldProduct.tags ? oldProduct.tags : 'None'}</del>`;
     }
 
     // TODO issues
