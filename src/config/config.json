@@ -2,7 +2,8 @@
     "base": {
         "region": "us-west-2",
         "infrastructureAlertEmail": "nortakales@gmail.com",
-        "pushoverConfigSecretKey": "pushover-users-groups-apps"
+        "pushoverConfigSecretKey": "pushover-users-groups-apps",
+        "dynamoAccessEndpoint": "https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod"
     },
     "autoxReminder": {
         "enabled": "true",

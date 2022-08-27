@@ -34,7 +34,7 @@ export class ProductTrackerCron extends Construct {
                 PRODUCT_HISTORY_TABLE_NAME: config.productTracker.productHistoryDynamoTableName,
                 ENABLED: config.productTracker.enabled,
                 REGION: config.base.region,
-                PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey
+                DYNAMO_ACCESS_ENDPOINT: config.base.dynamoAccessEndpoint
             },
             timeout: cdk.Duration.minutes(5),
             memorySize: 512,

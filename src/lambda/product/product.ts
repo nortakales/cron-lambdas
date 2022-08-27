@@ -1,3 +1,6 @@
+
+const DYNAMO_ACCESS_ENDPOINT = process.env.DYNAMO_ACCESS_ENDPOINT!;
+
 export interface Product {
     title: string
     website: Website
@@ -28,6 +31,10 @@ export function areDifferent(oldProduct: Product, newProduct: Product) {
         oldProduct.issues !== newProduct.issues;
 }
 
+export function generateDeleteUrl(product: Product) {
+    return `${DYNAMO_ACCESS_ENDPOINT}?operation=DELETE&table=products&hashKeyName=title&hashKey=${product.title}`;
+}
+
 export function generateDiffText(oldProduct: Product, newProduct: Product) {
 
     let text = `<b><a href="${newProduct.url}">${newProduct.title}</a>`;
@@ -37,6 +44,7 @@ export function generateDiffText(oldProduct: Product, newProduct: Product) {
     if (oldProduct.url !== newProduct.url) {
         text += ` (new URL)`;
     }
+    text += ` <a href="${generateDeleteUrl(newProduct)}" style="color:black;">X</a>`
 
     text += `<br>Price: ${newProduct.price ? newProduct.price : ''}`;
     if (oldProduct.price !== newProduct.price) {
@@ -69,7 +77,7 @@ export function generateDiffText(oldProduct: Product, newProduct: Product) {
 }
 
 export function generateText(product: Product) {
-    return `<b><a href="${product.url}">${product.title}</a></b><br>
+    return `<b><a href="${product.url}">${product.title}</a></b> <a href="${generateDeleteUrl(product)}" style="color:black;">X</a><br>
             Price: ${product.price ? product.price : ''}<br>
             Status: ${product.status ? product.status : ''}<br>
             Promotion: ${product.promotion ? product.promotion : ''}<br>

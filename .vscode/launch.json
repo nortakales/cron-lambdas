@@ -97,7 +97,8 @@
                 "ENABLED": "true",
                 "REGION": "us-west-2",
                 "PRODUCT_TABLE_NAME": "products",
-                "PRODUCT_HISTORY_TABLE_NAME": "product_history"
+                "PRODUCT_HISTORY_TABLE_NAME": "product_history",
+                "DYNAMO_ACCESS_ENDPOINT": "https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod"
             },
             "internalConsoleOptions": "openOnSessionStart"
         },
