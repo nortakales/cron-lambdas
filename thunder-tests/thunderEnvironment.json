@@ -1,0 +1,34 @@
+[
+  {
+    "_id": "ca4fa673-3aad-4316-84d5-22ad2ee4be8f",
+    "name": "cron-lambdas",
+    "default": false,
+    "sortNum": 10000,
+    "created": "2022-08-27T06:49:36.927Z",
+    "modified": "2022-08-27T06:49:36.928Z",
+    "data": [
+      {
+        "name": "endpoint",
+        "value": "https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod"
+      }
+    ]
+  },
+  {
+    "_id": "56909cbf-0dc7-433e-a3e7-c930cb18a839",
+    "name": "imessage-node-app",
+    "default": true,
+    "sortNum": 20000,
+    "created": "2022-08-27T06:49:42.505Z",
+    "modified": "2022-08-27T06:49:42.506Z",
+    "data": [
+      {
+        "name": "api-key",
+        "value": "TiFxToLbjH8eo2pfA5KunfXXIuZ3zkg5"
+      },
+      {
+        "name": "endpoint",
+        "value": "https://a5mlcvrduh.execute-api.us-west-2.amazonaws.com/prod/"
+      }
+    ]
+  }
+]

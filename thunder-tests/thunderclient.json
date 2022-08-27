@@ -1,0 +1,157 @@
+[
+  {
+    "_id": "a6cc31db-7c6e-445c-8dd8-009cd918f2e9",
+    "colId": "35945cc7-9970-4c66-b84a-2b47abc5b5d6",
+    "containerId": "",
+    "name": "GET Query",
+    "url": "{{endpoint}}?operation=QUERY&table=products&indexName=urlKey-index&hashKeyName=urlKey&hashKey=republic-fighter-tank-75342&rangeKeyName=website&rangeKey=LEGO",
+    "method": "GET",
+    "sortNum": 10000,
+    "created": "2022-08-27T06:49:05.740Z",
+    "modified": "2022-08-27T06:49:05.740Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "operation",
+        "value": "QUERY",
+        "isPath": false
+      },
+      {
+        "name": "table",
+        "value": "products",
+        "isPath": false
+      },
+      {
+        "name": "indexName",
+        "value": "urlKey-index",
+        "isPath": false
+      },
+      {
+        "name": "hashKeyName",
+        "value": "urlKey",
+        "isPath": false
+      },
+      {
+        "name": "hashKey",
+        "value": "republic-fighter-tank-75342",
+        "isPath": false
+      },
+      {
+        "name": "rangeKeyName",
+        "value": "website",
+        "isPath": false
+      },
+      {
+        "name": "rangeKey",
+        "value": "LEGO",
+        "isPath": false
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "71e73b7e-0bc0-4212-885b-91a94653d25e",
+    "colId": "35945cc7-9970-4c66-b84a-2b47abc5b5d6",
+    "containerId": "",
+    "name": "GET Delete",
+    "url": "https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=DELETE&table=products&hashKeyName=title&hashKey=LEGO 75342 - Republic Fighter Tank",
+    "method": "GET",
+    "sortNum": 20000,
+    "created": "2022-08-27T06:49:05.742Z",
+    "modified": "2022-08-27T06:49:05.742Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "operation",
+        "value": "DELETE",
+        "isPath": false
+      },
+      {
+        "name": "table",
+        "value": "products",
+        "isPath": false
+      },
+      {
+        "name": "hashKeyName",
+        "value": "title",
+        "isPath": false
+      },
+      {
+        "name": "hashKey",
+        "value": "LEGO 75342 - Republic Fighter Tank",
+        "isPath": false
+      }
+    ],
+    "tests": []
+  },
+  {
+    "_id": "eadf47ed-8a00-4fd4-bd9f-70cf79870c81",
+    "colId": "35945cc7-9970-4c66-b84a-2b47abc5b5d6",
+    "containerId": "",
+    "name": "POST Put",
+    "url": "https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod",
+    "method": "POST",
+    "sortNum": 30000,
+    "created": "2022-08-27T06:49:05.743Z",
+    "modified": "2022-08-27T06:49:05.743Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "{\n  \"table\": \"products\",\n  \"operation\": \"PUT\",\n  \"item\": {\n    \"title\": \"LEGO 10305 - Lion Knights Castle\",\n    \"urlKey\": \"lion-knights-castle-10305\",\n    \"website\": \"LEGO\"\n  }\n}",
+      "form": []
+    },
+    "tests": []
+  },
+  {
+    "_id": "136c2a9f-f4fc-461b-9d38-670e3cb84eab",
+    "colId": "1f9eab21-0133-4310-81cd-70ddf3d54e4a",
+    "containerId": "",
+    "name": "PUT",
+    "url": "{{endpoint}}/imessage-api-bucket/test",
+    "method": "PUT",
+    "sortNum": 10000,
+    "created": "2022-08-27T06:49:13.876Z",
+    "modified": "2022-08-27T06:49:13.876Z",
+    "headers": [
+      {
+        "name": "content-type",
+        "value": "text/plain"
+      },
+      {
+        "name": "x-api-key",
+        "value": "{{api-key}}"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "text",
+      "raw": "testing even more",
+      "form": []
+    },
+    "tests": []
+  },
+  {
+    "_id": "2b3a0dfb-18ea-4089-960a-1db64989b5a9",
+    "colId": "1f9eab21-0133-4310-81cd-70ddf3d54e4a",
+    "containerId": "",
+    "name": "GET",
+    "url": "{{endpoint}}/imessage-api-bucket/test",
+    "method": "GET",
+    "sortNum": 20000,
+    "created": "2022-08-27T06:49:13.877Z",
+    "modified": "2022-08-27T06:49:13.877Z",
+    "headers": [
+      {
+        "name": "content-type",
+        "value": "text/json"
+      },
+      {
+        "name": "x-api-key",
+        "value": "{{api-key}}"
+      }
+    ],
+    "params": [],
+    "tests": []
+  }
+]

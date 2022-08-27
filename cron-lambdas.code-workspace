@@ -4,5 +4,7 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"thunder-client.saveToWorkspace": true
+	}
 }
