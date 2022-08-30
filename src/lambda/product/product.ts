@@ -46,29 +46,44 @@ export function generateDiffText(oldProduct: Product, newProduct: Product) {
     }
     text += ` <a href="${generateDeleteUrl(newProduct)}" style="color:black;">X</a>`
 
-    text += `<br>Price: ${newProduct.price ? newProduct.price : ''}`;
+    text += `<br>Price:`;
     if (oldProduct.price !== newProduct.price) {
-        text += ` <del style="color:red">${oldProduct.price ? oldProduct.price : 'None'}</del>`;
+        text += ` <span style="color:green">${newProduct.price || 'No price'}</span>`;
+        text += ` <del style="color:red">${oldProduct.price || 'No price'}</del>`;
+    } else {
+        text += ` ${newProduct.price || ''}`;
     }
 
-    text += `<br>Status: ${newProduct.status ? newProduct.status : ''}`;
+    text += `<br>Status:`;
     if (oldProduct.status !== newProduct.status) {
-        text += ` <del style="color:red">${oldProduct.status ? oldProduct.status : 'None'}</del>`;
+        text += ` <span style="color:green">${newProduct.status || 'No status'}</span>`;
+        text += ` <del style="color:red">${oldProduct.status || 'No status'}</del>`;
+    } else {
+        text += ` ${newProduct.status || ''}`;
     }
 
-    text += `<br>Promotion: ${newProduct.promotion ? newProduct.promotion : ''}`;
+    text += `<br>Promotion:`;
     if (oldProduct.promotion !== newProduct.promotion) {
-        text += ` <del style="color:red">${oldProduct.promotion ? oldProduct.promotion : 'None'}</del>`;
+        text += ` <span style="color:green">${newProduct.promotion || 'No promotion'}</span>`;
+        text += ` <del style="color:red">${oldProduct.promotion || 'No promotion'}</del>`;
+    } else {
+        text += ` ${newProduct.promotion || ''}`;
     }
 
-    text += `<br>Add to Cart: ${newProduct.addToCartButton ? newProduct.addToCartButton : ''}`;
+    text += `<br>Add to Cart:`;
     if (oldProduct.addToCartButton !== newProduct.addToCartButton) {
-        text += ` <del style="color:red">${oldProduct.addToCartButton ? oldProduct.addToCartButton : 'None'}</del>`;
+        text += ` <span style="color:green">${newProduct.addToCartButton || 'No addToCartButton'}</span>`;
+        text += ` <del style="color:red">${oldProduct.addToCartButton || ' No addToCartButton'}</del>`;
+    } else {
+        text += ` ${newProduct.addToCartButton || ''}`;
     }
 
-    text += `<br>Tags: ${newProduct.tags ? newProduct.tags : ''}`;
+    text += `<br>Tags:`;
     if (!arrayEquals(oldProduct.tags, newProduct.tags)) {
-        text += ` <del style="color:red">${oldProduct.tags ? oldProduct.tags : 'None'}</del>`;
+        text += ` <span style="color:green">${newProduct.tags && newProduct.tags.length ? newProduct.tags : 'No tags'}</span>`;
+        text += ` <del style="color:red">${oldProduct.tags && oldProduct.tags.length ? oldProduct.tags : 'No tags'}</del>`;
+    } else {
+        text += ` ${newProduct.tags || ''}`;
     }
 
     // TODO issues
@@ -78,11 +93,11 @@ export function generateDiffText(oldProduct: Product, newProduct: Product) {
 
 export function generateText(product: Product) {
     return `<b><a href="${product.url}">${product.title}</a></b> <a href="${generateDeleteUrl(product)}" style="color:black;">X</a><br>
-            Price: ${product.price ? product.price : ''}<br>
-            Status: ${product.status ? product.status : ''}<br>
-            Promotion: ${product.promotion ? product.promotion : ''}<br>
-            Add to Cart: ${product.addToCartButton ? product.addToCartButton : ''}<br>
-            Tags: ${product.tags ? product.tags : ''}`;
+            Price: ${product.price || ''}<br>
+            Status: ${product.status || ''}<br>
+            Promotion: ${product.promotion || ''}<br>
+            Add to Cart: ${product.addToCartButton || ''}<br>
+            Tags: ${product.tags || ''}`;
 }
 
 function arrayEquals(a: string[] | undefined, b: string[] | undefined) {
