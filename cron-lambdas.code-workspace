@@ -5,6 +5,7 @@
 		}
 	],
 	"settings": {
-		"thunder-client.saveToWorkspace": true
+		"thunder-client.saveToWorkspace": true,
+		"task.allowAutomaticTasks": "on"
 	}
 }
