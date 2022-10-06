@@ -26,6 +26,7 @@ const KEYWORDS_TO_ALWAYS_INCLUDE = [
 // IDW Publishing
 // Image Comics
 // Marvel Comics
+// Oni Press
 // Other
 // Skybound
 // Top Cow Productions
@@ -108,7 +109,8 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Crusade Comics",
     "Fluke Publishing",
     "LINE Webtoon",
-    "VIZ Media"
+    "VIZ Media",
+    "Bilibili Comics"
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
