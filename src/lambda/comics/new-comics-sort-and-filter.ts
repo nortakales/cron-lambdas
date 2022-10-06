@@ -17,6 +17,19 @@ const KEYWORDS_TO_ALWAYS_INCLUDE = [
     "TMNT"
 ]
 
+// TODO - switch to allow list
+// BOOM! Studios
+// Comixology
+// DC Comics
+// Dark Horse Comics
+// Dynamite
+// IDW Publishing
+// Image Comics
+// Marvel Comics
+// Other
+// Skybound
+// Top Cow Productions
+
 const PUBLISHERS_TO_EXCLUDE = [
     "Ablaze",
     "Abstract Studio",
@@ -90,7 +103,12 @@ const PUBLISHERS_TO_EXCLUDE = [
     "A Wave Blue World Inc",
     "Astonishing Comics",
     "Asylum Press",
-    "Opus Comics"
+    "Opus Comics",
+    "Battle Quest Comics",
+    "Crusade Comics",
+    "Fluke Publishing",
+    "LINE Webtoon",
+    "VIZ Media"
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
@@ -160,6 +178,7 @@ const SERIES_TO_EXCLUDE = [
     "Gambit",
     "Iron Fist",
     "Marvel Previews",
+    "Mad"
 ]
 function removeNumber(title: string) {
     return title.replace(/\s#\d+$/, '');
