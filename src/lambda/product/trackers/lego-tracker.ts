@@ -9,11 +9,18 @@ export async function getLatestProductData(product: Product): Promise<Product> {
     const html = await httpsGet(BASE_URL + product.urlKey);
     const dom = parse(html);
 
-    const price = getPrice(dom);
+    let price = getPrice(dom);
     const addToCartButton = getAddToCartButton(dom);
     const status = getStatus(dom);
-    const tags = getTags(dom);
+    let tags = getTags(dom);
     const promotion = getPromotion(dom);
+
+
+    const salePrice = getSalePrice(dom);
+    if (salePrice) {
+        price = salePrice;
+        tags.push("On sale");
+    }
 
     return {
         title: product.title,
@@ -29,9 +36,17 @@ export async function getLatestProductData(product: Product): Promise<Product> {
 }
 
 function getPrice(dom: HTMLElement) {
-    let text = dom.querySelector('span[data-test="product-price"]')?.innerText;
+    let text = dom.querySelector('div[class*="ProductDetailsPagestyles__ProductOverviewContainer"] span[data-test="product-price"]')?.innerText;
     if (text) {
         text = text.toLowerCase().replace('price', '');
+    }
+    return text;
+}
+
+function getSalePrice(dom: HTMLElement) {
+    let text = dom.querySelector('div[class*="ProductDetailsPagestyles__ProductOverviewContainer"] span[data-test="product-price-sale"]')?.innerText;
+    if (text) {
+        text = text.toLowerCase().replace('sale price', '');
     }
     return text;
 }
@@ -54,7 +69,7 @@ function getTags(dom: HTMLElement) {
 function getPromotion(dom: HTMLElement) {
     let text = dom.querySelector('div[class*="TargetedPromotionstyles"]')?.innerText;
     if (text) {
-        text = text.replace('*Not VIP?', '');
+        text = text.replace(/\*?Not VIP\?/, '');
     }
     return text;
 }

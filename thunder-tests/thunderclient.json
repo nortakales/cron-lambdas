@@ -93,12 +93,12 @@
     "method": "POST",
     "sortNum": 30000,
     "created": "2022-08-27T06:49:05.743Z",
-    "modified": "2022-08-27T06:49:05.743Z",
+    "modified": "2022-09-02T16:24:51.455Z",
     "headers": [],
     "params": [],
     "body": {
       "type": "json",
-      "raw": "{\n  \"table\": \"products\",\n  \"operation\": \"PUT\",\n  \"item\": {\n    \"title\": \"LEGO 10305 - Lion Knights Castle\",\n    \"urlKey\": \"lion-knights-castle-10305\",\n    \"website\": \"LEGO\"\n  }\n}",
+      "raw": "{\n  \"table\": \"products\",\n  \"operation\": \"PUT\",\n  \"item\": {\n    \"title\": \"LEGO 21335 - Motorized Lighthouse\",\n    \"urlKey\": \"motorised-lighthouse-21335\",\n    \"website\": \"LEGO\"\n  }\n}",
       "form": []
     },
     "tests": []

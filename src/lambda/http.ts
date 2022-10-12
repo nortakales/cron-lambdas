@@ -25,7 +25,7 @@ export async function httpsGet(url: string, userAgent?: string, attempts: number
 
             if (RETRYABLE_CODES.includes(response.statusCode) && attempts > 1) {
                 console.log(`Received statusCode=${response.statusCode}, will retry`);
-                return httpsGet(url, userAgent, attempts--);
+                return httpsGet(url, userAgent, --attempts);
             }
 
             let errorMessage = '';
