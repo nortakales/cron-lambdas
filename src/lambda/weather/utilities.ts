@@ -16,15 +16,15 @@ export function toReadablePacificDate(time: number, format?: Format) {
 
     switch (format as Format) {
         case Format.DATE_ONLY:
-            return moment(time).tz("America/Los_Angeles").format('M/D/YYYY, h:mm:ss A');
+            return moment(time).tz("America/Los_Angeles").format('M/D/YYYY');
         case Format.TIME_ONLY:
-            return moment(time).tz("America/Los_Angeles").format('M/D/YYYY, h:mm:ss A');
+            return moment(time).tz("America/Los_Angeles").format('M/D/YYYY, h:mm A');
         case Format.ISO_8601:
             return moment(time).tz("America/Los_Angeles").format('YYYY-MM-DDTHH:mm:ssZ');
         case Format.DATE_AND_TIME:
         case undefined:
         default:
-            return moment(time).tz("America/Los_Angeles").format('M/D/YYYY, h:mm:ss A');
+            return moment(time).tz("America/Los_Angeles").format('M/D/YYYY, h:mm A');
     }
 }
 
