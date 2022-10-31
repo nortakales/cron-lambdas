@@ -1,3 +1,43 @@
+import moment from 'moment-timezone';
+
+export enum Format {
+    DATE_ONLY,
+    TIME_ONLY,
+    DATE_AND_TIME,
+    ISO_8601
+}
+
+export function toReadablePacificDate(time: number, format?: Format) {
+    // If the time is less than a date 466 years from now, it is most likely in seconds
+    // Modify it to be in millis
+    if (time < 16343349350) {
+        time = time * 1000;
+    }
+
+    switch (format as Format) {
+        case Format.DATE_ONLY:
+            return moment(time).tz("America/Los_Angeles").format('M/D/YYYY, h:mm:ss A');
+        case Format.TIME_ONLY:
+            return moment(time).tz("America/Los_Angeles").format('M/D/YYYY, h:mm:ss A');
+        case Format.ISO_8601:
+            return moment(time).tz("America/Los_Angeles").format('YYYY-MM-DDTHH:mm:ssZ');
+        case Format.DATE_AND_TIME:
+        case undefined:
+        default:
+            return moment(time).tz("America/Los_Angeles").format('M/D/YYYY, h:mm:ss A');
+    }
+}
+
+export function getStartOfDay(datetime: number) {
+
+    // If the time is less than a date 466 years from now, it is most likely in seconds
+    // Modify it to be in millis
+    if (datetime < 16343349350) {
+        datetime = datetime * 1000;
+    }
+
+    return moment(datetime).tz("America/Los_Angeles").startOf('day').valueOf();
+}
 
 export function getDirectionFromDegrees(degrees: number) {
     if (degrees < 0 || degrees > 360)
@@ -20,66 +60,6 @@ export function getDirectionFromDegrees(degrees: number) {
         return "Southeast";
     return "Invalid direction";
 }
-
-export function toSystemLocalIsoString(date: Date) {
-    var tzo = -date.getTimezoneOffset(), // This relies on local (system) time!
-        dif = tzo >= 0 ? '+' : '-',
-        pad = function (num: number) {
-            var norm = Math.floor(Math.abs(num));
-            return (norm < 10 ? '0' : '') + norm;
-        };
-
-    return date.getFullYear() +
-        '-' + pad(date.getMonth() + 1) +
-        '-' + pad(date.getDate()) +
-        'T' + pad(date.getHours()) +
-        ':' + pad(date.getMinutes()) +
-        ':' + pad(date.getSeconds()) +
-        dif + pad(tzo / 60) +
-        ':' + pad(tzo % 60);
-}
-
-export function toPacificIsoString(date: Date) {
-    let unpadded = date.toLocaleString('sv', { timeZone: 'America/Los_Angeles', timeZoneName: 'short' })
-        // TODO this could be more generic
-        .replace(' GMT−8', '-08:00') // U+2212
-        .replace(' GMT−7', '-07:00') // U+2212
-        .replace(' GMT-8', '-08:00')
-        .replace(' GMT-7', '-07:00')
-        .replace(' ', 'T');
-
-    // TODO clean up this function - it has caused so many problems
-    if (/T\d:/.test(unpadded)) {
-        unpadded = unpadded.replace('T', 'T0');
-    }
-    return unpadded;
-}
-
-export enum Format {
-    DATE_ONLY,
-    TIME_ONLY,
-    DATE_AND_TIME
-}
-
-export function toReadablePacificDate(time: number, format?: Format) {
-    // If the time is less than a date 466 years from now, it is most likely in seconds
-    // Modify it to be in millis
-    if (time < 16343349350) {
-        time = time * 1000;
-    }
-
-    switch (format as Format) {
-        case Format.DATE_ONLY:
-            return new Date(time).toLocaleDateString('en-us', { timeZone: 'America/Los_Angeles' });
-        case Format.TIME_ONLY:
-            return new Date(time).toLocaleTimeString('en-us', { timeZone: 'America/Los_Angeles' });
-        case Format.DATE_AND_TIME:
-        case undefined:
-        default:
-            return new Date(time).toLocaleString('en-us', { timeZone: 'America/Los_Angeles' });
-    }
-}
-
 
 export interface AngleAndSpeed {
     angle?: number,
@@ -183,26 +163,6 @@ function averageAngleV4(anglesAndSpeeds: AngleAndSpeed[]) {
         direction += 180;
     }
     return direction;
-}
-
-export function removeTimeFromEpochMillisForTimezone(datetime: number) {
-
-    // TODO There is still a bug where a day gets repeated at the DST crossover
-
-    // If the time is less than a date 466 years from now, it is most likely in seconds
-    // Modify it to be in millis
-    if (datetime < 16343349350) {
-        datetime = datetime * 1000;
-    }
-
-    const dateObject = new Date(datetime);
-    const pacificIsoString = toPacificIsoString(dateObject);
-    //console.log(pacificIsoString);
-    const droppedTimeLocalIsoString = pacificIsoString.replace(/T\d{2}:\d{2}:\d{2}/, 'T00:00:00');
-    //console.log(droppedTimeLocalIsoString);
-    const newDateObject = new Date(droppedTimeLocalIsoString);
-    //console.log(newDateObject.getTime());
-    return newDateObject.getTime();
 }
 
 export function round(number: number, decimal: number) {

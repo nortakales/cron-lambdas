@@ -4,7 +4,6 @@ import { BiDaily48HourWindAlert } from './alerts/48-hour-wind-alert';
 import { Daily7DayWindAlert } from './alerts/7-day-wind-alert';
 import { Alert, NotificationType } from './interfaces/alert-types';
 import { WeatherData } from "./data-sources/common/common-data";
-import { toPacificIsoString } from './utilities';
 import { Duration } from "typed-duration";
 import * as DDB from '../dynamo';
 import { YearlyFirstFreezeAlert } from './alerts/yearly-first-freeze-alert';
@@ -14,6 +13,7 @@ import { Daily7DaySnowAlert } from './alerts/7-day-snow-alert';
 import { HourlyMinutelyHeavyRainAlert } from './alerts/1-hour-heavy-rain-alert';
 import * as openweather from './data-sources/openweather/openweather-api';
 import { startLambdaLog } from '../utilities/logging';
+import { Format, toReadablePacificDate } from './utilities';
 
 const ENABLED = process.env.ENABLED!;
 const TABLE_NAME = process.env.TABLE_NAME!;
@@ -39,20 +39,20 @@ const allowableOffset = Duration.minutes.of(10);
 
 async function shouldRunAlert(alert: Alert) {
 
-    const currentTime = new Date();
+    const currentTime = Date.now();
     let runAlert = true;
 
     const item = await getLastTimestamp(alert.alertKey);
 
     if (item?.lastTimestamp) {
-        const lastAlertTime = new Date(item.lastTimestamp);
+        const lastAlertTime = new Date(item.lastTimestamp).getTime(); // TODO could update to moment
 
         let timeComparison = Duration.milliseconds.from(alert.interval) - Duration.milliseconds.from(allowableOffset);
 
-        console.log("Last alert time: " + lastAlertTime.getTime() + " / " + toPacificIsoString(lastAlertTime));
-        console.log("Current time: " + currentTime.getTime() + " / " + toPacificIsoString(currentTime));
+        console.log("Last alert time: " + lastAlertTime + " / " + toReadablePacificDate(lastAlertTime, Format.ISO_8601));
+        console.log("Current time: " + currentTime + " / " + toReadablePacificDate(currentTime, Format.ISO_8601));
 
-        if (currentTime.getTime() - lastAlertTime.getTime() < timeComparison) {
+        if (currentTime - lastAlertTime < timeComparison) {
             console.log("Not enough time has passed to run " + alert.alertKey);
             runAlert = false;
         }
@@ -128,9 +128,9 @@ async function processRegularReport(weatherData: WeatherData) {
                 pushAlertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
             }
 
-            const currentTime = new Date();
-            console.log("Updating timestamp for alert " + alert.alertKey + " to " + toPacificIsoString(currentTime));
-            await updateLastTimestamp(alert.alertKey, toPacificIsoString(currentTime));
+            const currentTime = Date.now();
+            console.log("Updating timestamp for alert " + alert.alertKey + " to " + toReadablePacificDate(currentTime, Format.ISO_8601));
+            await updateLastTimestamp(alert.alertKey, toReadablePacificDate(currentTime, Format.ISO_8601));
         }
     }
 

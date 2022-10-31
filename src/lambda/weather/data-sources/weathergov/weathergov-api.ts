@@ -1,6 +1,6 @@
 import { httpsGet } from '../../../http';
 import { cToF, kmhToMph, mmToIn } from '../../conversions';
-import { AngleAndSpeed, averageAngle, Format, removeTimeFromEpochMillisForTimezone, toReadablePacificDate } from '../../utilities';
+import { AngleAndSpeed, averageAngle, Format, getStartOfDay, toReadablePacificDate } from '../../utilities';
 import { WeatherData } from '../common/common-data';
 import { WeatherGovData, WeatherGovProperty } from './weathergov-data';
 
@@ -51,7 +51,7 @@ export async function getAsCommonData() {
             if (currentDay != null) {
 
                 commonData.daily.push({
-                    datetime: removeTimeFromEpochMillisForTimezone(currentDayTimestamp!),
+                    datetime: getStartOfDay(currentDayTimestamp!) / 1000, // Don't need millis
                     temp: {
                         min: dailyMinTemp,
                         max: dailyMaxTemp

@@ -19,7 +19,7 @@ export interface LocationData {
 // https://www.visualcrossing.com/resources/documentation/weather-data/weather-data-documentation/
 export interface HourlyValues {
     datetimeStr: string, // 2021-11-27T13:00:00-08:00
-    datetime: number, // millis, 1638018000000
+    //datetime: number, // millis, 1638018000000
 
     preciptype: string // rain, snow, freezing rain, ice, (can be empty)
     pop: number, // % 0 to 100

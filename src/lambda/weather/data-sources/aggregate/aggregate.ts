@@ -1,10 +1,13 @@
-import { Format, toReadablePacificDate } from "../../utilities";
+import { Format, getStartOfDay, toReadablePacificDate } from "../../utilities";
 import { WeatherData } from "../common/common-data";
 import * as openweather from "../openweather/openweather-api";
 import * as weathergov from "../weathergov/weathergov-api";
 import * as tomorrowio from "../tomorrowio/tomorrowio-api";
 import * as visualcrossing from "../visualcrossing/visualcrossing-api";
 import { AggregatedProperty, AggregatedWeatherData, DailyConditions, HourlyConditions } from "./aggregate-data";
+
+const TOTAL_DAYS = 8; // All current sources give today + 7 days
+const TOTAL_HOURS = 3 * 24 // We have 4 sources for 2 days, the rest for almost 7 days, but that is unneeded
 
 export async function getAggregatedData() {
 
@@ -48,6 +51,7 @@ export async function getAggregatedData() {
                 aggregatedHourlyData[timestamp] = aggregatedData;
             } else {
                 // aggregatedData.pressure.addDataPoint(dataSourceName, hourlyData.pressure);
+                // TODO this would be a good one to add back in
                 // aggregatedData.humidity.addDataPoint(dataSourceName, hourlyData.humidity);
                 // aggregatedData.dew_point.addDataPoint(dataSourceName, hourlyData.dew_point);
                 // aggregatedData.uvi.addDataPoint(dataSourceName, hourlyData.uvi);
@@ -115,8 +119,24 @@ export async function getAggregatedData() {
     //     console.log(`${toReadablePacificDate(+data, Format.DATE_ONLY)} ${aggregatedDailyData[data].wind_deg.data.openweather} ${aggregatedDailyData[data].wind_deg.data.weathergov} ${aggregatedDailyData[data].wind_deg.data.tomorrowio}`);
     // }
 
+    const now = Date.now() / 1000;
+    const today = getStartOfDay(now) / 1000;
+    const dailyMax = (today + (TOTAL_DAYS * 86400));
+    const hourlyMin = (now - 3600);
+    const hourlyMax = (hourlyMin + (TOTAL_HOURS * 3600));
+    console.log("Daily min: " + toReadablePacificDate(today));
+    console.log("Daily max: " + toReadablePacificDate(dailyMax));
+    console.log("Hourly min: " + toReadablePacificDate(hourlyMin));
+    console.log("Hourly max: " + toReadablePacificDate(hourlyMax));
+
     return {
-        hourly: Object.values(aggregatedHourlyData).sort((a: any, b: any) => a.datetime - b.datetime),
-        daily: Object.values(aggregatedDailyData).sort((a: any, b: any) => a.datetime - b.datetime)
+        hourly: Object.values(aggregatedHourlyData)
+            .sort((a: any, b: any) => a.datetime - b.datetime)
+            .filter((hourlyData: any) => hourlyData.datetime < hourlyMax)
+            .filter((hourlyData: any) => hourlyData.datetime > hourlyMin),
+        daily: Object.values(aggregatedDailyData)
+            .sort((a: any, b: any) => a.datetime - b.datetime)
+            .filter((dailyData: any) => dailyData.datetime < dailyMax)
+            .filter((dailyData: any) => dailyData.datetime >= today)
     } as AggregatedWeatherData;
 }

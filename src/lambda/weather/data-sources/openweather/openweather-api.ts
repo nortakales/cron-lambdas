@@ -2,7 +2,7 @@ import * as SM from '../../../secrets';
 import { httpsGet } from '../../../http';
 import { OpenWeatherData } from './openweather-data';
 import { WeatherData } from '../common/common-data';
-import { removeTimeFromEpochMillisForTimezone } from '../../utilities';
+import { getStartOfDay } from '../../utilities';
 import { mmToIn, mToMi } from '../../conversions';
 
 const API_KEY_SECRET_OPEN_WEATHER = process.env.API_KEY_SECRET_OPEN_WEATHER!;
@@ -78,7 +78,7 @@ export async function getAsCommonData() {
         })),
         daily: openWeatherData.daily.map(daily => ({
             // In March, this was -8 at noon, and -8 at 1PM for DST crossover
-            datetime: removeTimeFromEpochMillisForTimezone(daily.dt),
+            datetime: getStartOfDay(daily.dt) / 1000, // Don't need millis
 
             sunrise: daily.sunrise,
             sunset: daily.sunset,

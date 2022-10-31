@@ -3,7 +3,7 @@
 import * as SM from '../../../secrets';
 import { httpsGet } from '../../../http';
 import { CurrentConditions, DailyConditions, HourlyConditions, WeatherData } from '../common/common-data';
-import { AngleAndSpeed, averageAngle, Format, removeTimeFromEpochMillisForTimezone, toReadablePacificDate } from '../../utilities';
+import { AngleAndSpeed, averageAngle, Format, getStartOfDay, toReadablePacificDate } from '../../utilities';
 import queryString from 'query-string';
 import { VisualCrossingData } from './visualcrossing-data';
 
@@ -84,12 +84,15 @@ export async function getAsCommonData() {
 
     for (let hourlyData of data.location.values) {
 
-        const day = toReadablePacificDate(hourlyData.datetime, Format.DATE_ONLY);
+        const correctedDatetime = new Date(hourlyData.datetimeStr).getTime();
+        // Visual Crossing's datetime and datetimeStr don't line up
+        // datetimeStr seems more accurate
+        const day = toReadablePacificDate(correctedDatetime, Format.DATE_ONLY);
         if (day !== currentDay) {
             if (currentDay != null) {
 
                 commonData.daily.push({
-                    datetime: removeTimeFromEpochMillisForTimezone(currentDayTimestamp!),
+                    datetime: getStartOfDay(currentDayTimestamp!) / 1000, // Don't need millis
                     temp: {
                         min: dailyMinTemp,
                         max: dailyMaxTemp
@@ -113,7 +116,7 @@ export async function getAsCommonData() {
                 dailyWindGust = 0; // max
             }
             currentDay = day;
-            currentDayTimestamp = hourlyData.datetime;
+            currentDayTimestamp = correctedDatetime;
         }
 
 
@@ -133,7 +136,7 @@ export async function getAsCommonData() {
 
         // Take of hourly
         commonData.hourly.push({
-            datetime: hourlyData.datetime / 1000, // Don't need millis
+            datetime: correctedDatetime / 1000, // Don't need millis
             wind_speed: hourlyData.wspd,
             wind_deg: hourlyData.wdir,
             wind_gust: hourlyData.wgust,

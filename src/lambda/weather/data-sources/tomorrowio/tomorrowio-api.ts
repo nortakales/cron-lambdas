@@ -1,7 +1,7 @@
 import * as SM from '../../../secrets';
 import { httpsGet } from '../../../http';
 import { CurrentConditions, DailyConditions, HourlyConditions, WeatherData } from '../common/common-data';
-import { removeTimeFromEpochMillisForTimezone } from '../../utilities';
+import { getStartOfDay } from '../../utilities';
 import queryString from 'query-string';
 import { TomorrowIOData } from './tomorrowio-data';
 
@@ -149,7 +149,7 @@ export async function getAsCommonData() {
             for (let interval of timeline.intervals) {
                 const values = interval.values;
                 dailyConditions.push({
-                    datetime: removeTimeFromEpochMillisForTimezone(new Date(interval.startTime).getTime()),
+                    datetime: getStartOfDay(new Date(interval.startTime).getTime()) / 1000, // Don't need millis
 
                     temp: {
                         max: values.temperatureMax,

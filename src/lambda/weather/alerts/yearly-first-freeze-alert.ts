@@ -1,7 +1,7 @@
 import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import * as DDB from '../../dynamo';
-import { Format, toPacificIsoString, toReadablePacificDate } from "../utilities";
+import { Format, toReadablePacificDate } from "../utilities";
 import { WeatherData } from "../data-sources/common/common-data";
 
 const TABLE_NAME = process.env.TABLE_NAME!;
@@ -88,7 +88,7 @@ export class YearlyFirstFreezeAlert implements Alert {
 
         await DDB.put(TABLE_NAME, {
             alertKey: this.alertKey + '-' + season,
-            lastTimestamp: toPacificIsoString(new Date()),
+            lastTimestamp: toReadablePacificDate(Date.now(), Format.ISO_8601),
             count: count
         })
     }
