@@ -14,7 +14,7 @@ export class DynamoDBAccessAPI extends Construct {
     constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function) {
         super(scope, id);
 
-        const logGroup = new logs.LogGroup(this, id + "AccessLogs");
+        const logGroup = new logs.LogGroup(this, id + "-AccessLogs");
 
         const api = new apigateway.RestApi(this, id + "-API", {
             restApiName: "DynamoDB Access API",
