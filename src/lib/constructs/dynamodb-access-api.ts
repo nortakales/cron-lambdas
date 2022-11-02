@@ -14,13 +14,17 @@ export class DynamoDBAccessAPI extends Construct {
     constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function) {
         super(scope, id);
 
+        const logGroup = new logs.LogGroup(this, id + "AccessLogs");
+
         const api = new apigateway.RestApi(this, id + "-API", {
             restApiName: "DynamoDB Access API",
             description: "Allows API access to various DynamoDB operations and all tables",
             deployOptions: {
                 metricsEnabled: true,
                 loggingLevel: apigateway.MethodLoggingLevel.INFO,
-                dataTraceEnabled: true
+                dataTraceEnabled: true,
+                accessLogDestination: new apigateway.LogGroupLogDestination(logGroup),
+                accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields()
             }
         });
 
