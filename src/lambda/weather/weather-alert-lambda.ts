@@ -2,7 +2,7 @@ import { sendEmail } from '../emailer';
 import { NotificationApplication, sendPushNotification, Sound } from '../notifier';
 import { BiDaily48HourWindAlert } from './alerts/48-hour-wind-alert';
 import { Daily7DayWindAlert } from './alerts/7-day-wind-alert';
-import { Alert, NotificationType } from './interfaces/alert-types';
+import { Alert, NotificationType, ReportType } from './interfaces/alert-types';
 import { WeatherData } from "./data-sources/common/common-data";
 import { Duration } from "typed-duration";
 import * as DDB from '../dynamo';
@@ -14,6 +14,7 @@ import { HourlyMinutelyHeavyRainAlert } from './alerts/1-hour-heavy-rain-alert';
 import * as openweather from './data-sources/openweather/openweather-api';
 import { startLambdaLog } from '../utilities/logging';
 import { Format, toReadablePacificDate } from './utilities';
+import { getAggregatedData } from './data-sources/aggregate/aggregate';
 
 const ENABLED = process.env.ENABLED!;
 const TABLE_NAME = process.env.TABLE_NAME!;
@@ -76,9 +77,9 @@ const alerts: Alert[] = [
 exports.handler = async (event: any = {}, context: any = {}) => {
     startLambdaLog(event, context, process.env);
 
-    const adhoc = isAdhocReport(event);
+    const reportType = getReportType(event);
 
-    if (ENABLED !== 'true' && !adhoc) {
+    if (ENABLED !== 'true' && !reportType.isAdhoc) {
         console.log("Weather Alert is not enabled, exiting...");
         return {
             statusCode: 200,
@@ -87,16 +88,17 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         };
     }
 
-    console.log(`Running as ${adhoc ? 'ADHOC' : 'REGULAR'} report...`);
+    console.log(`Running as ${reportType.name} report...`);
 
-    const weatherData: WeatherData = await openweather.getAsCommonData();
-
-    if (adhoc) {
-        const report = await processAdhocReport(weatherData);
-        //console.log(report.body);
-        return report;
-    } else {
-        return await processRegularReport(weatherData);
+    switch (reportType) {
+        case ReportType.ADHOC:
+            return await processAdhocReport(await openweather.getAsCommonData());
+        case ReportType.ADHOC_AGGREGATE:
+            return await processAdhocAggregateReport();
+            break;
+        case ReportType.REGULAR:
+        default:
+            return await processRegularReport(await openweather.getAsCommonData());
     }
 };
 
@@ -191,14 +193,37 @@ async function processAdhocReport(weatherData: WeatherData) {
     };
 }
 
-function isAdhocReport(event: any) {
-    if (REPORT_TYPE && REPORT_TYPE === 'adhoc') {
-        return true;
+async function processAdhocAggregateReport() {
+
+    const data = await getAggregatedData();
+
+    let alertBody = '';
+
+    for (let alert of alerts) {
+
+        const alertData = await alert.processAggregate(data);
+
+        if (alertData.hasAlert) {
+            alertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
+        } else {
+            alertBody += `${alert.alertTitle}\n\nNo alerts\n\n\n`;
+        }
     }
-    if (event?.queryStringParameters?.type === 'adhoc') {
-        return true;
-    }
-    return false;
+
+    console.log("Complete");
+
+    return {
+        statusCode: 200,
+        headers: {},
+        body: alertBody
+    };
+}
+
+function getReportType(event: any): ReportType {
+    const stringToParse = event?.queryStringParameters?.type || REPORT_TYPE;
+    if (stringToParse === 'adhoc') return ReportType.ADHOC;
+    if (stringToParse === 'adhocAggregate') return ReportType.ADHOC_AGGREGATE;
+    return ReportType.REGULAR;
 }
 
 // Uncomment this to call locally

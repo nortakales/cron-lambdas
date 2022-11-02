@@ -2,6 +2,7 @@ import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import { WeatherData } from "../data-sources/common/common-data";
 import { getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
+import { AggregatedWeatherData } from "../data-sources/aggregate/aggregate-data";
 
 export class Daily7DayNationalWeatherAlert implements Alert {
 
@@ -40,6 +41,15 @@ ${alertData.description?.substring(0, 200)}...
             hasAlert: true,
             alertMessage: message,
             notificationType: NotificationType.EMAIL_AND_PUSH
+        }
+    }
+
+    async processAggregate(weatherData: AggregatedWeatherData) {
+
+        // TODO look at weather alert data from all sources
+
+        return {
+            hasAlert: false
         }
     }
 }

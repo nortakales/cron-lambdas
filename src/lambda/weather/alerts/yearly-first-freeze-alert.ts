@@ -3,6 +3,7 @@ import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import * as DDB from '../../dynamo';
 import { Format, toReadablePacificDate } from "../utilities";
 import { WeatherData } from "../data-sources/common/common-data";
+import { AggregatedWeatherData } from "../data-sources/aggregate/aggregate-data";
 
 const TABLE_NAME = process.env.TABLE_NAME!;
 
@@ -35,6 +36,46 @@ export class YearlyFirstFreezeAlert implements Alert {
             if (dailyData.temp.min <= this.freezeThreshold) {
                 hasAlert = true;
                 message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: min temp of ${dailyData.temp.min}°F\n`;
+            }
+        }
+
+        if (!hasAlert) {
+            return {
+                hasAlert: false
+            }
+        }
+
+        await this.recordNotificationForThisSeason(adhoc);
+
+        return {
+            hasAlert: true,
+            alertMessage: message,
+            notificationType: NotificationType.EMAIL_AND_PUSH
+        }
+    }
+
+    async processAggregate(weatherData: AggregatedWeatherData, adhoc: boolean = false) {
+
+        console.log("Running " + this.alertTitle);
+
+        const shouldNotifyForThisSeason = await this.shouldNotifyForThisSeason();
+        if (!shouldNotifyForThisSeason) {
+            console.log('Already alerted about freezing temps for the current season');
+            return {
+                hasAlert: false
+            }
+        }
+
+        let hasAlert = false;
+        let message = '';
+
+        for (let dailyData of weatherData.daily) {
+
+            const minTempData = dailyData.temp.min;
+
+            if ((minTempData.average - minTempData.std) <= this.freezeThreshold) {
+                hasAlert = true;
+                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: min temp of ${minTempData.toString()} °F\n`;
             }
         }
 

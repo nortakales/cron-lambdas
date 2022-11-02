@@ -8,17 +8,17 @@ async function main() {
     console.log("Starting report");
     //console.log(JSON.stringify(data, null, 2));
 
-    // for (let dailyData of data.daily) {
-    //     console.log(toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY));
-    //     //console.log("Max Temp: " + dailyData.temp.max.toString());
-    //     // console.log("Min Temp: " + dailyData.temp.min.toString());
-    //     //console.log("Wind Speed: " + dailyData.wind_speed.toString());
-    //     console.log("Wind Gust: " + dailyData.wind_gust.toString());
-    //     // console.log("PoP: " + dailyData.pop.toString());
-    //     // console.log("Rain: " + dailyData.rain.toString());
-    //     //console.log("Snow: " + dailyData.snow.toString());
-    //     console.log('');
-    // }
+    for (let dailyData of data.daily) {
+        console.log(toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY));
+        //console.log("Max Temp: " + dailyData.temp.max.toString());
+        // console.log("Min Temp: " + dailyData.temp.min.toString());
+        //console.log("Wind Speed: " + dailyData.wind_speed.toString());
+        //console.log("Wind Gust: " + dailyData.wind_gust.toString());
+        // console.log("PoP: " + dailyData.pop.toString());
+        console.log("Rain: " + dailyData.rain.toString());
+        // console.log("Snow: " + dailyData.snow.toString());
+        console.log('');
+    }
 
     // for (let hourlyData of data.hourly) {
     //     console.log(toReadablePacificDate(hourlyData.datetime, Format.DATE_AND_TIME));

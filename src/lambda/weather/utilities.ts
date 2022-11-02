@@ -18,7 +18,7 @@ export function toReadablePacificDate(time: number, format?: Format) {
         case Format.DATE_ONLY:
             return moment(time).tz("America/Los_Angeles").format('M/D/YYYY');
         case Format.TIME_ONLY:
-            return moment(time).tz("America/Los_Angeles").format('M/D/YYYY, h:mm A');
+            return moment(time).tz("America/Los_Angeles").format('h:mm A');
         case Format.ISO_8601:
             return moment(time).tz("America/Los_Angeles").format('YYYY-MM-DDTHH:mm:ssZ');
         case Format.DATE_AND_TIME:

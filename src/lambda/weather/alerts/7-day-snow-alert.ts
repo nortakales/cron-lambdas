@@ -2,6 +2,7 @@ import { Duration } from "typed-duration";
 import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
 import { WeatherData } from "../data-sources/common/common-data";
 import { Format, getDirectionFromDegrees, round, toReadablePacificDate } from "../utilities";
+import { AggregatedWeatherData } from "../data-sources/aggregate/aggregate-data";
 
 export class Daily7DaySnowAlert implements Alert {
 
@@ -37,4 +38,12 @@ export class Daily7DaySnowAlert implements Alert {
             notificationType: NotificationType.EMAIL_AND_PUSH
         }
     }
+
+    async processAggregate(weatherData: AggregatedWeatherData) {
+        // TODO check snow aggregate data
+        return {
+            hasAlert: false
+        }
+    }
+
 }
