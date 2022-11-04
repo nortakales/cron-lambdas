@@ -14,9 +14,9 @@ async function main() {
         // console.log("Min Temp: " + dailyData.temp.min.toString());
         //console.log("Wind Speed: " + dailyData.wind_speed.toString());
         //console.log("Wind Gust: " + dailyData.wind_gust.toString());
-        // console.log("PoP: " + dailyData.pop.toString());
-        console.log("Rain: " + dailyData.rain.toString());
-        // console.log("Snow: " + dailyData.snow.toString());
+        console.log("PoP: " + dailyData.pop.toString());
+        //console.log("Rain: " + dailyData.rain.toString());
+        //console.log("Snow: " + dailyData.snow.toString());
         console.log('');
     }
 
