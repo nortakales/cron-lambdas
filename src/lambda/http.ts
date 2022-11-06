@@ -7,14 +7,19 @@ const RETRYABLE_CODES = [
     504
 ]
 
-export async function httpsGet(url: string, userAgent?: string, attempts: number = 3): Promise<string> {
+export async function httpsGet(url: string, userAgent?: string, attempts: number = 3, headers: any = {}): Promise<string> {
 
     console.log(`Getting this URL with ${attempts} attempts left: ${url}`);
 
     return new Promise(function (resolve, reject) {
 
+        const userAgentHeader = { 'User-Agent': userAgent || 'Mozilla/5.0' };
+
         const options = {
-            headers: { 'User-Agent': userAgent || 'Mozilla/5.0' }
+            headers: {
+                ...userAgentHeader,
+                ...headers
+            }
         };
 
         var request = HTTPS.get(url, options, (response) => {

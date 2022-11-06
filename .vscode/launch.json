@@ -30,6 +30,7 @@
                 "API_KEY_SECRET_OPEN_WEATHER": "openweathermap-apikey",
                 "API_KEY_SECRET_TOMORROW_IO": "tomorrowio-apikey",
                 "API_KEY_SECRET_VISUAL_CROSSING": "visualcrossing-apikey",
+                "API_CREDENTIALS_SECRET_METEOMATICS": "meteomatics-api-credentials",
             },
             "internalConsoleOptions": "openOnSessionStart"
         },
@@ -119,6 +120,7 @@
                 "API_KEY_SECRET_OPEN_WEATHER": "openweathermap-apikey",
                 "API_KEY_SECRET_TOMORROW_IO": "tomorrowio-apikey",
                 "API_KEY_SECRET_VISUAL_CROSSING": "visualcrossing-apikey",
+                "API_CREDENTIALS_SECRET_METEOMATICS": "meteomatics-api-credentials",
                 "LATITUDE": "47.806994",
                 "LONGITUDE": "-122.192443",
                 "REGION": "us-west-2"

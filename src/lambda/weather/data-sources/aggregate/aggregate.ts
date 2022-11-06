@@ -5,6 +5,7 @@ import * as weathergov from "../weathergov/weathergov-api";
 import * as tomorrowio from "../tomorrowio/tomorrowio-api";
 import * as visualcrossing from "../visualcrossing/visualcrossing-api";
 import { AggregatedProperty, AggregatedWeatherData, DailyConditions, HourlyConditions } from "./aggregate-data";
+import * as meteomatics from "../meteomatics/meteomatics-api";
 
 const TOTAL_DAYS = 8; // All current sources give today + 7 days
 const TOTAL_HOURS = 3 * 24 // We have 4 sources for 2 days, the rest for almost 7 days, but that is unneeded
@@ -15,12 +16,14 @@ export async function getAggregatedData() {
     const weathergovData = await weathergov.getAsCommonData();
     const tomorrowIOData = await tomorrowio.getAsCommonData();
     const visualCrossingData = await visualcrossing.getAsCommonData();
+    const meteomaticsData = await meteomatics.getAsCommonData();
 
     const allData: { [key: string]: WeatherData } = {
         ow: openWeatherData,
         wg: weathergovData,
         ti: tomorrowIOData,
-        vc: visualCrossingData
+        vc: visualCrossingData,
+        mm: meteomaticsData
     }
 
     // Map of timestamp to HourlyConditions
