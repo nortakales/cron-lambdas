@@ -121,7 +121,10 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Literati Press",
     "Merc Publishing",
     "Storm King Comics",
-    "Sumerian Comics"
+    "Sumerian Comics",
+    "Blacktooth Comics",
+    "Iconic Comics",
+    "Panel Syndicate"
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
