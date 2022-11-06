@@ -1,5 +1,5 @@
 import { Duration } from "typed-duration";
-import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
+import { Alert, AlertData, NotificationType, ReportType } from "../interfaces/alert-types";
 import { WeatherData } from "../data-sources/common/common-data";
 import { Format, getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 import { AggregatedWeatherData } from "../data-sources/aggregate/aggregate-data";
@@ -13,7 +13,7 @@ export class Daily7DayWindAlert implements Alert {
     private readonly windSpeedThreshold = 15;
     private readonly windGustThreshold = 30;
 
-    async process(weatherData: WeatherData) {
+    async process(weatherData: WeatherData, reportType: ReportType) {
 
         console.log("Running " + this.alertTitle);
 
@@ -40,7 +40,7 @@ export class Daily7DayWindAlert implements Alert {
         }
     }
 
-    async processAggregate(weatherData: AggregatedWeatherData) {
+    async processAggregate(weatherData: AggregatedWeatherData, reportType: ReportType) {
 
         console.log("Running " + this.alertTitle);
 
@@ -55,7 +55,7 @@ export class Daily7DayWindAlert implements Alert {
 
             if ((windSpeedData.average + windSpeedData.std) > this.windSpeedThreshold || (windGustData.average + windGustData.std) > this.windGustThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}\n    ${windSpeedData.toString()} mph\n    ${windGustData.toString()} mph\n    ${windDegreeData.toString()} deg\n    ${getDirectionFromDegrees(windDegreeData.average)}\n`;
+                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}\n    ${windSpeedData.toString(reportType)} mph\n    ${windGustData.toString(reportType)} mph\n    ${windDegreeData.toString(reportType)} deg\n    ${getDirectionFromDegrees(windDegreeData.average)}\n`;
             }
         }
 

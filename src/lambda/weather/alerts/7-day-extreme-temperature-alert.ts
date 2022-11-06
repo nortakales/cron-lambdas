@@ -1,5 +1,5 @@
 import { Duration } from "typed-duration";
-import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
+import { Alert, AlertData, NotificationType, ReportType } from "../interfaces/alert-types";
 import { WeatherData } from "../data-sources/common/common-data";
 import { Format, getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 import { AggregatedWeatherData } from "../data-sources/aggregate/aggregate-data";
@@ -13,7 +13,7 @@ export class Daily7DayExtremeTemperatureAlert implements Alert {
     private readonly highTemp = 85;
     private readonly lowTemp = 25;
 
-    async process(weatherData: WeatherData) {
+    async process(weatherData: WeatherData, reportType: ReportType) {
 
         console.log("Running " + this.alertTitle);
 
@@ -46,7 +46,7 @@ export class Daily7DayExtremeTemperatureAlert implements Alert {
         }
     }
 
-    async processAggregate(weatherData: AggregatedWeatherData) {
+    async processAggregate(weatherData: AggregatedWeatherData, reportType: ReportType) {
 
         console.log("Running " + this.alertTitle);
 
@@ -61,9 +61,9 @@ export class Daily7DayExtremeTemperatureAlert implements Alert {
             if ((maxData.average + maxData.std) > this.highTemp || (minData.average - minData.std) < this.lowTemp) {
                 hasAlert = true;
 
-                let tempText = "high of " + maxData.toString() + " °F";
+                let tempText = "high of " + maxData.toString(reportType) + " °F";
                 if ((minData.average - minData.std) < this.lowTemp) {
-                    tempText = "low of " + minData.toString() + " °F";
+                    tempText = "low of " + minData.toString(reportType) + " °F";
                 }
 
                 message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: ${tempText}\n`;

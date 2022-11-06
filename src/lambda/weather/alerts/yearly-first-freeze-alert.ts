@@ -1,5 +1,5 @@
 import { Duration } from "typed-duration";
-import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
+import { Alert, AlertData, NotificationType, ReportType } from "../interfaces/alert-types";
 import * as DDB from '../../dynamo';
 import { Format, toReadablePacificDate } from "../utilities";
 import { WeatherData } from "../data-sources/common/common-data";
@@ -17,7 +17,7 @@ export class YearlyFirstFreezeAlert implements Alert {
 
     private readonly freezeThreshold = 34;
 
-    async process(weatherData: WeatherData, adhoc: boolean = false) {
+    async process(weatherData: WeatherData, reportType: ReportType) {
 
         console.log("Running " + this.alertTitle);
 
@@ -45,7 +45,7 @@ export class YearlyFirstFreezeAlert implements Alert {
             }
         }
 
-        await this.recordNotificationForThisSeason(adhoc);
+        await this.recordNotificationForThisSeason(reportType.isAdhoc);
 
         return {
             hasAlert: true,
@@ -54,7 +54,7 @@ export class YearlyFirstFreezeAlert implements Alert {
         }
     }
 
-    async processAggregate(weatherData: AggregatedWeatherData, adhoc: boolean = false) {
+    async processAggregate(weatherData: AggregatedWeatherData, reportType: ReportType) {
 
         console.log("Running " + this.alertTitle);
 
@@ -75,7 +75,7 @@ export class YearlyFirstFreezeAlert implements Alert {
 
             if ((minTempData.average - minTempData.std) <= this.freezeThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: min temp of ${minTempData.toString()} °F\n`;
+                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: min temp of ${minTempData.toString(reportType)} °F\n`;
             }
         }
 
@@ -85,7 +85,7 @@ export class YearlyFirstFreezeAlert implements Alert {
             }
         }
 
-        await this.recordNotificationForThisSeason(adhoc);
+        await this.recordNotificationForThisSeason(reportType.isAdhoc);
 
         return {
             hasAlert: true,

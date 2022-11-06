@@ -1,5 +1,5 @@
 import { Duration } from "typed-duration";
-import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
+import { Alert, AlertData, NotificationType, ReportType } from "../interfaces/alert-types";
 import { WeatherData } from "../data-sources/common/common-data";
 import { getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 import { AggregatedWeatherData } from "../data-sources/aggregate/aggregate-data";
@@ -10,7 +10,7 @@ export class Daily7DayNationalWeatherAlert implements Alert {
     alertTitle = "National Weather Alert";
     alertKey = "7-day-national-weather-alert-daily";
 
-    async process(weatherData: WeatherData) {
+    async process(weatherData: WeatherData, reportType: ReportType) {
 
         console.log("Running " + this.alertTitle);
 
@@ -44,7 +44,7 @@ ${alertData.description?.substring(0, 200)}...
         }
     }
 
-    async processAggregate(weatherData: AggregatedWeatherData) {
+    async processAggregate(weatherData: AggregatedWeatherData, reportType: ReportType) {
 
         // TODO look at weather alert data from all sources
 

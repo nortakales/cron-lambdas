@@ -1,5 +1,5 @@
 import { Duration } from "typed-duration";
-import { Alert, AlertData, NotificationType } from "../interfaces/alert-types";
+import { Alert, AlertData, NotificationType, ReportType } from "../interfaces/alert-types";
 import { WeatherData } from "../data-sources/common/common-data";
 import { Format, getDirectionFromDegrees, toReadablePacificDate } from "../utilities";
 import { AggregatedWeatherData } from "../data-sources/aggregate/aggregate-data";
@@ -12,7 +12,7 @@ export class HourlyMinutelyHeavyRainAlert implements Alert {
 
     private readonly rainThreshold = 0.2; // inches - this amount in 1 minute would be huge
 
-    async process(weatherData: WeatherData) {
+    async process(weatherData: WeatherData, reportType: ReportType) {
 
         console.log("Running " + this.alertTitle);
 
@@ -46,7 +46,7 @@ export class HourlyMinutelyHeavyRainAlert implements Alert {
         }
     }
 
-    async processAggregate(weatherData: AggregatedWeatherData) {
+    async processAggregate(weatherData: AggregatedWeatherData, reportType: ReportType) {
 
         // TODO do we even have this aggregate data? should just use hourly?
 

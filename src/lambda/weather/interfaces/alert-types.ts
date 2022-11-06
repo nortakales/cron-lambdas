@@ -7,8 +7,8 @@ export interface Alert {
     interval: TimeDuration
     alertTitle: string;
     alertKey: string;
-    process(weatherData: WeatherData, adhoc?: boolean): Promise<AlertData>
-    processAggregate(weatherData: AggregatedWeatherData, adhoc?: boolean): Promise<AlertData>
+    process(weatherData: WeatherData, reportType: ReportType): Promise<AlertData>
+    processAggregate(weatherData: AggregatedWeatherData, reportType: ReportType): Promise<AlertData>
 }
 
 export interface AlertData {
@@ -27,13 +27,16 @@ export class ReportType {
 
     readonly name: string;
     readonly isAdhoc: boolean;
+    readonly dataSourceBreakout: boolean;
 
-    static readonly REGULAR = new ReportType('REGULAR', false);
-    static readonly ADHOC = new ReportType('ADHOC', false);
-    static readonly ADHOC_AGGREGATE = new ReportType('ADHOC_AGGREGATE', false);
+    static readonly REGULAR = new ReportType('REGULAR', false, false);
+    static readonly ADHOC = new ReportType('ADHOC', false, false);
+    static readonly ADHOC_AGGREGATE = new ReportType('ADHOC_AGGREGATE', false, false);
+    static readonly ADHOC_AGGREGATE_BREAKOUT = new ReportType('ADHOC_AGGREGATE_BREAKOUT', false, true);
 
-    private constructor(name: string, isAdhoc: boolean) {
+    private constructor(name: string, isAdhoc: boolean, dataSourceBreakout: boolean) {
         this.name = name;
         this.isAdhoc = isAdhoc;
+        this.dataSourceBreakout = dataSourceBreakout;
     }
 }

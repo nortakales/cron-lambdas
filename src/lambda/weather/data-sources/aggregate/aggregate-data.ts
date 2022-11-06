@@ -1,3 +1,4 @@
+import { ReportType } from "../../interfaces/alert-types";
 
 export interface AggregatedWeatherData {
     current: CurrentConditions;
@@ -94,7 +95,7 @@ export class AggregatedProperty {
         this.std = Math.sqrt(values.map(x => Math.pow(x - this.average, 2)).reduce((a, b) => a + b) / values.length)
     }
 
-    toString() {
+    toString(reportType: ReportType) {
         if (Object.keys(this.data).length <= 0) {
             return "No data";
         }
@@ -104,6 +105,11 @@ export class AggregatedProperty {
         }
         dataPoints = dataPoints.replace(/, $/, '');
 
-        return `${this.average.toFixed(2)} ± ${this.std.toFixed(2)} [${dataPoints}]`;
+        let output = `${this.average.toFixed(2)} ± ${this.std.toFixed(2)}`;
+        if (reportType?.dataSourceBreakout) {
+            output += ` [${dataPoints}]`;
+        }
+
+        return output;
     }
 }

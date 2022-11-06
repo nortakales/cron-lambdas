@@ -92,17 +92,17 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     switch (reportType) {
         case ReportType.ADHOC:
-            return await processAdhocReport(await openweather.getAsCommonData());
+            return await processAdhocReport(await openweather.getAsCommonData(), reportType);
         case ReportType.ADHOC_AGGREGATE:
-            return await processAdhocAggregateReport();
+            return await processAdhocAggregateReport(reportType);
             break;
         case ReportType.REGULAR:
         default:
-            return await processRegularReport(await openweather.getAsCommonData());
+            return await processRegularReport(await openweather.getAsCommonData(), reportType);
     }
 };
 
-async function processRegularReport(weatherData: WeatherData) {
+async function processRegularReport(weatherData: WeatherData, reportType: ReportType) {
 
     let hasAlerts = false;
     let hasEmailAlert = false;
@@ -117,7 +117,7 @@ async function processRegularReport(weatherData: WeatherData) {
             continue;
         }
 
-        const alertData = await alert.process(weatherData);
+        const alertData = await alert.process(weatherData, reportType);
 
         if (alertData.hasAlert) {
             hasAlerts = true;
@@ -169,13 +169,13 @@ async function processRegularReport(weatherData: WeatherData) {
     };
 }
 
-async function processAdhocReport(weatherData: WeatherData) {
+async function processAdhocReport(weatherData: WeatherData, reportType: ReportType) {
 
     let alertBody = '';
 
     for (let alert of alerts) {
 
-        const alertData = await alert.process(weatherData);
+        const alertData = await alert.process(weatherData, reportType);
 
         if (alertData.hasAlert) {
             alertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
@@ -193,7 +193,7 @@ async function processAdhocReport(weatherData: WeatherData) {
     };
 }
 
-async function processAdhocAggregateReport() {
+async function processAdhocAggregateReport(reportType: ReportType) {
 
     const data = await getAggregatedData();
 
@@ -201,7 +201,7 @@ async function processAdhocAggregateReport() {
 
     for (let alert of alerts) {
 
-        const alertData = await alert.processAggregate(data);
+        const alertData = await alert.processAggregate(data, reportType);
 
         if (alertData.hasAlert) {
             alertBody += `${alert.alertTitle}\n\n${alertData.alertMessage}\n\n`;
