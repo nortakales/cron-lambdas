@@ -221,8 +221,10 @@ async function processAdhocAggregateReport(reportType: ReportType) {
 
 function getReportType(event: any): ReportType {
     const stringToParse = event?.queryStringParameters?.type || REPORT_TYPE;
+    // TODO refactor this
     if (stringToParse === 'adhoc') return ReportType.ADHOC;
     if (stringToParse === 'adhocAggregate') return ReportType.ADHOC_AGGREGATE;
+    if (stringToParse === 'adhocAggregateBreakout') return ReportType.ADHOC_AGGREGATE_BREAKOUT;
     return ReportType.REGULAR;
 }
 
