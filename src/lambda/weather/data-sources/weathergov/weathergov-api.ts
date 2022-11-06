@@ -80,7 +80,7 @@ export async function getAsCommonData() {
 
 
         dailyMaxTemp = Math.max(dailyMaxTemp, hourlyData.temperature || 0);
-        dailyMinTemp = Math.min(dailyMinTemp, hourlyData.temperature || 0);
+        dailyMinTemp = Math.min(dailyMinTemp, hourlyData.temperature || 999);
         dailyPop = Math.max(dailyPop, hourlyData.probabilityOfPrecipitation || 0);
         dailyRain += hourlyData.quantitativePrecipitation || 0;
         dailySnow += hourlyData.snowfallAmount || 0;
@@ -246,7 +246,7 @@ function getValueInCorrectUnits(currentUnits: string, value: number) {
 
 
 export async function main() {
-    const data = await getOpenWeatherData();
+    //const data = await getOpenWeatherData();
     //console.log(JSON.stringify(data, null, 2));
     //console.log(JSON.stringify(convertToHourlyData(data), null, 2));
     //console.log(JSON.stringify(convertToHourlyData(data).map(entry => { return entry.datetime }), null, 2));
@@ -258,6 +258,10 @@ export async function main() {
     // console.log(convertTimePeriodToSequenceOfMillis("2021-11-14T09:00:00+00:00/PT6H"));
     // console.log(convertTimePeriodToSequenceOfMillis("2021-11-14T09:00:00+00:00/P1DT6H"));
     // console.log(convertTimePeriodToSequenceOfMillis("2021-11-14T09:00:00+00:00/P1D"));
+
+    // const data = await getAsCommonData();
+    // console.log(JSON.stringify(data, null, 2));
+
 }
 
-//main();
+// main();

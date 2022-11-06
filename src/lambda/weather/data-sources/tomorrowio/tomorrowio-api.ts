@@ -127,6 +127,12 @@ export async function getAsCommonData() {
 
                     visibility: values.visibility,
 
+                    // TODO - use precipType
+                    // 0: N/A
+                    // 1: Rain
+                    // 2: Snow
+                    // 3: Freezing Rain
+                    // 4: Ice Pellets / Sleet
                     pop: values.precipitationProbability,
                     rain: values.precipitationIntensity,
                     snow: values.snowAccumulation,
@@ -156,6 +162,12 @@ export async function getAsCommonData() {
                         min: values.temperatureMin
                     },
 
+                    // TODO - use precipType
+                    // 0: N/A
+                    // 1: Rain
+                    // 2: Snow
+                    // 3: Freezing Rain
+                    // 4: Ice Pellets / Sleet
                     pop: values.precipitationProbability,
                     rain: values.precipitationIntensity,
                     snow: values.snowAccumulation,

@@ -91,7 +91,7 @@ export async function getAsCommonData() {
 
 
         dailyMaxTemp = Math.max(dailyMaxTemp, dataPoint.temp || 0);
-        dailyMinTemp = Math.min(dailyMinTemp, dataPoint.temp || 0);
+        dailyMinTemp = Math.min(dailyMinTemp, dataPoint.temp || 999);
         dailyRain += dataPoint.precip || 0;
         dailyWindSpeed = Math.max(dailyWindSpeed, dataPoint.windSpeed || 0);
         if (dataPoint.windDir) {

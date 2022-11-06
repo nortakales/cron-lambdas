@@ -121,7 +121,7 @@ export async function getAsCommonData() {
 
 
         dailyMaxTemp = Math.max(dailyMaxTemp, hourlyData.temp || 0);
-        dailyMinTemp = Math.min(dailyMinTemp, hourlyData.temp || 0);
+        dailyMinTemp = Math.min(dailyMinTemp, hourlyData.temp || 999);
         dailyPop = Math.max(dailyPop, hourlyData.pop || 0);
         dailyRain += hourlyData.precip || 0;
         dailySnow += hourlyData.snow || 0;
