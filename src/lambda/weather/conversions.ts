@@ -2,6 +2,10 @@ export function mmToIn(mm: number) {
     return mm / 25.4;
 }
 
+export function cmToIn(cm: number) {
+    return cm / 2.54;
+}
+
 export function mToMi(m: number) {
     return m / 1609.344;
 }

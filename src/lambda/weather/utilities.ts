@@ -175,3 +175,20 @@ export function round(number: number, decimal: number) {
     const modifier = Math.pow(10, decimal);
     return Math.round((number + Number.EPSILON) * modifier) / modifier;
 }
+
+export function equals(map1: { [key: string]: string }, map2: { [key: string]: string }) {
+
+    const map1Keys = Object.keys(map1);
+    const map2Keys = Object.keys(map2);
+
+    if (map1Keys.length !== map2Keys.length) {
+        return false;
+    }
+
+    for (var key of map1Keys) {
+        if (map1[key] !== map2[key]) {
+            return false;
+        }
+    }
+    return true;
+}
