@@ -40,9 +40,29 @@ export class Daily7DaySnowAlert implements Alert {
     }
 
     async processAggregate(weatherData: AggregatedWeatherData, reportType: ReportType) {
-        // TODO check snow aggregate data
+
+        console.log("Running " + this.alertTitle);
+
+        let hasAlert = false;
+        let message = '';
+
+        for (let dailyData of weatherData.daily) {
+            if (dailyData.snow && dailyData.snow.average + dailyData.snow.std > this.snowThreshold) {
+                hasAlert = true;
+                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: snow is coming! ${dailyData.snow.toString(reportType)} inches\n`;
+            }
+        }
+
+        if (!hasAlert) {
+            return {
+                hasAlert: false
+            }
+        }
+
         return {
-            hasAlert: false
+            hasAlert: true,
+            alertMessage: message,
+            notificationType: NotificationType.EMAIL_AND_PUSH
         }
     }
 
