@@ -94,8 +94,8 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         case ReportType.ADHOC:
             return await processAdhocReport(await openweather.getAsCommonData(), reportType);
         case ReportType.ADHOC_AGGREGATE:
+        case ReportType.ADHOC_AGGREGATE_BREAKOUT:
             return await processAdhocAggregateReport(reportType);
-            break;
         case ReportType.REGULAR:
         default:
             return await processRegularReport(await openweather.getAsCommonData(), reportType);
