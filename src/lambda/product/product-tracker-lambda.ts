@@ -1,7 +1,7 @@
 import { put, scan } from "../dynamo";
 import { sendEmail } from "../emailer";
 import { startLambdaLog } from "../utilities/logging";
-import { areDifferent, generateDiffText, generateText, Product, Website } from "./product";
+import { CommonDiffMetadata, generateDiff, generateDiffText, generateText, Product, Website } from "./product";
 import { getLatestProductData } from "./trackers/lego-tracker";
 
 const ENABLED = process.env.ENABLED!;
@@ -32,8 +32,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         };
     }
 
-    let diffBody = '';
-    let sameBody = '';
+    const productDiffs = [];
 
     for (const product of products) {
         console.log("Looking up latest details for product:");
@@ -44,26 +43,56 @@ exports.handler = async (event: any = {}, context: any = {}) => {
                 newProduct = await getLatestProductData(product);
                 break;
         }
-        if (areDifferent(product, newProduct)) {
-            diffBody += generateDiffText(product, newProduct) + '<br><br>';
-            await put(PRODUCT_TABLE_NAME, newProduct);
+        productDiffs.push(generateDiff(product, newProduct));
+    }
+
+    const commonDiffMetadata: CommonDiffMetadata = {
+        commonPriceDiff: false,
+        commonAddToCartButtonDiff: false,
+        commonStatusDiff: false,
+        commonPromotionDiff: false,
+        commonTagsDiff: false,
+        commonIssuesDiff: false
+    }
+
+    const allPromotionDiffs: { [key: string]: number } = {};
+
+    for (const diff of productDiffs) {
+        if (diff.diffPromotion) {
+            const promotionDiffKey = diff.newProduct.promotion + "/" + diff.oldProduct.promotion;
+            allPromotionDiffs[promotionDiffKey] = allPromotionDiffs[promotionDiffKey] ? allPromotionDiffs[promotionDiffKey] + 1 : 1;
+        }
+    }
+    if (Object.keys(allPromotionDiffs).length == 1 && allPromotionDiffs[Object.keys(allPromotionDiffs)[0]] == productDiffs.length) {
+        commonDiffMetadata.commonPromotionDiff = true;
+    }
+
+    let diffBody = '';
+    let sameBody = '';
+    for (const diff of productDiffs) {
+        if (diff.anyDiff) {
+            diffBody += generateDiffText(diff, commonDiffMetadata) + '<br><br>';
+            await put(PRODUCT_TABLE_NAME, diff.newProduct);
             // TODO save history
         } else {
-            sameBody += generateText(newProduct) + '<br><br>';
+            sameBody += generateText(diff.newProduct) + '<br><br>';
         }
     }
 
-    // TODO
-    // iterate through all products
-    // call the appropriate tracker for that product
-    //      tracker should query page and get details
-    //      tracker should just return latest product
-    // store historical record
-    // make updates to current product
-    // accumulate notifications into email based on diff
-    // send email
 
-    const emailBody = `<h1>Changes</h1>
+    // TODO
+    // store historical record
+    // organize by website
+
+    let emailBody = '';
+
+    if (commonDiffMetadata.commonPromotionDiff) {
+        emailBody += `<h1>Common Changes</h1>Promotion:`
+        emailBody += ` <span style="color:green">${productDiffs[0].newProduct.promotion || 'No promotion'}</span>`;
+        emailBody += ` <del style="color:red">${productDiffs[0].oldProduct.promotion || 'No promotion'}</del>`;
+    }
+
+    emailBody += `<h1>Changes</h1>
     ${diffBody ? diffBody : 'None'}<br>
     <h1>Summary</h1>
     ${sameBody ? sameBody : 'None'}`;
@@ -83,4 +112,4 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 };
 
 // Uncomment this to call locally
-// exports.handler();
+exports.handler();

@@ -14,30 +14,79 @@ export interface Product {
     issues?: string[]
 }
 
-export enum Website {
-    LEGO = 'LEGO'
+export interface ProductDiff {
+    oldProduct: Product
+    newProduct: Product
+
+    diffTitle: boolean
+    diffWebsite: boolean
+    diffUrlKey: boolean
+    diffUrl: boolean
+    diffPrice: boolean
+    diffAddToCartButton: boolean
+    diffStatus: boolean
+    diffPromotion: boolean
+    diffTags: boolean
+    diffIssues: boolean
+
+    anyDiff: boolean
 }
 
-export function areDifferent(oldProduct: Product, newProduct: Product) {
-    return oldProduct.title !== newProduct.title ||
-        oldProduct.website !== newProduct.website ||
-        oldProduct.urlKey !== newProduct.urlKey ||
-        oldProduct.url !== newProduct.url ||
-        oldProduct.price !== newProduct.price ||
-        oldProduct.addToCartButton !== newProduct.addToCartButton ||
-        oldProduct.status !== newProduct.status ||
-        oldProduct.promotion !== newProduct.promotion ||
-        !arrayEquals(oldProduct.tags, newProduct.tags) ||
-        oldProduct.issues !== newProduct.issues;
+export interface CommonDiffMetadata {
+    commonPriceDiff: boolean
+    commonAddToCartButtonDiff: boolean
+    commonStatusDiff: boolean
+    commonPromotionDiff: boolean
+    commonTagsDiff: boolean
+    commonIssuesDiff: boolean
+}
+
+export enum Website {
+    LEGO = 'LEGO'
 }
 
 export function generateDeleteUrl(product: Product) {
     return `${DYNAMO_ACCESS_ENDPOINT}?operation=DELETE&table=products&hashKeyName=title&hashKey=${product.title}`;
 }
 
-export function generateDiffText(oldProduct: Product, newProduct: Product) {
+export function generateDiff(oldProduct: Product, newProduct: Product): ProductDiff {
 
-    let text = `<b><a href="${newProduct.url}">${newProduct.title}</a>`;
+    const diffTitle = oldProduct.title !== newProduct.title;
+    const diffWebsite = oldProduct.website !== newProduct.website;
+    const diffUrlKey = oldProduct.urlKey !== newProduct.urlKey;
+    const diffUrl = oldProduct.url !== newProduct.url;
+    const diffPrice = oldProduct.price !== newProduct.price;
+    const diffAddToCartButton = oldProduct.addToCartButton !== newProduct.addToCartButton;
+    const diffStatus = oldProduct.status !== newProduct.status;
+    const diffPromotion = oldProduct.promotion !== newProduct.promotion;
+    const diffTags = !arrayEquals(oldProduct.tags, newProduct.tags);
+    const diffIssues = oldProduct.issues !== newProduct.issues;
+
+    return {
+        oldProduct,
+        newProduct,
+        diffTitle,
+        diffWebsite,
+        diffUrlKey,
+        diffUrl,
+        diffPrice,
+        diffAddToCartButton,
+        diffStatus,
+        diffPromotion,
+        diffTags,
+        diffIssues,
+        anyDiff: diffTitle || diffWebsite || diffUrlKey || diffUrl || diffPrice || diffAddToCartButton ||
+            diffStatus || diffPromotion || diffTags || diffIssues
+
+    }
+}
+
+export function generateDiffText(diff: ProductDiff, commonDiffMetadata: CommonDiffMetadata) {
+
+    const oldProduct = diff.oldProduct;
+    const newProduct = diff.newProduct;
+
+    let text = `<b><a href="${newProduct.url}">${newProduct.title}</a></b>`;
     if (oldProduct.title !== newProduct.title) {
         text += ` <del style="color:red">${oldProduct.title}</del>`;
     }
@@ -63,7 +112,9 @@ export function generateDiffText(oldProduct: Product, newProduct: Product) {
     }
 
     text += `<br>Promotion:`;
-    if (oldProduct.promotion !== newProduct.promotion) {
+    if (commonDiffMetadata.commonPromotionDiff) {
+        text += ` <span style="color:grey">See summary</span>`;
+    } else if (oldProduct.promotion !== newProduct.promotion) {
         text += ` <span style="color:green">${newProduct.promotion || 'No promotion'}</span>`;
         text += ` <del style="color:red">${oldProduct.promotion || 'No promotion'}</del>`;
     } else {
