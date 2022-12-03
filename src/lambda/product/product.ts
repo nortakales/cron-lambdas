@@ -34,11 +34,17 @@ export interface ProductDiff {
 
 export interface CommonDiffMetadata {
     commonPriceDiff: boolean
+    allPriceDiffs: { [key: string]: number }
     commonAddToCartButtonDiff: boolean
+    allAddToCartButtonDiffs: { [key: string]: number }
     commonStatusDiff: boolean
+    allStatusDiffs: { [key: string]: number }
     commonPromotionDiff: boolean
+    allPromotionDiffs: { [key: string]: number }
     commonTagsDiff: boolean
+    allTagsDiffs: { [key: string]: number }
     commonIssuesDiff: boolean
+    allIssuesDiffs: { [key: string]: number }
 }
 
 export enum Website {
@@ -60,7 +66,7 @@ export function generateDiff(oldProduct: Product, newProduct: Product): ProductD
     const diffStatus = oldProduct.status !== newProduct.status;
     const diffPromotion = oldProduct.promotion !== newProduct.promotion;
     const diffTags = !arrayEquals(oldProduct.tags, newProduct.tags);
-    const diffIssues = oldProduct.issues !== newProduct.issues;
+    const diffIssues = !arrayEquals(oldProduct.issues, newProduct.issues);
 
     return {
         oldProduct,
@@ -159,11 +165,67 @@ function arrayEquals(a: string[] | undefined, b: string[] | undefined) {
 }
 
 export function diffIsOnlyCommon(diff: ProductDiff, commonDiffMetadata: CommonDiffMetadata) {
-    // TODO missing fields not in commonDiffMetadata
     return commonDiffMetadata.commonAddToCartButtonDiff == diff.diffAddToCartButton &&
         commonDiffMetadata.commonIssuesDiff == diff.diffIssues &&
         commonDiffMetadata.commonPriceDiff == diff.diffPrice &&
         commonDiffMetadata.commonPromotionDiff == diff.diffPromotion &&
         commonDiffMetadata.commonStatusDiff == diff.diffStatus &&
-        commonDiffMetadata.commonTagsDiff == diff.diffTags;
+        commonDiffMetadata.commonTagsDiff == diff.diffTags &&
+        !diff.diffTitle && !diff.diffUrl && !diff.diffUrlKey && !diff.diffWebsite;
+}
+
+export function generateCommonDiffMetadata(diffs: ProductDiff[]) {
+    const commonDiffMetadata: CommonDiffMetadata = {
+        commonPriceDiff: false,
+        allPriceDiffs: {},
+        commonAddToCartButtonDiff: false,
+        allAddToCartButtonDiffs: {},
+        commonStatusDiff: false,
+        allStatusDiffs: {},
+        commonPromotionDiff: false,
+        allPromotionDiffs: {},
+        commonTagsDiff: false,
+        allTagsDiffs: {},
+        commonIssuesDiff: false,
+        allIssuesDiffs: {}
+    }
+
+    for (const diff of diffs) {
+        if (diff.diffPrice) {
+            const priceDiffKey = diff.newProduct.price + "/" + diff.oldProduct.price;
+            commonDiffMetadata.allPriceDiffs[priceDiffKey] = commonDiffMetadata.allPriceDiffs[priceDiffKey] ?
+                commonDiffMetadata.allPriceDiffs[priceDiffKey] + 1 : 1;
+        }
+        if (diff.diffAddToCartButton) {
+            const addToCartButtonDiffKey = diff.newProduct.addToCartButton + "/" + diff.oldProduct.addToCartButton;
+            commonDiffMetadata.allAddToCartButtonDiffs[addToCartButtonDiffKey] = commonDiffMetadata.allAddToCartButtonDiffs[addToCartButtonDiffKey] ?
+                commonDiffMetadata.allAddToCartButtonDiffs[addToCartButtonDiffKey] + 1 : 1;
+        }
+        if (diff.diffStatus) {
+            const statusDiffKey = diff.newProduct.status + "/" + diff.oldProduct.status;
+            commonDiffMetadata.allStatusDiffs[statusDiffKey] = commonDiffMetadata.allStatusDiffs[statusDiffKey] ?
+                commonDiffMetadata.allStatusDiffs[statusDiffKey] + 1 : 1;
+        }
+        if (diff.diffPromotion) {
+            const promotionDiffKey = diff.newProduct.promotion + "/" + diff.oldProduct.promotion;
+            commonDiffMetadata.allPromotionDiffs[promotionDiffKey] = commonDiffMetadata.allPromotionDiffs[promotionDiffKey] ?
+                commonDiffMetadata.allPromotionDiffs[promotionDiffKey] + 1 : 1;
+        }
+        // TODO tags and issues - they are arrays
+    }
+
+    if (Object.keys(commonDiffMetadata.allPriceDiffs).length == 1 && commonDiffMetadata.allPriceDiffs[Object.keys(commonDiffMetadata.allPriceDiffs)[0]] == diffs.length) {
+        commonDiffMetadata.commonPriceDiff = true;
+    }
+    if (Object.keys(commonDiffMetadata.allAddToCartButtonDiffs).length == 1 && commonDiffMetadata.allAddToCartButtonDiffs[Object.keys(commonDiffMetadata.allAddToCartButtonDiffs)[0]] == diffs.length) {
+        commonDiffMetadata.commonAddToCartButtonDiff = true;
+    }
+    if (Object.keys(commonDiffMetadata.allStatusDiffs).length == 1 && commonDiffMetadata.allStatusDiffs[Object.keys(commonDiffMetadata.allStatusDiffs)[0]] == diffs.length) {
+        commonDiffMetadata.commonStatusDiff = true;
+    }
+    if (Object.keys(commonDiffMetadata.allPromotionDiffs).length == 1 && commonDiffMetadata.allPromotionDiffs[Object.keys(commonDiffMetadata.allPromotionDiffs)[0]] == diffs.length) {
+        commonDiffMetadata.commonPromotionDiff = true;
+    }
+
+    return commonDiffMetadata;
 }

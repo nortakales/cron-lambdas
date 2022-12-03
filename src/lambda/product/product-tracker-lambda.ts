@@ -1,7 +1,7 @@
 import { put, scan } from "../dynamo";
 import { sendEmail } from "../emailer";
 import { startLambdaLog } from "../utilities/logging";
-import { CommonDiffMetadata, diffIsOnlyCommon, generateDiff, generateDiffText, generateText, Product, ProductDiff, Website } from "./product";
+import { diffIsOnlyCommon, generateCommonDiffMetadata, generateDiff, generateDiffText, generateText, Product, Website } from "./product";
 import { getLatestProductData } from "./trackers/lego-tracker";
 
 const ENABLED = process.env.ENABLED!;
@@ -46,26 +46,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         productDiffs.push(generateDiff(product, newProduct));
     }
 
-    const commonDiffMetadata: CommonDiffMetadata = {
-        commonPriceDiff: false,
-        commonAddToCartButtonDiff: false,
-        commonStatusDiff: false,
-        commonPromotionDiff: false,
-        commonTagsDiff: false,
-        commonIssuesDiff: false
-    }
-
-    const allPromotionDiffs: { [key: string]: number } = {};
-
-    for (const diff of productDiffs) {
-        if (diff.diffPromotion) {
-            const promotionDiffKey = diff.newProduct.promotion + "/" + diff.oldProduct.promotion;
-            allPromotionDiffs[promotionDiffKey] = allPromotionDiffs[promotionDiffKey] ? allPromotionDiffs[promotionDiffKey] + 1 : 1;
-        }
-    }
-    if (Object.keys(allPromotionDiffs).length == 1 && allPromotionDiffs[Object.keys(allPromotionDiffs)[0]] == productDiffs.length) {
-        commonDiffMetadata.commonPromotionDiff = true;
-    }
+    const commonDiffMetadata = generateCommonDiffMetadata(productDiffs);
 
     let diffBody = '';
     let sameBody = '';
@@ -86,7 +67,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     // TODO
     // store historical record
-    // organize by website
+    // group by website
 
     let emailBody = '';
 
@@ -116,4 +97,4 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 };
 
 // Uncomment this to call locally
-exports.handler();
+// exports.handler();
