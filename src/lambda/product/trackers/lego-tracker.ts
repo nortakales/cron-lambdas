@@ -70,6 +70,7 @@ function getPromotion(dom: HTMLElement) {
     let text = dom.querySelector('div[class*="TargetedPromotionstyles"]')?.innerText;
     if (text) {
         text = text.replace(/\*?Not VIP\?/, '');
+        text = text.replace(/\*Learn more/, '');
     }
     return text;
 }

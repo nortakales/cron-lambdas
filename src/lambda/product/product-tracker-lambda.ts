@@ -1,7 +1,7 @@
 import { put, scan } from "../dynamo";
 import { sendEmail } from "../emailer";
 import { startLambdaLog } from "../utilities/logging";
-import { CommonDiffMetadata, generateDiff, generateDiffText, generateText, Product, Website } from "./product";
+import { CommonDiffMetadata, diffIsOnlyCommon, generateDiff, generateDiffText, generateText, Product, ProductDiff, Website } from "./product";
 import { getLatestProductData } from "./trackers/lego-tracker";
 
 const ENABLED = process.env.ENABLED!;
@@ -71,9 +71,13 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     let sameBody = '';
     for (const diff of productDiffs) {
         if (diff.anyDiff) {
-            diffBody += generateDiffText(diff, commonDiffMetadata) + '<br><br>';
             await put(PRODUCT_TABLE_NAME, diff.newProduct);
             // TODO save history
+            if (diffIsOnlyCommon(diff, commonDiffMetadata)) {
+                sameBody += generateText(diff.newProduct) + '<br><br>';
+            } else {
+                diffBody += generateDiffText(diff, commonDiffMetadata) + '<br><br>';
+            }
         } else {
             sameBody += generateText(diff.newProduct) + '<br><br>';
         }

@@ -157,3 +157,13 @@ function arrayEquals(a: string[] | undefined, b: string[] | undefined) {
         a.length === b.length &&
         a.every((val, index) => val === b[index]);
 }
+
+export function diffIsOnlyCommon(diff: ProductDiff, commonDiffMetadata: CommonDiffMetadata) {
+    // TODO missing fields not in commonDiffMetadata
+    return commonDiffMetadata.commonAddToCartButtonDiff == diff.diffAddToCartButton &&
+        commonDiffMetadata.commonIssuesDiff == diff.diffIssues &&
+        commonDiffMetadata.commonPriceDiff == diff.diffPrice &&
+        commonDiffMetadata.commonPromotionDiff == diff.diffPromotion &&
+        commonDiffMetadata.commonStatusDiff == diff.diffStatus &&
+        commonDiffMetadata.commonTagsDiff == diff.diffTags;
+}
