@@ -130,7 +130,11 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Whatnot Publishing",
     "Comely Comix",
     "Comics Experience Publishing",
-    "Zine Panique"
+    "Zine Panique",
+    "Artists Elite Comics",
+    "Boing Being",
+    "Comics Experience Publishing",
+    "Really Easy Press"
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
