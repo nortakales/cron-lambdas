@@ -158,7 +158,8 @@ export function generateText(product: Product) {
 }
 
 function arrayEquals(a: string[] | undefined, b: string[] | undefined) {
-    return Array.isArray(a) &&
+    return (a === undefined && b === undefined) ||
+        Array.isArray(a) &&
         Array.isArray(b) &&
         a.length === b.length &&
         a.every((val, index) => val === b[index]);
