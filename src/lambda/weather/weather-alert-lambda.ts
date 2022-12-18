@@ -121,9 +121,9 @@ async function processRegularReport(reportType: ReportType) {
 
     let weatherData;
     if (reportType.isAggregate) {
-        weatherData = await openweather.getAsCommonData();
-    } else {
         weatherData = await getAggregatedData();
+    } else {
+        weatherData = await openweather.getAsCommonData();
     }
 
     for (let alert of alerts) {
@@ -136,9 +136,9 @@ async function processRegularReport(reportType: ReportType) {
         let alertData: AlertData;
 
         if (reportType.isAggregate) {
-            alertData = await alert.process(weatherData as WeatherData, reportType);
-        } else {
             alertData = await alert.processAggregate(weatherData as AggregatedWeatherData, reportType);
+        } else {
+            alertData = await alert.process(weatherData as WeatherData, reportType);
         }
 
         if (alertData.hasAlert) {
