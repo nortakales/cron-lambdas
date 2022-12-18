@@ -10,7 +10,7 @@ export class Daily7DaySnowAlert implements Alert {
     alertTitle = "7 Day Snow Alert";
     alertKey = "7-day-snow-alert-daily";
 
-    private readonly snowThreshold = 0;
+    private readonly snowThreshold = 0.1;
 
     async process(weatherData: WeatherData, reportType: ReportType) {
 
