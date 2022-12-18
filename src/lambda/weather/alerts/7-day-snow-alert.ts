@@ -22,7 +22,7 @@ export class Daily7DaySnowAlert implements Alert {
         for (let dailyData of weatherData.daily) {
             if (dailyData.snow && round(dailyData.snow, 1) > this.snowThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: snow is coming! ${round(dailyData.snow, 1)} inches\n`;
+                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: ${round(dailyData.snow, 1)} inches\n`;
             }
         }
 
@@ -49,7 +49,7 @@ export class Daily7DaySnowAlert implements Alert {
         for (let dailyData of weatherData.daily) {
             if (dailyData.snow && dailyData.snow.average + dailyData.snow.std > this.snowThreshold) {
                 hasAlert = true;
-                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: snow is coming! ${dailyData.snow.toString(reportType)} inches\n`;
+                message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}: ${dailyData.snow.toString(reportType)} inches\n`;
             }
         }
 
