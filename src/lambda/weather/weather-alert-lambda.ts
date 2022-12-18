@@ -2,7 +2,7 @@ import { sendEmail } from '../emailer';
 import { NotificationApplication, sendPushNotification, Sound } from '../notifier';
 import { BiDaily48HourWindAlert } from './alerts/48-hour-wind-alert';
 import { Daily7DayWindAlert } from './alerts/7-day-wind-alert';
-import { Alert, NotificationType, ReportType } from './interfaces/alert-types';
+import { Alert, AlertData, NotificationType, ReportType } from './interfaces/alert-types';
 import { WeatherData } from "./data-sources/common/common-data";
 import { Duration } from "typed-duration";
 import * as DDB from '../dynamo';
@@ -15,6 +15,7 @@ import * as openweather from './data-sources/openweather/openweather-api';
 import { startLambdaLog } from '../utilities/logging';
 import { Format, toReadablePacificDate } from './utilities';
 import { getAggregatedData } from './data-sources/aggregate/aggregate';
+import { AggregatedWeatherData } from './data-sources/aggregate/aggregate-data';
 
 const ENABLED = process.env.ENABLED!;
 const TABLE_NAME = process.env.TABLE_NAME!;
@@ -22,6 +23,8 @@ const EMAIL_LIST = process.env.EMAIL_LIST!;
 const SUBJECT = process.env.SUBJECT!;
 const FROM = process.env.FROM!;
 const REPORT_TYPE = process.env.REPORT_TYPE;
+
+const DEFAULT_REPORT_TYPE = ReportType.REGULAR_AGGREGATE;
 
 async function getLastTimestamp(alertKey: string) {
     return await DDB.get(TABLE_NAME, {
@@ -97,18 +100,31 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         case ReportType.ADHOC_AGGREGATE_BREAKOUT:
             return await processAdhocAggregateReport(reportType);
         case ReportType.REGULAR:
+        case ReportType.REGULAR_AGGREGATE:
+            return await processRegularReport(reportType);
         default:
-            return await processRegularReport(await openweather.getAsCommonData(), reportType);
+            return {
+                statusCode: 400,
+                headers: {},
+                body: "Unknown ReportType: " + reportType
+            };
     }
 };
 
-async function processRegularReport(weatherData: WeatherData, reportType: ReportType) {
+async function processRegularReport(reportType: ReportType) {
 
     let hasAlerts = false;
     let hasEmailAlert = false;
     let hasPushAlert = false;
     let emailAlertBody = '';
     let pushAlertBody = '';
+
+    let weatherData;
+    if (reportType.isAggregate) {
+        weatherData = await openweather.getAsCommonData();
+    } else {
+        weatherData = await getAggregatedData();
+    }
 
     for (let alert of alerts) {
 
@@ -117,7 +133,13 @@ async function processRegularReport(weatherData: WeatherData, reportType: Report
             continue;
         }
 
-        const alertData = await alert.process(weatherData, reportType);
+        let alertData: AlertData;
+
+        if (reportType.isAggregate) {
+            alertData = await alert.process(weatherData as WeatherData, reportType);
+        } else {
+            alertData = await alert.processAggregate(weatherData as AggregatedWeatherData, reportType);
+        }
 
         if (alertData.hasAlert) {
             hasAlerts = true;
@@ -225,7 +247,7 @@ function getReportType(event: any): ReportType {
     if (stringToParse === 'adhoc') return ReportType.ADHOC;
     if (stringToParse === 'adhocAggregate') return ReportType.ADHOC_AGGREGATE;
     if (stringToParse === 'adhocAggregateBreakout') return ReportType.ADHOC_AGGREGATE_BREAKOUT;
-    return ReportType.REGULAR;
+    return DEFAULT_REPORT_TYPE;
 }
 
 // Uncomment this to call locally

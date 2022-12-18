@@ -27,16 +27,19 @@ export class ReportType {
 
     readonly name: string;
     readonly isAdhoc: boolean;
+    readonly isAggregate: boolean;
     readonly dataSourceBreakout: boolean;
 
-    static readonly REGULAR = new ReportType('REGULAR', false, false);
-    static readonly ADHOC = new ReportType('ADHOC', false, false);
-    static readonly ADHOC_AGGREGATE = new ReportType('ADHOC_AGGREGATE', false, false);
-    static readonly ADHOC_AGGREGATE_BREAKOUT = new ReportType('ADHOC_AGGREGATE_BREAKOUT', false, true);
+    static readonly REGULAR = new ReportType('REGULAR', false, false, false);
+    static readonly REGULAR_AGGREGATE = new ReportType('REGULAR_AGGREGATE', false, true, false);
+    static readonly ADHOC = new ReportType('ADHOC', true, false, false);
+    static readonly ADHOC_AGGREGATE = new ReportType('ADHOC_AGGREGATE', true, true, false);
+    static readonly ADHOC_AGGREGATE_BREAKOUT = new ReportType('ADHOC_AGGREGATE_BREAKOUT', true, true, true);
 
-    private constructor(name: string, isAdhoc: boolean, dataSourceBreakout: boolean) {
+    private constructor(name: string, isAdhoc: boolean, isAggregate: boolean, dataSourceBreakout: boolean) {
         this.name = name;
         this.isAdhoc = isAdhoc;
+        this.isAggregate = isAggregate;
         this.dataSourceBreakout = dataSourceBreakout;
     }
 }
