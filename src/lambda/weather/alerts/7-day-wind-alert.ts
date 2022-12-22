@@ -53,7 +53,7 @@ export class Daily7DayWindAlert implements Alert {
             const windGustData = dailyData.wind_gust;
             const windDegreeData = dailyData.wind_deg;
 
-            if ((windSpeedData.average + windSpeedData.std) > this.windSpeedThreshold || (windGustData.average + windGustData.std) > this.windGustThreshold) {
+            if ((windSpeedData.average) > this.windSpeedThreshold || (windGustData.average) > this.windGustThreshold) {
                 hasAlert = true;
                 message += `${toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY)}\n    ${windSpeedData.toString(reportType)} mph\n    ${windGustData.toString(reportType)} mph\n    ${windDegreeData.toString(reportType)} deg\n    ${getDirectionFromDegrees(windDegreeData.average)}\n`;
             }
