@@ -65,7 +65,7 @@ export class BiDaily48HourWindAlert implements Alert {
             const windGustData = hourlyData.wind_gust;
             const windDegreeData = hourlyData.wind_deg;
 
-            if ((windSpeedData.average + windSpeedData.std) > this.windSpeedThreshold || (windGustData.average + windGustData.std) > this.windGustThreshold) {
+            if ((windSpeedData.average) > this.windSpeedThreshold || (windGustData.average) > this.windGustThreshold) {
                 hasAlert = true;
                 const currentDate = toReadablePacificDate(hourlyData.datetime, Format.DATE_ONLY);
                 if (date !== currentDate) {
