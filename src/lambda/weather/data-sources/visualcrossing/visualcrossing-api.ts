@@ -2,7 +2,7 @@
 
 import * as SM from '../../../secrets';
 import { httpsGet } from '../../../http';
-import { CurrentConditions, DailyConditions, HourlyConditions, WeatherData } from '../common/common-data';
+import { WeatherData } from '../common/common-data';
 import { AngleAndSpeed, averageAngle, Format, getStartOfDay, toReadablePacificDate } from '../../utilities';
 import queryString from 'query-string';
 import { VisualCrossingData } from './visualcrossing-data';

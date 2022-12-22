@@ -13,14 +13,14 @@ async function main() {
     const reportType = ReportType.ADHOC_AGGREGATE_BREAKOUT;
 
     for (let dailyData of data.daily) {
-        // console.log(toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY));
+        //console.log(toReadablePacificDate(dailyData.datetime, Format.DATE_ONLY));
         // //console.log("Max Temp: " + dailyData.temp.max.toString(reportType));
         // //console.log("Min Temp: " + dailyData.temp.min.toString(reportType));
-        // //console.log("Wind Speed: " + dailyData.wind_speed.toString(reportType));
-        // // console.log("Wind Gust: " + dailyData.wind_gust.toString(reportType));
+        //console.log("Wind Speed: " + dailyData.wind_speed.toString(reportType));
+        //console.log("Wind Gust: " + dailyData.wind_gust.toString(reportType));
         // // console.log("PoP: " + dailyData.pop.toString(reportType));
         // //console.log("Rain: " + dailyData.rain.toString(reportType));
-        // //console.log("Snow: " + dailyData.snow.toString(reportType));
+        //console.log("Snow: " + dailyData.snow.toString(reportType));
         // console.log('');
     }
 
@@ -32,7 +32,7 @@ async function main() {
         // console.log("PoP: " + hourlyData.pop.toString(reportType));
         //console.log("Rain: " + hourlyData.rain.toString(reportType));
         //console.log("Snow: " + hourlyData.snow.toString(reportType));
-        console.log('');
+        //console.log('');
     }
 }
 

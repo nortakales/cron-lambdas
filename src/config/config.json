@@ -37,7 +37,8 @@
         "apiKeySecretOpenWeather": "openweathermap-apikey",
         "apiKeySecretTomorrowIo": "tomorrowio-apikey",
         "apiKeySecretVisualCrossing": "visualcrossing-apikey",
-        "apiCredentialsSecretMeteomatics": "meteomatics-api-credentials"
+        "apiCredentialsSecretMeteomatics": "meteomatics-api-credentials",
+        "apiKeyAccuWeather": "accuweather-api-key"
     },
     "newComics": {
         "enabled": "true",
