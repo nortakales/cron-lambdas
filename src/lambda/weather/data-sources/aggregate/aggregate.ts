@@ -29,7 +29,7 @@ export async function getAggregatedData() {
         vc: visualCrossingData,
         mm: meteomaticsData,
         om: openmeteoData,
-        aw: accuwWeatherData
+        // aw: accuwWeatherData
     }
 
     // Map of timestamp to HourlyConditions
