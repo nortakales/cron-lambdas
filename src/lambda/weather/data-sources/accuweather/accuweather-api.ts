@@ -5,19 +5,22 @@ import { DailyConditions, HourlyConditions, WeatherData } from '../common/common
 import { averageAngle, getStartOfDay } from '../../utilities';
 
 const API_KEY_ACCUWEATHER = process.env.API_KEY_ACCUWEATHER!;
+const API_KEY_ACCUWEATHER_ALTERNATE = process.env.API_KEY_ACCUWEATHER_ALTERNATE!;
 
 export async function getAccuWeatherData() {
 
     const apiKey = await SM.getSecretString(API_KEY_ACCUWEATHER);
+    const apiKey2 = await SM.getSecretString(API_KEY_ACCUWEATHER_ALTERNATE);
 
-    const locationUrl = `https://dataservice.accuweather.com/locations/v1/postalcodes/US/search?apikey=${apiKey}&q=98021`;
-    const locationJson = await httpsGet(locationUrl);
-    const locationData = JSON.parse(locationJson);
-    const locationKey = locationData[0].Key;
+    // TODO Check that the locationKey hasn't changed every so often
+    // const locationUrl = `https://dataservice.accuweather.com/locations/v1/postalcodes/US/search?apikey=${apiKey}&q=98021`;
+    // const locationJson = await httpsGet(locationUrl);
+    // const locationData = JSON.parse(locationJson);
+    // const locationKey = locationData[0].Key;
+    const locationKey = '41277_PC';
 
     const hourlyUrl = `https://dataservice.accuweather.com/forecasts/v1/hourly/12hour/${locationKey}?apikey=${apiKey}&details=true`;
-    const dailyUrl = `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}?apikey=${apiKey}&details=true`;
-
+    const dailyUrl = `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}?apikey=${apiKey2}&details=true`;
 
     let hourlyData;
     let dailyData;

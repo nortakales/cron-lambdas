@@ -20,7 +20,7 @@ export async function getAggregatedData() {
     const visualCrossingData = await visualcrossing.getAsCommonData();
     const meteomaticsData = await meteomatics.getAsCommonData();
     const openmeteoData = await openmeteo.getAsCommonData();
-    // const accuwWeatherData = await accuweather.getAsCommonData();
+    const accuwWeatherData = await accuweather.getAsCommonData();
 
     const allData: { [key: string]: WeatherData } = {
         ow: openWeatherData,
@@ -29,7 +29,7 @@ export async function getAggregatedData() {
         vc: visualCrossingData,
         mm: meteomaticsData,
         om: openmeteoData,
-        // aw: accuwWeatherData
+        aw: accuwWeatherData
     }
 
     // Map of timestamp to HourlyConditions

@@ -42,7 +42,8 @@ export class WeatherAlertCron extends Construct {
                 API_KEY_SECRET_TOMORROW_IO: config.weatherAlert.apiKeySecretTomorrowIo,
                 API_KEY_SECRET_VISUAL_CROSSING: config.weatherAlert.apiKeySecretVisualCrossing,
                 API_CREDENTIALS_SECRET_METEOMATICS: config.weatherAlert.apiCredentialsSecretMeteomatics,
-                API_KEY_ACCUWEATHER: config.weatherAlert.apiKeyAccuWeather
+                API_KEY_ACCUWEATHER: config.weatherAlert.apiKeyAccuWeather,
+                API_KEY_ACCUWEATHER_ALTERNATE: config.weatherAlert.apiKeyAccuWeatherAlternate,
             },
             timeout: cdk.Duration.seconds(10),
             retryAttempts: 2,

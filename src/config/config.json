@@ -38,7 +38,8 @@
         "apiKeySecretTomorrowIo": "tomorrowio-apikey",
         "apiKeySecretVisualCrossing": "visualcrossing-apikey",
         "apiCredentialsSecretMeteomatics": "meteomatics-api-credentials",
-        "apiKeyAccuWeather": "accuweather-api-key"
+        "apiKeyAccuWeather": "accuweather-api-key",
+        "apiKeyAccuWeatherAlternate": "accuweather-alternate-api-key"
     },
     "newComics": {
         "enabled": "true",

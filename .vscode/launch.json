@@ -32,6 +32,7 @@
                 "API_KEY_SECRET_VISUAL_CROSSING": "visualcrossing-apikey",
                 "API_CREDENTIALS_SECRET_METEOMATICS": "meteomatics-api-credentials",
                 "API_KEY_ACCUWEATHER": "accuweather-api-key",
+                "API_KEY_ACCUWEATHER_ALTERNATE": "accuweather-alternate-api-key",
             },
             "internalConsoleOptions": "openOnSessionStart"
         },
@@ -123,6 +124,7 @@
                 "API_KEY_SECRET_VISUAL_CROSSING": "visualcrossing-apikey",
                 "API_CREDENTIALS_SECRET_METEOMATICS": "meteomatics-api-credentials",
                 "API_KEY_ACCUWEATHER": "accuweather-api-key",
+                "API_KEY_ACCUWEATHER_ALTERNATE": "accuweather-alternate-api-key",
                 "LATITUDE": "47.806994",
                 "LONGITUDE": "-122.192443",
                 "REGION": "us-west-2"
