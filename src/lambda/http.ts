@@ -33,16 +33,21 @@ export async function httpsGet(url: string, userAgent?: string, attempts: number
                 return httpsGet(url, userAgent, --attempts);
             }
 
-            let errorMessage = '';
+            let statusCodeMessage = '';
             switch (response.statusCode) {
                 case 429:
-                    errorMessage = ' Too many requests!';
+                    statusCodeMessage = ' Too many requests!';
                     break;
             }
 
             if (response.statusCode < 200 ||
                 response.statusCode >= 300) {
-                return reject(new Error('statusCode=' + response.statusCode + errorMessage));
+                const errorMessage = 'Error getting URL: ' + url +
+                    '\nStatusCode: ' + response.statusCode +
+                    '\nStatusCodeMessage: ' + statusCodeMessage;
+                console.log(errorMessage);
+                // TODO maybe move this to when data transfer is finished to dump the response data?
+                throw new Error(errorMessage);
             }
 
             let data = '';
@@ -57,9 +62,11 @@ export async function httpsGet(url: string, userAgent?: string, attempts: number
                 resolve(data);
             });
 
-        }).on("error", (err) => {
-            console.log("Error: " + err.message);
-            reject(err.message);
+        }).on("error", (error) => {
+            const errorMessage = 'Error getting URL: ' + url +
+                '\nErrorMessage: ' + error.message
+            console.log(errorMessage);
+            throw error;
         });
 
         request.end();
