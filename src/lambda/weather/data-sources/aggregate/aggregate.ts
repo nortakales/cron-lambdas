@@ -12,24 +12,77 @@ import * as accuweather from "../accuweather/accuweather-api";
 const TOTAL_DAYS = 8; // All current sources give today + 7 days
 const TOTAL_HOURS = 3 * 24 // We have 4 sources for 2 days, the rest for almost 7 days, but that is unneeded
 
+export interface DataSource {
+    readonly fullName: string,
+    readonly shortCode: string,
+    getData(): Promise<WeatherData>
+}
+
+const dataSources: DataSource[] = [
+    {
+        fullName: "OpenWeather",
+        shortCode: "ow",
+        getData: async function () {
+            return await openweather.getAsCommonData();
+        }
+    },
+    {
+        fullName: "Weather.gov",
+        shortCode: "wg",
+        getData: async function () {
+            return await weathergov.getAsCommonData();
+        }
+    },
+    {
+        fullName: "TomorrowIO",
+        shortCode: "ti",
+        getData: async function () {
+            return await tomorrowio.getAsCommonData();
+        }
+    },
+    {
+        fullName: "VisualCrossing",
+        shortCode: "vc",
+        getData: async function () {
+            return await visualcrossing.getAsCommonData();
+        }
+    },
+    {
+        fullName: "Meteomatics",
+        shortCode: "mm",
+        getData: async function () {
+            return await meteomatics.getAsCommonData();
+        }
+    },
+    {
+        fullName: "OpenMeteo",
+        shortCode: "om",
+        getData: async function () {
+            return await openmeteo.getAsCommonData();
+        }
+    },
+    {
+        fullName: "AccuWeather",
+        shortCode: "aw",
+        getData: async function () {
+            return await accuweather.getAsCommonData();
+        }
+    },
+]
+
 export async function getAggregatedData() {
 
-    const openWeatherData = await openweather.getAsCommonData();
-    const weathergovData = await weathergov.getAsCommonData();
-    const tomorrowIOData = await tomorrowio.getAsCommonData();
-    const visualCrossingData = await visualcrossing.getAsCommonData();
-    const meteomaticsData = await meteomatics.getAsCommonData();
-    const openmeteoData = await openmeteo.getAsCommonData();
-    const accuwWeatherData = await accuweather.getAsCommonData();
+    const allData: { [key: string]: WeatherData } = {};
 
-    const allData: { [key: string]: WeatherData } = {
-        ow: openWeatherData,
-        wg: weathergovData,
-        ti: tomorrowIOData,
-        vc: visualCrossingData,
-        mm: meteomaticsData,
-        om: openmeteoData,
-        aw: accuwWeatherData
+    for (let dataSource of dataSources) {
+        try {
+            allData[dataSource.shortCode] = await dataSource.getData();
+        } catch (error) {
+            // TODO well unfortunately this doesn't work - need a lot of refactoring to get it working
+            // The issue is that all of the async/await calls are executing in another call stack
+            console.log("ERROR: Error processing data source " + dataSource.fullName + ", will continue on without it.");
+            console.log(error);
+        }
     }
 
     // Map of timestamp to HourlyConditions
