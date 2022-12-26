@@ -22,22 +22,20 @@ export async function getAccuWeatherData() {
     const hourlyUrl = `https://dataservice.accuweather.com/forecasts/v1/hourly/12hour/${locationKey}?apikey=${apiKey}&details=true`;
     const dailyUrl = `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}?apikey=${apiKey2}&details=true`;
 
-    let hourlyData;
-    let dailyData;
+    const hourlyData = await httpsGet(hourlyUrl);
+    const dailyData = await httpsGet(dailyUrl);
     try {
-        hourlyData = await httpsGet(hourlyUrl);
-        dailyData = await httpsGet(dailyUrl);
         const weatherData: AccuWeatherData = {
             hourlyData: JSON.parse(hourlyData),
             dailyData: JSON.parse(dailyData)
         }
         return weatherData;
     } catch (error) {
-        console.log(JSON.stringify(error, null, 2));
-        console.log("Dumping hourly weather data:");
+        console.log("ERROR parsing weather data! Dumping payload:");
         console.log(hourlyData);
-        console.log("Dumping daily weather data:");
+        console.log("ERROR parsing weather data! Dumping payload:");
         console.log(dailyData);
+        console.log(error);
         throw error;
     }
 }

@@ -27,15 +27,14 @@ export async function getMeteomaticsData() {
     // https://api.meteomatics.com/2022-11-04T00:00:00Z--2022-11-12T00:00:00Z:PT1H/wind_speed_10m:mph,wind_gusts_10m_1h:mph,wind_dir_10m:d,t_2m:F,precip_1h:mm/47.806994,-122.192443/json?accessToken=
     const url = `https://api.meteomatics.com/${start}--${end}:PT1H/wind_speed_10m:mph,wind_gusts_10m_1h:mph,wind_dir_10m:d,t_2m:F,precip_1h:mm/${LATITUDE},${LONGITUDE}/json?access_token=${authObject.access_token}`;
 
-    let data;
+    const data = await httpsGet(url);
     try {
-        data = await httpsGet(url);
         const weatherData: MeteomaticsData = JSON.parse(data);
         return weatherData;
     } catch (error) {
-        console.log(JSON.stringify(error, null, 2));
-        console.log("Dumping weather data:");
+        console.log("ERROR parsing weather data! Dumping payload:");
         console.log(data);
+        console.log(error);
         throw error;
     }
 }

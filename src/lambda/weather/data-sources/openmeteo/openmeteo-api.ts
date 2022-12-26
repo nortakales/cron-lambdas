@@ -40,15 +40,14 @@ export async function getOpenMeteoData() {
 
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}&hourly=temperature_2m,relativehumidity_2m,precipitation,rain,showers,snowfall,snow_depth,windspeed_10m,winddirection_10m,windgusts_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,rain_sum,showers_sum,snowfall_sum,windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch&timezone=America%2FLos_Angeles`;
 
-    let data;
+    const data = await httpsGet(url);
     try {
-        data = await httpsGet(url);
         const weatherData: OpenMeteoData = JSON.parse(data);
         return weatherData;
     } catch (error) {
-        console.log(JSON.stringify(error, null, 2));
-        console.log("Dumping weather data:");
+        console.log("ERROR parsing weather data! Dumping payload:");
         console.log(data);
+        console.log(error);
         throw error;
     }
 }

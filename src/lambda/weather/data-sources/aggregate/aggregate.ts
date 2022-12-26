@@ -1,87 +1,32 @@
+import { isStatusObject } from "../../../http";
 import { getStartOfDay, toReadablePacificDate } from "../../utilities";
 import { WeatherData } from "../common/common-data";
-import * as openweather from "../openweather/openweather-api";
-import * as weathergov from "../weathergov/weathergov-api";
-import * as tomorrowio from "../tomorrowio/tomorrowio-api";
-import * as visualcrossing from "../visualcrossing/visualcrossing-api";
 import { AggregatedProperty, AggregatedWeatherData, DailyConditions, HourlyConditions } from "./aggregate-data";
-import * as meteomatics from "../meteomatics/meteomatics-api";
-import * as openmeteo from "../openmeteo/openmeteo-api";
-import * as accuweather from "../accuweather/accuweather-api";
+import { dataSources } from "./data-sources";
 
 const TOTAL_DAYS = 8; // All current sources give today + 7 days
 const TOTAL_HOURS = 3 * 24 // We have 4 sources for 2 days, the rest for almost 7 days, but that is unneeded
-
-export interface DataSource {
-    readonly fullName: string,
-    readonly shortCode: string,
-    getData(): Promise<WeatherData>
-}
-
-const dataSources: DataSource[] = [
-    {
-        fullName: "OpenWeather",
-        shortCode: "ow",
-        getData: async function () {
-            return await openweather.getAsCommonData();
-        }
-    },
-    {
-        fullName: "Weather.gov",
-        shortCode: "wg",
-        getData: async function () {
-            return await weathergov.getAsCommonData();
-        }
-    },
-    {
-        fullName: "TomorrowIO",
-        shortCode: "ti",
-        getData: async function () {
-            return await tomorrowio.getAsCommonData();
-        }
-    },
-    {
-        fullName: "VisualCrossing",
-        shortCode: "vc",
-        getData: async function () {
-            return await visualcrossing.getAsCommonData();
-        }
-    },
-    {
-        fullName: "Meteomatics",
-        shortCode: "mm",
-        getData: async function () {
-            return await meteomatics.getAsCommonData();
-        }
-    },
-    {
-        fullName: "OpenMeteo",
-        shortCode: "om",
-        getData: async function () {
-            return await openmeteo.getAsCommonData();
-        }
-    },
-    {
-        fullName: "AccuWeather",
-        shortCode: "aw",
-        getData: async function () {
-            return await accuweather.getAsCommonData();
-        }
-    },
-]
 
 export async function getAggregatedData() {
 
     const allData: { [key: string]: WeatherData } = {};
 
     for (let dataSource of dataSources) {
+        if (!dataSource.enabled) {
+            console.log('Skipping data source "' + dataSource.fullName + '" because it is disabled');
+            continue;
+        }
         try {
             allData[dataSource.shortCode] = await dataSource.getData();
         } catch (error) {
             // TODO well unfortunately this doesn't work - need a lot of refactoring to get it working
             // The issue is that all of the async/await calls are executing in another call stack
-            console.log("ERROR: Error processing data source " + dataSource.fullName + ", will continue on without it.");
-            console.log(error);
+            console.log("DATA_SOURCE_SKIPPED: Issue processing data source " + dataSource.fullName + ", will continue on without it.");
+            if (isStatusObject(error)) {
+                console.log("DATA_SOURCE_SKIPPED: " + JSON.stringify(error, null, 2).replace('\\n', '\n').replace('\\n', '\n'));
+            } else {
+                console.log(error);
+            }
         }
     }
 

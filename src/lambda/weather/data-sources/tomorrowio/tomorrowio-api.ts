@@ -72,17 +72,15 @@ export async function getTomorrowIOData() {
         arrayFormat: "comma"
     });
 
+    const data = await httpsGet(getTimelineURL + "?" + queryStringParams);
 
-    let data;
     try {
-        data = await httpsGet(getTimelineURL + "?" + queryStringParams);
         const weatherData: TomorrowIOData = JSON.parse(data);
-        //console.log(JSON.stringify(weatherData, null, 2));
         return weatherData;
     } catch (error) {
-        console.log(JSON.stringify(error, null, 2));
-        console.log("Dumping weather data:");
+        console.log("ERROR parsing weather data! Dumping payload:");
         console.log(data);
+        console.log(error);
         throw error;
     }
 }

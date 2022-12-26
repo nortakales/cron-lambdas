@@ -13,18 +13,17 @@ export async function getOpenWeatherData() {
 
     const apiKey = await SM.getSecretString(API_KEY_SECRET_OPEN_WEATHER);
 
-    // https://api.openweathermap.org/data/2.5/onecall?lat=47.806994&lon=-122.192443&appid=c6eaff3ab2bec2990b0df6123e69b74e&lang=en&units=imperial
+    // https://api.openweathermap.org/data/2.5/onecall?lat=47.806994&lon=-122.192443&lang=en&units=imperial&appid=
     const url = `https://api.openweathermap.org/data/2.5/onecall?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${apiKey}&lang=en&units=imperial`;
 
-    let data;
+    const data = await httpsGet(url);
     try {
-        data = await httpsGet(url);
         const weatherData: OpenWeatherData = JSON.parse(data);
         return weatherData;
     } catch (error) {
-        console.log(JSON.stringify(error, null, 2));
-        console.log("Dumping weather data:");
+        console.log("ERROR parsing weather data! Dumping payload:");
         console.log(data);
+        console.log(error);
         throw error;
     }
 }

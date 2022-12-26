@@ -46,17 +46,15 @@ export async function getVisualCrossingData() {
         arrayFormat: "comma"
     });
 
+    const data = await httpsGet(forecastUrl + "?" + queryStringParams);
 
-    let data;
     try {
-        data = await httpsGet(forecastUrl + "?" + queryStringParams);
         const weatherData: VisualCrossingData = JSON.parse(data);
-        // console.log(JSON.stringify(weatherData, null, 2));
         return weatherData;
     } catch (error) {
-        console.log(JSON.stringify(error, null, 2));
-        console.log("Dumping weather data:");
+        console.log("ERROR parsing weather data! Dumping payload:");
         console.log(data);
+        console.log(error);
         throw error;
     }
 }

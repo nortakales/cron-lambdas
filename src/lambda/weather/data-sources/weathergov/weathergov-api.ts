@@ -8,17 +8,18 @@ import { WeatherGovData, WeatherGovProperty } from './weathergov-data';
 export async function getOpenWeatherData() {
 
     const url = `https://api.weather.gov/gridpoints/SEW/130,76`;
+    //const url = `https://www.nortakales.com/thisisjustmetestingweatherapp`;
     const userAgent = '(Custom Weather App, nortakales@gmail.com)';
 
-    let data;
+    const data = await httpsGet(url, userAgent);
+
     try {
-        data = await httpsGet(url, userAgent);
         const weatherData: WeatherGovData = JSON.parse(data);
         return weatherData;
     } catch (error) {
-        console.log(JSON.stringify(error, null, 2));
-        console.log("Dumping weather data:");
+        console.log("ERROR parsing weather data! Dumping payload:");
         console.log(data);
+        console.log(error);
         throw error;
     }
 }
