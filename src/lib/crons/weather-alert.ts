@@ -45,7 +45,7 @@ export class WeatherAlertCron extends Construct {
                 API_KEY_ACCUWEATHER: config.weatherAlert.apiKeyAccuWeather,
                 API_KEY_ACCUWEATHER_ALTERNATE: config.weatherAlert.apiKeyAccuWeatherAlternate,
             },
-            timeout: cdk.Duration.seconds(10),
+            timeout: cdk.Duration.seconds(60),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,

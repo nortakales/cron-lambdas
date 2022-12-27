@@ -269,4 +269,4 @@ function getReportType(event: any): ReportType {
 }
 
 // Uncomment this to call locally
-exports.handler();
+// exports.handler();
