@@ -1,7 +1,7 @@
-import { isStatusObject } from "../../../http";
+import { isStatusObject, Status } from "../../../http";
 import { getStartOfDay, toReadablePacificDate } from "../../utilities";
 import { WeatherData } from "../common/common-data";
-import { AggregatedProperty, AggregatedWeatherData, DailyConditions, HourlyConditions } from "./aggregate-data";
+import { AggregatedProperty, AggregatedWeatherData, DailyConditions, HourlyConditions, SkippedDataSource } from "./aggregate-data";
 import { dataSources } from "./data-sources";
 
 const TOTAL_DAYS = 8; // All current sources give today + 7 days
@@ -10,6 +10,7 @@ const TOTAL_HOURS = 3 * 24 // We have 4 sources for 2 days, the rest for almost 
 export async function getAggregatedData() {
 
     const allData: { [key: string]: WeatherData } = {};
+    const skippedDataSources: SkippedDataSource[] = [];
 
     for (let dataSource of dataSources) {
         if (!dataSource.enabled) {
@@ -19,14 +20,19 @@ export async function getAggregatedData() {
         try {
             allData[dataSource.shortCode] = await dataSource.getData();
         } catch (error) {
-            // TODO well unfortunately this doesn't work - need a lot of refactoring to get it working
-            // The issue is that all of the async/await calls are executing in another call stack
+            let reason;
             console.log("DATA_SOURCE_SKIPPED: Issue processing data source " + dataSource.fullName + ", will continue on without it.");
             if (isStatusObject(error)) {
                 console.log("DATA_SOURCE_SKIPPED: " + JSON.stringify(error, null, 2).replace('\\n', '\n').replace('\\n', '\n'));
+                reason = (error as Status).statusCode + " " + (error as Status).statusMessage;
             } else {
-                console.log(error);
+                console.error(error);
+                reason = "Unknown error";
             }
+            skippedDataSources.push({
+                dataSourceName: dataSource.fullName,
+                reason: reason
+            });
         }
     }
 
@@ -144,6 +150,7 @@ export async function getAggregatedData() {
         daily: Object.values(aggregatedDailyData)
             .sort((a: any, b: any) => a.datetime - b.datetime)
             .filter((dailyData: any) => dailyData.datetime < dailyMax)
-            .filter((dailyData: any) => dailyData.datetime >= today)
+            .filter((dailyData: any) => dailyData.datetime >= today),
+        skippedDataSources: skippedDataSources
     } as AggregatedWeatherData;
 }

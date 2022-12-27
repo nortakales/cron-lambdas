@@ -158,6 +158,17 @@ async function processRegularReport(reportType: ReportType) {
         }
     }
 
+    if (reportType.isAggregate && (weatherData as AggregatedWeatherData).skippedDataSources.length > 0) {
+        hasAlerts = true;
+        let skippedSourcesMessage = 'Skipped Data Sources\n\n';
+        for (let skippedSource of (weatherData as AggregatedWeatherData).skippedDataSources) {
+            skippedSourcesMessage += `${skippedSource.dataSourceName}: ${skippedSource.reason}\n\n`
+        }
+        emailAlertBody += skippedSourcesMessage;
+        pushAlertBody += skippedSourcesMessage;
+        // TODO maybe send a special notification if we are skipping a source too often?
+    }
+
     if (!hasAlerts) {
         console.log("No alerts!");
         console.log("Complete");
@@ -232,6 +243,13 @@ async function processAdhocAggregateReport(reportType: ReportType) {
         }
     }
 
+    if (data.skippedDataSources.length > 0) {
+        alertBody += 'Skipped Data Sources\n\n';
+        for (let skippedSource of data.skippedDataSources) {
+            alertBody += `${skippedSource.dataSourceName}: ${skippedSource.reason}\n\n`
+        }
+    }
+
     console.log("Complete");
 
     return {
@@ -251,4 +269,4 @@ function getReportType(event: any): ReportType {
 }
 
 // Uncomment this to call locally
-// exports.handler();
+exports.handler();

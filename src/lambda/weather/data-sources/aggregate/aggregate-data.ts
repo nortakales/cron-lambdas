@@ -5,6 +5,13 @@ export interface AggregatedWeatherData {
     minutely: MinutelyConditions[];
     hourly: HourlyConditions[];
     daily: DailyConditions[];
+
+    skippedDataSources: SkippedDataSource[]
+}
+
+export interface SkippedDataSource {
+    dataSourceName: string,
+    reason: string
 }
 
 export interface BaseConditions {
