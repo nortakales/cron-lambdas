@@ -4,7 +4,7 @@ import { parse, HTMLElement } from 'node-html-parser';
 
 const BASE_URL = 'https://www.lego.com/en-us/product/';
 
-export async function getLatestProductData(product: Product): Promise<Product> {
+export async function getLatestProductData(product: Product, attempts: number = 2): Promise<Product> {
 
     const html = await httpsGet(BASE_URL + product.urlKey);
     const dom = parse(html);
@@ -15,11 +15,21 @@ export async function getLatestProductData(product: Product): Promise<Product> {
     let tags = getTags(dom);
     const promotion = getPromotion(dom);
 
-
     const salePrice = getSalePrice(dom);
     if (salePrice) {
         price = salePrice;
         tags.push("On sale");
+    }
+
+    // If some of the stuff is undefined, give it another try
+    // TODO this should be abstracted out from lego class
+    if (price === undefined && addToCartButton === undefined && status === undefined && tags === undefined && promotion === undefined) {
+        if (--attempts > 0) {
+            console.log(`Product appears to be empty, trying again with ${attempts} left`);
+            return getLatestProductData(product, attempts);
+        } else {
+            console.log(`Product appears to be empty after all attempts`);
+        }
     }
 
     return {
