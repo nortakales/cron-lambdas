@@ -29,6 +29,8 @@ async function httpGet(event: any) {
     required(event.queryStringParameters.operation, "event.queryStringParameters.operation");
 
     switch (event.queryStringParameters.operation) {
+        case "PUT":
+            return await httpGet_put(event);
         case "QUERY":
             return await httpGet_query(event);
         case "DELETE":
@@ -36,6 +38,11 @@ async function httpGet(event: any) {
         default:
             throw new Error("Unknown operation for httpGet: " + event.queryStringParameters.operation);
     }
+}
+
+
+async function httpGet_put(event: any) {
+
 }
 
 async function httpGet_query(event: any) {
