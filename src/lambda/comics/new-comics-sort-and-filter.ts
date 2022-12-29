@@ -209,7 +209,8 @@ const SERIES_TO_EXCLUDE = [
     "Mighty Morphin Power Rangers",
     "Cinebook",
     "Ediciones La Cupula",
-    "Wolverine"
+    "Wolverine",
+    "Killadelphia"
 ]
 function removeNumber(title: string) {
     return title.replace(/\s#\d+$/, '');
