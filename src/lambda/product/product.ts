@@ -12,6 +12,7 @@ export interface Product {
     promotion?: string
     tags?: string[]
     issues?: string[]
+    onSale?: boolean
 }
 
 export interface ProductDiff {

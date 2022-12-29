@@ -16,9 +16,11 @@ export async function getLatestProductData(product: Product, attempts: number = 
     const promotion = getPromotion(dom);
 
     const salePrice = getSalePrice(dom);
+    let onSale = false;
     if (salePrice) {
         price = salePrice;
         tags.push("On sale");
+        onSale = true;
     }
 
     // If some of the stuff is undefined, give it another try
@@ -41,7 +43,8 @@ export async function getLatestProductData(product: Product, attempts: number = 
         status,
         tags,
         promotion,
-        url: BASE_URL + product.urlKey
+        url: BASE_URL + product.urlKey,
+        onSale
     } as Product;
 }
 

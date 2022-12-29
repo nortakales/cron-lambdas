@@ -33,6 +33,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     }
 
     const productDiffs = [];
+    let saleBody = '';
 
     for (const product of products) {
         console.log("Looking up latest details for product:");
@@ -44,6 +45,10 @@ exports.handler = async (event: any = {}, context: any = {}) => {
                 break;
         }
         productDiffs.push(generateDiff(product, newProduct));
+
+        if (newProduct.onSale) {
+            saleBody += `<b><a href="${product.url}">${product.title}</a></b><br>`;
+        }
     }
 
     const commonDiffMetadata = generateCommonDiffMetadata(productDiffs);
@@ -78,7 +83,8 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     }
 
     emailBody += `<h1>Changes</h1>
-    ${diffBody ? diffBody : 'None'}<br>
+    ${diffBody ? diffBody : 'None'}
+    ${saleBody ? '<h1>Sales</h1>' + saleBody : ''}
     <h1>Summary</h1>
     ${sameBody ? sameBody : 'None'}`;
 
@@ -97,4 +103,4 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 };
 
 // Uncomment this to call locally
-// exports.handler();
+exports.handler();
