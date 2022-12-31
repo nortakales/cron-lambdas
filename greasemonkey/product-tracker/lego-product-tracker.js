@@ -41,20 +41,28 @@
         `.trim());
     }
 
+    function getTitle() {
+        return $('h1[data-test="product-overview-name"]').text();
+    }
+
     function showNotTrackedUI() {
+        let title = getTitle();
+        let website = 'LEGO';
         $('body').prepend(`
             <div style="z-index:999;position:absolute;background-color:#dc7b72;">
-            NOT tracked.
+            NOT tracked. <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=PUT&table=products&a1=title&a2=${title}&a3=urlKey&a4=${urlKey}&a5=website&a6=${website}">Add</a>
             </div>
         `.trim());
     }
 
-    GM_xmlhttpRequest({
-        method: "GET",
-        url: `https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=QUERY&table=products&indexName=urlKey-index&hashKeyName=urlKey&hashKey=${urlKey}&rangeKeyName=website&rangeKey=LEGO`,
-        onload: showUI,
-        onrror: logError,
-        ontimeout: logError
+    $(document).ready(function() {
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: `https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=QUERY&table=products&indexName=urlKey-index&hashKeyName=urlKey&hashKey=${urlKey}&rangeKeyName=website&rangeKey=LEGO`,
+            onload: showUI,
+            onrror: logError,
+            ontimeout: logError
+        });
     });
 
 })();
