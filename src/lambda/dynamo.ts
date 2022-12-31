@@ -53,6 +53,8 @@ export async function query(table: string, indexName: string, hashKeyName: strin
         ExpressionAttributeValues: keyConditionExpressionValues
     };
 
+    console.log(`Running query: ${table}:  ${JSON.stringify(query)}`);
+
     const item = await DDB.query(query);
 
     if (item.Items !== undefined) {
@@ -66,7 +68,7 @@ export async function query(table: string, indexName: string, hashKeyName: strin
 
 export async function put(table: string, item: { [key: string]: any }) {
 
-    console.log("Writing to DDB: " + JSON.stringify(item));
+    console.log(`Writing to DDB: ${table}: ${JSON.stringify(item)}`);
 
     await DDB.put({
         TableName: table,
@@ -89,7 +91,7 @@ export async function scan(table: string) {
 
 export async function del(table: string, key: { [key: string]: any }) {
 
-    console.log("Deleting from DDB: " + JSON.stringify(key));
+    console.log(`Deleting from DDB: ${table}: ${JSON.stringify(key)}`);
 
     await DDB.delete({
         TableName: table,
