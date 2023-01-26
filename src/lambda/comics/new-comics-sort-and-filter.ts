@@ -134,7 +134,12 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Artists Elite Comics",
     "Boing Being",
     "Comics Experience Publishing",
-    "Really Easy Press"
+    "Really Easy Press",
+    "American Nature",
+    "Dupuis",
+    "Kodansha",
+    "Lev Gleason - Comic House",
+    "Living the Line"
 ];
 
 // The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
