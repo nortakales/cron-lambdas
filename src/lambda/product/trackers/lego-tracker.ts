@@ -25,7 +25,7 @@ export async function getLatestProductData(product: Product, attempts: number = 
 
     // If some of the stuff is undefined, give it another try
     // TODO this should be abstracted out from lego class
-    if (price === undefined && addToCartButton === undefined && status === undefined && tags === undefined && promotion === undefined) {
+    if (price === undefined && addToCartButton === undefined && status === undefined && (tags === undefined || tags.length == 0) && promotion === undefined) {
         if (--attempts > 0) {
             console.log(`Product appears to be empty, trying again with ${attempts} left`);
             return getLatestProductData(product, attempts);
