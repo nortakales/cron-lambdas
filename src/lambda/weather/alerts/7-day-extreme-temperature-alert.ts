@@ -56,7 +56,7 @@ export class Daily7DayExtremeTemperatureAlert implements Alert {
         for (let dailyData of weatherData.daily) {
 
             const maxData = dailyData.temp.max;
-            const minData = dailyData.temp.max;
+            const minData = dailyData.temp.min;
 
             if ((maxData.average + maxData.std) > this.highTemp || (minData.average - minData.std) < this.lowTemp) {
                 hasAlert = true;
