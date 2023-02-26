@@ -18,7 +18,8 @@
             "michelegraaff@outlook.com",
             "sungcampbell@gmail.com",
             "nathan.olotoa@hotmail.com",
-            "jeff.waibel@gmail.com"
+            "jeff.waibel@gmail.com",
+            "bonnie@safehorses.org"
         ],
         "pushNotificationLambdaArn": "arn:aws:lambda:us-west-2:787068200846:function:AutoxPushLambdaFunction"
     },
