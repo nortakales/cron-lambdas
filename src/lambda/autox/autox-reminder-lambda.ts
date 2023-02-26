@@ -187,7 +187,7 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     });
 };
 
-const registrationRegex = /[Rr]egistration.{0,30}(go live|open).{0,20}?(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4})(?: at)? (\d{1,2}:\d{2}) ?([AaPp][Mm])/;
+const registrationRegex = /[Rr]egistration.{0,30}(?:go live|open).{0,20}?(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4})(?: at)? (\d{1,2}:\d{2}) ?([AaPp][Mm])/;
 function getRegistrationTimeFromHtml(html: string) {
 
     const match = registrationRegex.exec(html);
