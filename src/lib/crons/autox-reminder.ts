@@ -36,7 +36,7 @@ export class AutoxReminderCron extends Construct {
                 PUSH_NOTIFICATION_LAMBDA_ARN: config.autoxReminder.pushNotificationLambdaArn,
                 PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey
             },
-            timeout: cdk.Duration.seconds(10),
+            timeout: cdk.Duration.seconds(60),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
