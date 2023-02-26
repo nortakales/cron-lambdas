@@ -94,11 +94,19 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
 
             if (urlMatch.registrationDate !== null) {
                 const firstNotificationDate = getFirstNotificationDate(urlMatch.registrationDate);
-                const firstTimerId = await createTimer(firstNotificationDate, PUSH_NOTIFICATION_LAMBDA_ARN, urlMatch)
+                const firstTimerId = await createTimer(
+                    firstNotificationDate,
+                    PUSH_NOTIFICATION_LAMBDA_ARN,
+                    'First AutoX push notification for: ' + urlMatch.name,
+                    urlMatch)
                 urlMatch.firstTimerId = firstTimerId;
 
                 const secondNotificationDate = getSecondNotificationDate(urlMatch.registrationDate);
-                const secondTimerId = await createTimer(secondNotificationDate, PUSH_NOTIFICATION_LAMBDA_ARN, urlMatch)
+                const secondTimerId = await createTimer(
+                    secondNotificationDate,
+                    PUSH_NOTIFICATION_LAMBDA_ARN,
+                    'Second AutoX push notification for: ' + urlMatch.name,
+                    urlMatch)
                 urlMatch.secondTimerId = secondTimerId;
             }
 

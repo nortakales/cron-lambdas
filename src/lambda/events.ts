@@ -5,7 +5,7 @@ const REGION = process.env.REGION!;
 
 const events = new CloudWatchEventsClient({ region: REGION });
 
-export async function createTimer(triggerTime: Date, lambdaArn: string, data: any) {
+export async function createTimer(triggerTime: Date, lambdaArn: string, description: string, data: any) {
 
     const timerId = randomUUID();
     data.timerId = timerId;
@@ -14,7 +14,7 @@ export async function createTimer(triggerTime: Date, lambdaArn: string, data: an
 
     const rule = new PutRuleCommand({
         Name: timerId,
-        Description: 'One time trigger for sending an Autox notification',
+        Description: description,
         ScheduleExpression: `cron(${cronExpression})`
     });
 
