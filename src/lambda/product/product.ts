@@ -231,3 +231,18 @@ export function generateCommonDiffMetadata(diffs: ProductDiff[]) {
 
     return commonDiffMetadata;
 }
+
+export function diffCount(diff: ProductDiff) {
+    let count = 0;
+    if (diff.diffAddToCartButton) count++;
+    if (diff.diffIssues) count++;
+    if (diff.diffPrice) count++;
+    if (diff.diffPromotion) count++;
+    if (diff.diffStatus) count++;
+    if (diff.diffTags) count++;
+    if (diff.diffTitle) count++;
+    if (diff.diffUrl) count++;
+    if (diff.diffUrlKey) count++;
+    if (diff.diffWebsite) count++;
+    return count;
+}

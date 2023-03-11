@@ -1,7 +1,7 @@
 import { put, scan } from "../dynamo";
 import { sendEmail } from "../emailer";
 import { startLambdaLog } from "../utilities/logging";
-import { diffIsOnlyCommon, generateCommonDiffMetadata, generateDiff, generateDiffText, generateText, Product, Website } from "./product";
+import { diffCount, diffIsOnlyCommon, generateCommonDiffMetadata, generateDiff, generateDiffText, generateText, Product, Website } from "./product";
 import { getLatestProductData } from "./trackers/lego-tracker";
 
 const ENABLED = process.env.ENABLED!;
@@ -50,6 +50,17 @@ exports.handler = async (event: any = {}, context: any = {}) => {
             saleBody += `<b><a href="${product.url}">${product.title}</a></b><br>`;
         }
     }
+
+    // Sort by # of changes then title
+    productDiffs.sort(function (first, second) {
+        const firstDiffCount = diffCount(first);
+        const secondDiffCount = diffCount(second);
+        if (firstDiffCount == secondDiffCount) {
+            return first.newProduct.title.localeCompare(second.newProduct.title);
+        } else {
+            return secondDiffCount - firstDiffCount;
+        }
+    });
 
     const commonDiffMetadata = generateCommonDiffMetadata(productDiffs);
 
