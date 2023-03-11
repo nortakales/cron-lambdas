@@ -13,6 +13,7 @@ import { ErrorLogNotifier } from './constructs/error-log-notifier';
 import * as destinations from 'aws-cdk-lib/aws-logs-destinations';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
+import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 
 export class CDKPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -35,7 +36,12 @@ export class CDKPipelineStack extends cdk.Stack {
                     'npx cdk synth'
                 ]
             }),
-            selfMutation: true
+            selfMutation: true,
+            // codeBuildDefaults: {
+            //     buildEnvironment: {
+            //         buildImage: LinuxBuildImage.STANDARD_6_0 // TODO might need to do this if this is not the new default
+            //     }
+            // }
         });
 
         const deploy = new DeployCronLambdaStage(this, 'DeployCronLambdaStage');
