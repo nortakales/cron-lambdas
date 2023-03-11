@@ -13,6 +13,7 @@ export interface Product {
     tags?: string[]
     issues?: string[]
     onSale?: boolean
+    retirementDate?: string
 }
 
 export interface ProductDiff {
@@ -29,6 +30,7 @@ export interface ProductDiff {
     diffPromotion: boolean
     diffTags: boolean
     diffIssues: boolean
+    diffRetirementDate: boolean
 
     anyDiff: boolean
 }
@@ -46,6 +48,8 @@ export interface CommonDiffMetadata {
     allTagsDiffs: { [key: string]: number }
     commonIssuesDiff: boolean
     allIssuesDiffs: { [key: string]: number }
+    commonRetirementDateDiff: boolean;
+    allRetirementDateDiffs: { [key: string]: number }
 }
 
 export enum Website {
@@ -68,6 +72,7 @@ export function generateDiff(oldProduct: Product, newProduct: Product): ProductD
     const diffPromotion = oldProduct.promotion !== newProduct.promotion;
     const diffTags = !arrayEquals(oldProduct.tags, newProduct.tags);
     const diffIssues = !arrayEquals(oldProduct.issues, newProduct.issues);
+    const diffRetirementDate = oldProduct.retirementDate !== newProduct.retirementDate;
 
     return {
         oldProduct,
@@ -82,8 +87,9 @@ export function generateDiff(oldProduct: Product, newProduct: Product): ProductD
         diffPromotion,
         diffTags,
         diffIssues,
+        diffRetirementDate,
         anyDiff: diffTitle || diffWebsite || diffUrlKey || diffUrl || diffPrice || diffAddToCartButton ||
-            diffStatus || diffPromotion || diffTags || diffIssues
+            diffStatus || diffPromotion || diffTags || diffIssues || diffRetirementDate
 
     }
 }
@@ -144,6 +150,14 @@ export function generateDiffText(diff: ProductDiff, commonDiffMetadata: CommonDi
         text += ` ${newProduct.tags || ''}`;
     }
 
+    text += `<br>Retirement Date:`
+    if (oldProduct.retirementDate !== newProduct.retirementDate) {
+        text += ` <span style="color:green">${newProduct.retirementDate || 'No retirementDate'}</span>`;
+        text += ` <del style="color:red">${oldProduct.retirementDate || ' No retirementDate'}</del>`;
+    } else {
+        text += ` ${newProduct.retirementDate || ''}`;
+    }
+
     // TODO issues
 
     return text;
@@ -155,7 +169,8 @@ export function generateText(product: Product) {
             Status: ${product.status || ''}<br>
             Promotion: ${product.promotion || ''}<br>
             Add to Cart: ${product.addToCartButton || ''}<br>
-            Tags: ${product.tags || ''}`;
+            Tags: ${product.tags || ''}<br>
+            RetirementDate: ${product.retirementDate || ''}`;
 }
 
 function arrayEquals(a: string[] | undefined, b: string[] | undefined) {
@@ -173,6 +188,7 @@ export function diffIsOnlyCommon(diff: ProductDiff, commonDiffMetadata: CommonDi
         commonDiffMetadata.commonPromotionDiff == diff.diffPromotion &&
         commonDiffMetadata.commonStatusDiff == diff.diffStatus &&
         commonDiffMetadata.commonTagsDiff == diff.diffTags &&
+        commonDiffMetadata.commonRetirementDateDiff == diff.diffRetirementDate &&
         !diff.diffTitle && !diff.diffUrl && !diff.diffUrlKey && !diff.diffWebsite;
 }
 
@@ -189,7 +205,9 @@ export function generateCommonDiffMetadata(diffs: ProductDiff[]) {
         commonTagsDiff: false,
         allTagsDiffs: {},
         commonIssuesDiff: false,
-        allIssuesDiffs: {}
+        allIssuesDiffs: {},
+        commonRetirementDateDiff: false,
+        allRetirementDateDiffs: {}
     }
 
     for (const diff of diffs) {
@@ -213,6 +231,11 @@ export function generateCommonDiffMetadata(diffs: ProductDiff[]) {
             commonDiffMetadata.allPromotionDiffs[promotionDiffKey] = commonDiffMetadata.allPromotionDiffs[promotionDiffKey] ?
                 commonDiffMetadata.allPromotionDiffs[promotionDiffKey] + 1 : 1;
         }
+        if (diff.diffRetirementDate) {
+            const retirementDateDiffKey = diff.newProduct.retirementDate + "/" + diff.oldProduct.retirementDate;
+            commonDiffMetadata.allRetirementDateDiffs[retirementDateDiffKey] = commonDiffMetadata.allRetirementDateDiffs[retirementDateDiffKey] ?
+                commonDiffMetadata.allRetirementDateDiffs[retirementDateDiffKey] + 1 : 1;
+        }
         // TODO tags and issues - they are arrays
     }
 
@@ -227,6 +250,9 @@ export function generateCommonDiffMetadata(diffs: ProductDiff[]) {
     }
     if (Object.keys(commonDiffMetadata.allPromotionDiffs).length == 1 && commonDiffMetadata.allPromotionDiffs[Object.keys(commonDiffMetadata.allPromotionDiffs)[0]] == diffs.length) {
         commonDiffMetadata.commonPromotionDiff = true;
+    }
+    if (Object.keys(commonDiffMetadata.allRetirementDateDiffs).length == 1 && commonDiffMetadata.allRetirementDateDiffs[Object.keys(commonDiffMetadata.allRetirementDateDiffs)[0]] == diffs.length) {
+        commonDiffMetadata.commonRetirementDateDiff = true;
     }
 
     return commonDiffMetadata;
@@ -244,5 +270,6 @@ export function diffCount(diff: ProductDiff) {
     if (diff.diffUrl) count++;
     if (diff.diffUrlKey) count++;
     if (diff.diffWebsite) count++;
+    if (diff.diffRetirementDate) count++;
     return count;
 }

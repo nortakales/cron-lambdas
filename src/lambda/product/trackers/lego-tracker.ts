@@ -2,11 +2,13 @@ import { httpsGet } from "../../http";
 import { Product, Website } from "../product";
 import { parse, HTMLElement } from 'node-html-parser';
 
-const BASE_URL = 'https://www.lego.com/en-us/product/';
+const LEGO_BASE_URL = 'https://www.lego.com/en-us/product/';
+const BRICKSET_BASE_URL = 'https://brickset.com/sets/';
+const NUMBER_REGEX = /LEGO (\d+) /;
 
 export async function getLatestProductData(product: Product, attempts: number = 2): Promise<Product> {
 
-    const html = await httpsGet(BASE_URL + product.urlKey);
+    const html = await httpsGet(LEGO_BASE_URL + product.urlKey);
     const dom = parse(html);
 
     let price = getPrice(dom);
@@ -34,6 +36,9 @@ export async function getLatestProductData(product: Product, attempts: number = 
         }
     }
 
+    // Now grab the expire date from Brickset
+    const retirementDate = await getRetirementDateFromBrickset(product);
+
     return {
         title: product.title,
         website: product.website,
@@ -43,8 +48,9 @@ export async function getLatestProductData(product: Product, attempts: number = 
         status,
         tags,
         promotion,
-        url: BASE_URL + product.urlKey,
-        onSale
+        url: LEGO_BASE_URL + product.urlKey,
+        onSale,
+        retirementDate
     } as Product;
 }
 
@@ -88,6 +94,28 @@ function getPromotion(dom: HTMLElement) {
     return text;
 }
 
+async function getRetirementDateFromBrickset(product: Product) {
+
+    const match = product.title.match(NUMBER_REGEX);
+    if (!match || !match[1]) {
+        throw Error("Could not parse number from title: " + product.title);
+    }
+
+    const html = await httpsGet(BRICKSET_BASE_URL + match[1]);
+    const dom = parse(html);
+
+    return getRetirementDate(dom);
+}
+
+function getRetirementDate(dom: HTMLElement) {
+    let text = dom.querySelector('dt:contains("Launch/exit")')?.nextElementSibling.innerText;
+    if (text) {
+        text = text.replace(/^\d+ \w+ \d+ \- /, '');
+        text = text.replace("{t.b.a}", "TBA")
+    }
+    return text;
+}
+
 async function test() {
     const testProduct: Product = {
         title: "LEGO 75342 - Republic Fighter Tank",
@@ -99,4 +127,4 @@ async function test() {
 }
 
 // Uncomment to test
-//test();
+// test();
