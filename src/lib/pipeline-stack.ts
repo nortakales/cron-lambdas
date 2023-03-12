@@ -37,11 +37,11 @@ export class CDKPipelineStack extends cdk.Stack {
                 ]
             }),
             selfMutation: true,
-            // codeBuildDefaults: {
-            //     buildEnvironment: {
-            //         buildImage: LinuxBuildImage.STANDARD_6_0 // TODO might need to do this if this is not the new default
-            //     }
-            // }
+            codeBuildDefaults: {
+                buildEnvironment: {
+                    buildImage: LinuxBuildImage.STANDARD_6_0
+                }
+            }
         });
 
         const deploy = new DeployCronLambdaStage(this, 'DeployCronLambdaStage');
