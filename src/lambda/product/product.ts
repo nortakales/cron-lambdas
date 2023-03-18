@@ -170,7 +170,7 @@ export function generateText(product: Product) {
             Promotion: ${product.promotion || ''}<br>
             Add to Cart: ${product.addToCartButton || ''}<br>
             Tags: ${product.tags || ''}<br>
-            RetirementDate: ${product.retirementDate || ''}`;
+            Retirement Date: ${product.retirementDate || ''}`;
 }
 
 function arrayEquals(a: string[] | undefined, b: string[] | undefined) {

@@ -5,6 +5,7 @@ import { parse, HTMLElement } from 'node-html-parser';
 const LEGO_BASE_URL = 'https://www.lego.com/en-us/product/';
 const BRICKSET_BASE_URL = 'https://brickset.com/sets/';
 const NUMBER_REGEX = /LEGO (\d+) /;
+const BRICK_ECONOMY_RETIRING_SOON_URL = 'https://www.brickeconomy.com/sets/retiring-soon';
 
 export async function getLatestProductData(product: Product, attempts: number = 2): Promise<Product> {
 
@@ -37,7 +38,11 @@ export async function getLatestProductData(product: Product, attempts: number = 
     }
 
     // Now grab the expire date from Brickset
-    const retirementDate = await getRetirementDateFromBrickset(product);
+    let retirementDate = await getRetirementDateFromBrickset(product);
+    const retiringSoonModels = await getRetiringSoonNumbersFromBrickEconomy();
+    if (retiringSoonModels.has(getLegoModelNumber(product))) {
+        retirementDate += " (retiring soon?)";
+    }
 
     return {
         title: product.title,
@@ -96,12 +101,7 @@ function getPromotion(dom: HTMLElement) {
 
 async function getRetirementDateFromBrickset(product: Product) {
 
-    const match = product.title.match(NUMBER_REGEX);
-    if (!match || !match[1]) {
-        throw Error("Could not parse number from title: " + product.title);
-    }
-
-    const html = await httpsGet(BRICKSET_BASE_URL + match[1]);
+    const html = await httpsGet(BRICKSET_BASE_URL + getLegoModelNumber(product));
     const dom = parse(html);
 
     return getRetirementDate(dom);
@@ -116,15 +116,44 @@ function getRetirementDate(dom: HTMLElement) {
     return text;
 }
 
-async function test() {
-    const testProduct: Product = {
-        title: "LEGO 75342 - Republic Fighter Tank",
-        website: Website.LEGO,
-        urlKey: "hogwarts-moment-charms-class-76385"
+async function getRetiringSoonNumbersFromBrickEconomy() {
+
+    const html = await httpsGet(BRICK_ECONOMY_RETIRING_SOON_URL);
+    const dom = parse(html);
+
+    var modelNumbers = new Set();
+
+    dom.querySelectorAll('.ctlsets-left > div > h4')?.forEach(function (element) {
+        const match = element.innerText.match(/^(\d+)[ \-]/);
+        if (!match || !match[1]) {
+            throw Error("Could not parse number from: " + element.innerText);
+        }
+        modelNumbers.add(match[1]);
+    });
+
+    return modelNumbers;
+}
+
+function getLegoModelNumber(product: Product) {
+    const match = product.title.match(NUMBER_REGEX);
+    if (!match || !match[1]) {
+        throw Error("Could not parse number from title: " + product.title);
     }
-    const returnedProduct = await getLatestProductData(testProduct);
-    console.log(JSON.stringify(returnedProduct, null, 2));
+    return match[1];
+}
+
+async function test() {
+    // const testProduct: Product = {
+    //     title: "LEGO 75342 - Republic Fighter Tank",
+    //     website: Website.LEGO,
+    //     urlKey: "hogwarts-moment-charms-class-76385"
+    // }
+    // const returnedProduct = await getLatestProductData(testProduct);
+    // console.log(JSON.stringify(returnedProduct, null, 2));
+    console.log("Testing...");
+    console.log(await getRetiringSoonNumbersFromBrickEconomy());
 }
 
 // Uncomment to test
 // test();
+
