@@ -1,12 +1,12 @@
 import * as cdk from 'aws-cdk-lib';
-import { AutoxReminderCron } from './crons/autox-reminder';
-import { WeatherAlertCron } from './crons/weather-alert';
+import { AutoxReminderCron } from './crons/autox-reminder-construct';
+import { WeatherAlertCron } from './crons/weather-alert-construct';
 import { DeleteTimerConstruct } from './constructs/delete-timer-construct';
 import { AdhocWeatherReportAPI } from './constructs/adhoc-weather-report-api';
-import { NewComicsCron } from './crons/new-comics';
+import { NewComicsCron } from './crons/new-comics-construct';
 import { ErrorLogNotifier } from './constructs/error-log-notifier';
 import { Construct } from 'constructs';
-import { ProductTrackerCron } from './crons/product-tracker';
+import { ProductTrackerCron } from './crons/product-tracker-construct';
 import { DynamoDBAccessAPI } from './constructs/dynamodb-access-api';
 
 export class CronLambdaStack extends cdk.Stack {
