@@ -6,19 +6,20 @@ const LEGO_BASE_URL = 'https://www.lego.com/en-us/product/';
 const BRICKSET_BASE_URL = 'https://brickset.com/sets/';
 const NUMBER_REGEX = /LEGO (\d+) /;
 const BRICK_ECONOMY_RETIRING_SOON_URL = 'https://www.brickeconomy.com/sets/retiring-soon';
+const BRICKRANKER_BASE_URL = 'https://brickranker.com/rankings/set/';
 
 export async function getLatestProductData(product: Product, attempts: number = 2): Promise<Product> {
 
-    const html = await httpsGet(LEGO_BASE_URL + product.urlKey);
-    const dom = parse(html);
+    const legoHtml = await httpsGet(LEGO_BASE_URL + product.urlKey);
+    const legoDom = parse(legoHtml);
 
-    let price = getPrice(dom);
-    const addToCartButton = getAddToCartButton(dom);
-    const status = getStatus(dom);
-    let tags = getTags(dom);
-    const promotion = getPromotion(dom);
+    let price = getPrice(legoDom);
+    const addToCartButton = getAddToCartButton(legoDom);
+    const status = getStatus(legoDom);
+    let tags = getTags(legoDom);
+    const promotion = getPromotion(legoDom);
 
-    const salePrice = getSalePrice(dom);
+    const salePrice = getSalePrice(legoDom);
     let onSale = false;
     if (salePrice) {
         price = salePrice;
@@ -39,9 +40,28 @@ export async function getLatestProductData(product: Product, attempts: number = 
 
     // Now grab the expire date from Brickset
     let retirementDate = await getRetirementDateFromBrickset(product);
-    const retiringSoonModels = await getRetiringSoonNumbersFromBrickEconomy();
-    if (retiringSoonModels.has(getLegoModelNumber(product))) {
-        retirementDate += " (retiring soon?)";
+    // const retiringSoonModels = await getRetiringSoonNumbersFromBrickEconomy();
+    // const retiringSoonModels = new Set();
+    // if (retiringSoonModels.has(getLegoModelNumber(product))) {
+    //     retirementDate += " (retiring soon?)";
+    // }
+
+    try {
+        const brickRankerHtml = await httpsGet(BRICKRANKER_BASE_URL + getLegoModelNumber(product) + '-1');
+        const brickRankerDom = parse(brickRankerHtml);
+
+        const brickRankerStatus = getStatusFromBrickRanker(brickRankerDom);
+        if (brickRankerStatus && brickRankerStatus !== 'Active') {
+            tags.push(brickRankerStatus);
+        }
+        const brickRankerRetirement = getRetirementDateFromBrickRanker(brickRankerHtml);
+        if (retirementDate && brickRankerRetirement) {
+            retirementDate += ' | ' + brickRankerRetirement;
+        } else if (brickRankerRetirement) {
+            retirementDate = brickRankerRetirement;
+        }
+    } catch (error) {
+
     }
 
     return {
@@ -142,6 +162,25 @@ function getLegoModelNumber(product: Product) {
     return match[1];
 }
 
+function getStatusFromBrickRanker(dom: HTMLElement) {
+    let text = dom.querySelector('strong:contains("Status:")')?.nextElementSibling.innerText;
+    return text;
+}
+function getRetirementDateFromBrickRanker(html: string) {
+
+    // This is necessary because BrickRanker has malformed html that isn't parsed by the library
+
+    const match = html.match(/<strong>Retired:.+?<\/p>/s)
+    if (!match || !match[0]) {
+        throw Error("Could not parse retirement date from BrickRanker");
+    }
+    return match[0]
+        .replace(/<.+?>/g, '')
+        .replace('Retired:', '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 async function test() {
     // const testProduct: Product = {
     //     title: "LEGO 75342 - Republic Fighter Tank",
@@ -151,7 +190,12 @@ async function test() {
     // const returnedProduct = await getLatestProductData(testProduct);
     // console.log(JSON.stringify(returnedProduct, null, 2));
     console.log("Testing...");
-    console.log(await getRetiringSoonNumbersFromBrickEconomy());
+    //console.log(await getRetiringSoonNumbersFromBrickEconomy());
+    let html = await httpsGet('https://brickranker.com/rankings/set/40539-1');
+    let dom = parse(html);
+
+    console.log(getStatusFromBrickRanker(dom));
+    console.log(getRetirementDateFromBrickRanker(html));
 }
 
 // Uncomment to test

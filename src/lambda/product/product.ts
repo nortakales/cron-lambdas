@@ -144,10 +144,10 @@ export function generateDiffText(diff: ProductDiff, commonDiffMetadata: CommonDi
 
     text += `<br>Tags:`;
     if (!arrayEquals(oldProduct.tags, newProduct.tags)) {
-        text += ` <span style="color:green">${newProduct.tags && newProduct.tags.length ? newProduct.tags : 'No tags'}</span>`;
-        text += ` <del style="color:red">${oldProduct.tags && oldProduct.tags.length ? oldProduct.tags : 'No tags'}</del>`;
+        text += ` <span style="color:green">${newProduct.tags && newProduct.tags.length ? newProduct.tags.join(' ') : 'No tags'}</span>`;
+        text += ` <del style="color:red">${oldProduct.tags && oldProduct.tags.length ? oldProduct.tags.join(' ') : 'No tags'}</del>`;
     } else {
-        text += ` ${newProduct.tags || ''}`;
+        text += ` ${newProduct.tags?.join(' ') || ''}`;
     }
 
     text += `<br>Retirement Date:`
@@ -169,7 +169,7 @@ export function generateText(product: Product) {
             Status: ${product.status || ''}<br>
             Promotion: ${product.promotion || ''}<br>
             Add to Cart: ${product.addToCartButton || ''}<br>
-            Tags: ${product.tags || ''}<br>
+            Tags: ${product.tags?.join(' ') || ''}<br>
             Retirement Date: ${product.retirementDate || ''}`;
 }
 
