@@ -139,10 +139,15 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Dupuis",
     "Kodansha",
     "Lev Gleason - Comic House",
-    "Living the Line"
+    "Living the Line",
+    "Band of Bards",
+    "Basement Comics",
+    "Drawn and Quarterly",
+    "Frank Miller Presents",
+    "Sergio Bonelli Editore"
 ];
 
-// The full title with have a pund (#) and decimals removed from the end, and then matched against this in full
+// The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
 const SERIES_TO_EXCLUDE = [
     "The Batman & Scooby-Doo Mysteries",
     "Harley Quinn: The Animated Series - The Eat, Bang, Kill Tour",
