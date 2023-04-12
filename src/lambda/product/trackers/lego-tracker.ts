@@ -8,7 +8,7 @@ const NUMBER_REGEX = /LEGO (\d+) /;
 const BRICK_ECONOMY_RETIRING_SOON_URL = 'https://www.brickeconomy.com/sets/retiring-soon';
 const BRICKRANKER_BASE_URL = 'https://brickranker.com/rankings/set/';
 
-export async function getLatestProductData(product: Product, attempts: number = 2): Promise<Product> {
+export async function getLatestProductData(product: Product, attempts: number = 3): Promise<Product> {
 
     const legoHtml = await httpsGet(LEGO_BASE_URL + product.urlKey);
     const legoDom = parse(legoHtml);
@@ -31,7 +31,8 @@ export async function getLatestProductData(product: Product, attempts: number = 
     // TODO this should be abstracted out from lego class
     if (price === undefined && addToCartButton === undefined && status === undefined && (tags === undefined || tags.length == 0) && promotion === undefined) {
         if (--attempts > 0) {
-            console.log(`Product appears to be empty, trying again with ${attempts} left`);
+            console.log(`Product appears to be empty, trying again with ${attempts} attempt(s) left`);
+            await new Promise(func => { console.log("Sleeping for 1000ms"); setTimeout(func, 1000) });
             return getLatestProductData(product, attempts);
         } else {
             console.log(`Product appears to be empty after all attempts`);
