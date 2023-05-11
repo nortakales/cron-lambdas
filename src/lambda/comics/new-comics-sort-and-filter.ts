@@ -144,7 +144,21 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Basement Comics",
     "Drawn and Quarterly",
     "Frank Miller Presents",
-    "Sergio Bonelli Editore"
+    "Sergio Bonelli Editore",
+    "Arcana Studio",
+    "First Second Books",
+    "Gemstone",
+    "Graphix",
+    "Kodansha Comics",
+    "Random House",
+    "Shogakukan Asia",
+    "Sigmate Studio",
+    "Ten Speed Press",
+    "Dell",
+    "Glenat",
+    "Hillman Periodicals",
+    "Seven Seas Entertainment"
+
 ];
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
