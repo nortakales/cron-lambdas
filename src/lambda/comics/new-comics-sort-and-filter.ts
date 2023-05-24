@@ -19,21 +19,27 @@ const KEYWORDS_TO_ALWAYS_INCLUDE = [
     "007"
 ]
 
+const KEYWORDS_TO_EXCLUDE = [
+    "Vampirella"
+]
+
 // TODO - switch to allow list
+// Antarctic Press
 // BOOM! Studios
 // Comixology
-// DC Comics
 // Dark Horse Comics
+// DC Comics
 // Dynamite
 // IDW Publishing
 // Image Comics
 // Marvel Comics
 // Oni Press
 // Other
+// Red 5
 // Skybound
 // Top Cow Productions
-// Antarctic
-// Red 5
+
+// Evil Ink?
 
 const PUBLISHERS_TO_EXCLUDE = [
     "A Wave Blue World Inc",
@@ -157,8 +163,11 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Dell",
     "Glenat",
     "Hillman Periodicals",
-    "Seven Seas Entertainment"
-
+    "Seven Seas Entertainment",
+    "Chapterhouse Comics",
+    "Diamond Publications",
+    "Dren Productions",
+    "Fair Square Comics",
 ];
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
@@ -181,8 +190,6 @@ const SERIES_TO_EXCLUDE = [
     "KISS: Phantom Obsession",
     "Red Sonja: Black, White, Red",
     "Sheena: Queen of the Jungle",
-    "Vampirella / Dracula: Unholy",
-    "Vampirella",
     "G.I. Joe: A Real American Hero",
     "Jupiter's Legacy: Requiem",
     "King Spawn",
@@ -234,7 +241,9 @@ const SERIES_TO_EXCLUDE = [
     "Cinebook",
     "Ediciones La Cupula",
     "Wolverine",
-    "Killadelphia"
+    "Killadelphia",
+    "Jungle Comics",
+    "Planet Comics"
 ]
 function removeNumber(title: string) {
     return title.replace(/\s#\d+$/, '');
@@ -244,15 +253,17 @@ export async function getFilteredAndSortedComics() {
     const newComics = await getNewComics();
 
     // Apply filters
-    const filteredPublishers = newComics.filter(comic => !PUBLISHERS_TO_EXCLUDE.includes(comic.publisher));
-    const filteredSeries = filteredPublishers.filter(comic => !SERIES_TO_EXCLUDE.includes(removeNumber(comic.title)));
+    const filtered = newComics.filter(comic => !PUBLISHERS_TO_EXCLUDE.includes(comic.publisher))
+        .filter(comic => !SERIES_TO_EXCLUDE.includes(removeNumber(comic.title)))
+        .filter(comic => !KEYWORDS_TO_EXCLUDE.some(keyword => comic.title.toLowerCase().includes(keyword.toLowerCase())));
+
 
     // Include must search keywords
     let mustInclude: Comic[] = [];
     for (let keyword of KEYWORDS_TO_ALWAYS_INCLUDE) {
         mustInclude = mustInclude.concat(newComics.filter(comic => comic.title.toLowerCase().includes(keyword.toLowerCase())));
     }
-    const finalList = filteredSeries.concat(mustInclude);
+    const finalList = filtered.concat(mustInclude);
 
     // Make sure everything we have is unique
     const finalUniqueList = finalList.filter((comic, index) => {
