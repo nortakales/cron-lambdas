@@ -51,10 +51,11 @@ export async function getTomorrowIOData() {
     // set the timesteps, like "current", "1h" and "1d"
     const timesteps = ["current", "1h", "1d"];
 
-    const millis7Days = 7 * 24 * 60 * 60 * 1000;
+    const daysAhead = 5;
+    const daysAheadInMillis = daysAhead * 24 * 60 * 60 * 1000;
     const now = new Date();
     const startTime = now.toISOString();
-    const endTime = new Date(now.getTime() + millis7Days).toISOString();
+    const endTime = new Date(now.getTime() + daysAheadInMillis).toISOString();
 
     // specify the timezone, using standard IANA timezone format
     const timezone = "America/Los_Angeles";
