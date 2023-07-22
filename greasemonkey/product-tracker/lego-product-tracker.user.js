@@ -36,13 +36,18 @@
     function showTrackingUI(data) {
         $('body').prepend(`
             <div style="z-index:999;position:absolute;background-color:#84a246;">
-            Tracked <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=DELETE&table=products&hashKeyName=title&hashKey=${data.title}">Remove</a>
+            Tracked <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=DELETE&table=products&hashKeyName=title&hashKey=${encodeURIComponent(data.title)}">Remove</a>
             </div>
         `.trim());
     }
 
     function getTitle() {
-        return $('h1[data-test="product-overview-name"]').text();
+        let productName = $('h1[data-test="product-overview-name"]')
+            .text()
+            .replace(/[^\x20-\x7E]/g, "")
+            .replace(/\s+/g, " ");
+        let productNumber = $('span[itemprop="mpn"]').text();
+        return `LEGO ${productNumber} - ${productName}`;
     }
 
     function showNotTrackedUI() {
@@ -50,7 +55,7 @@
         let website = 'LEGO';
         $('body').prepend(`
             <div style="z-index:999;position:absolute;background-color:#dc7b72;">
-            NOT tracked. <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=PUT&table=products&a1=title&a2=${title}&a3=urlKey&a4=${urlKey}&a5=website&a6=${website}">Add</a>
+            NOT tracked. <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=PUT&table=products&a1=title&a2=${encodeURIComponent(title)}&a3=urlKey&a4=${encodeURIComponent(urlKey)}&a5=website&a6=${encodeURIComponent(website)}">Add</a>
             </div>
         `.trim());
     }
@@ -58,7 +63,7 @@
     $(document).ready(function() {
         GM_xmlhttpRequest({
             method: "GET",
-            url: `https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=QUERY&table=products&indexName=urlKey-index&hashKeyName=urlKey&hashKey=${urlKey}&rangeKeyName=website&rangeKey=LEGO`,
+            url: `https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=QUERY&table=products&indexName=urlKey-index&hashKeyName=urlKey&hashKey=${encodeURIComponent(urlKey)}&rangeKeyName=website&rangeKey=LEGO`,
             onload: showUI,
             onrror: logError,
             ontimeout: logError
