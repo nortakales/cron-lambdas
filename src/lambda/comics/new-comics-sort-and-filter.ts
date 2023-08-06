@@ -168,6 +168,10 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Diamond Publications",
     "Dren Productions",
     "Fair Square Comics",
+    "Ape Entertainment",
+    "Visi8 Entertainment",
+    "Tokyopop",
+    "Stranger Comics"
 ];
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
