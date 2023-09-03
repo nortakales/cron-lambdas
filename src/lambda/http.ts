@@ -28,6 +28,7 @@ export async function httpsGet(url: string, userAgent?: string, attempts: number
         //     console.log("Payload is small enough, dumping payload:")
         //     console.log(status.payload);
         // }
+        console.error(JSON.stringify(status, null, 2))
         throw status;
     }
     // } catch (error) {
@@ -90,6 +91,7 @@ async function innerHttpsGet(url: string, userAgent?: string, attempts: number =
                 response.on('end', () => {
                     //console.log("Ended data transfer");
 
+                    // TODO Handle 301/302 moved status code
                     if (response.statusCode !== undefined && (response.statusCode < 200 || response.statusCode >= 300)) {
                         const errorMessage = 'Non-success status code getting URL: ' + url +
                             ' StatusCode: ' + response.statusCode + " " + statusCodes[response.statusCode];
