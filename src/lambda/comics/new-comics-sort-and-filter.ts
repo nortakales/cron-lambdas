@@ -38,7 +38,9 @@ const KEYWORDS_TO_EXCLUDE = [
 // Red 5
 // Skybound
 // Top Cow Productions
+// Millarworld
 
+// Blizzard?
 // Evil Ink?
 
 const PUBLISHERS_TO_EXCLUDE = [
@@ -173,7 +175,12 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Tokyopop",
     "Stranger Comics",
     "Be Amazed Studios",
-    "Bubbles Zine"
+    "Bubbles Zine",
+    "Apex Comics Group",
+    "DSTLRY",
+    "Glacier Bay Books",
+    "Lev Gleason - New Friday",
+    "Soaring Penguin Press"
 ];
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
