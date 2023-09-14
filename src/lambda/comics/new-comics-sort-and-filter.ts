@@ -180,7 +180,12 @@ const PUBLISHERS_TO_EXCLUDE = [
     "DSTLRY",
     "Glacier Bay Books",
     "Lev Gleason - New Friday",
-    "Soaring Penguin Press"
+    "Soaring Penguin Press",
+    "D.C. Thomson & Co.",
+    "Strangers Publishing",
+    "Black Eye Books",
+    "Devil's Due Publishing",
+
 ];
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
@@ -256,7 +261,14 @@ const SERIES_TO_EXCLUDE = [
     "Wolverine",
     "Killadelphia",
     "Jungle Comics",
-    "Planet Comics"
+    "Planet Comics",
+    "House of Slaughter",
+    "Batman Incorporated",
+    "Gargoyles",
+    "Ghost Rider",
+    "X-Men: Red",
+    "My Little Pony",
+    "Immortal X-Men"
 ]
 function removeNumber(title: string) {
     return title.replace(/\s#\d+$/, '');
