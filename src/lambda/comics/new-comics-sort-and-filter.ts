@@ -39,6 +39,7 @@ const KEYWORDS_TO_EXCLUDE = [
 // Skybound
 // Top Cow Productions
 // Millarworld
+// Titan Books
 
 // Blizzard?
 // Evil Ink?
@@ -185,7 +186,11 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Strangers Publishing",
     "Black Eye Books",
     "Devil's Due Publishing",
-
+    "Peow Studio",
+    "Recoil Comics",
+    "Yen Press",
+    "Europe Comics",
+    "Voyage Comics"
 ];
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
