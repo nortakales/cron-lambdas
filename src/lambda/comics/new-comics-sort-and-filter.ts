@@ -190,7 +190,9 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Recoil Comics",
     "Yen Press",
     "Europe Comics",
-    "Voyage Comics"
+    "Voyage Comics",
+    "Desert Island",
+    "Gold Key Comics"
 ];
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
