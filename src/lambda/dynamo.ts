@@ -1,5 +1,5 @@
 import { DynamoDBDocument, TranslateConfig } from "@aws-sdk/lib-dynamodb";
-import { DynamoDB } from "@aws-sdk/client-dynamodb";
+import { DynamoDB, ReturnValue } from "@aws-sdk/client-dynamodb";
 
 const REGION = process.env.REGION!;
 const dynamoClient = new DynamoDB({ region: REGION });
@@ -93,8 +93,9 @@ export async function del(table: string, key: { [key: string]: any }) {
 
     console.log(`Deleting from DDB: ${table}: ${JSON.stringify(key)}`);
 
-    await DDB.delete({
+    return await DDB.delete({
         TableName: table,
-        Key: key
+        Key: key,
+        ReturnValues: ReturnValue.ALL_OLD
     });
 }

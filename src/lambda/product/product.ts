@@ -57,7 +57,7 @@ export enum Website {
 }
 
 export function generateDeleteUrl(product: Product) {
-    return `${DYNAMO_ACCESS_ENDPOINT}?operation=DELETE&table=products&hashKeyName=title&hashKey=${product.title}`;
+    return `${DYNAMO_ACCESS_ENDPOINT}?operation=DELETE&table=products&hashKeyName=title&hashKey=${encodeURIComponent(product.title)}`;
 }
 
 export function generateDiff(oldProduct: Product, newProduct: Product): ProductDiff {

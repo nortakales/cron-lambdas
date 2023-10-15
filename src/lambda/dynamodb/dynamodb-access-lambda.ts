@@ -129,9 +129,12 @@ async function httpGet_delete(event: any) {
     }
 
     console.log(`Running delete: ${table}, ${hashKeyName}, ${hashKey}, ${rangeKeyName}, ${rangeKey}`);
-    await DDB.del(table, item);
-
-    return BLANK_SUCCESS;
+    const deletionResult = await DDB.del(table, item);
+    if (deletionResult.Attributes) {
+        return BLANK_SUCCESS;
+    } else {
+        return failureResponse("Expected item to exist before deletion, but it did not")
+    }
 }
 
 function required(thing: any, name: string) {
