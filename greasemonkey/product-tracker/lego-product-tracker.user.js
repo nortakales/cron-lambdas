@@ -51,19 +51,21 @@
     }
 
     function showNotTrackedUI() {
-        let title = getTitle();
+        let title = encodeURIComponent(getTitle());
+        let encodedUrlKey = encodeURIComponent(urlKey);
         let website = 'LEGO';
         $('body').prepend(`
             <div style="z-index:999;position:absolute;background-color:#dc7b72;">
-            NOT tracked. <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=PUT&table=products&a1=title&a2=${encodeURIComponent(title)}&a3=urlKey&a4=${encodeURIComponent(urlKey)}&a5=website&a6=${encodeURIComponent(website)}">Add</a>
+            NOT tracked. <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=PUT&table=products&a1=title&a2=${title}&a3=urlKey&a4=${encodedUrlKey}&a5=website&a6=${website}">Add</a>
             </div>
         `.trim());
     }
 
     $(document).ready(function() {
+        let encodedUrlKey = encodeURIComponent(urlKey);
         GM_xmlhttpRequest({
             method: "GET",
-            url: `https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=QUERY&table=products&indexName=urlKey-index&hashKeyName=urlKey&hashKey=${encodeURIComponent(urlKey)}&rangeKeyName=website&rangeKey=LEGO`,
+            url: `https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=QUERY&table=products&indexName=urlKey-index&hashKeyName=urlKey&hashKey=${encodedUrlKey}&rangeKeyName=website&rangeKey=LEGO`,
             onload: showUI,
             onrror: logError,
             ontimeout: logError
