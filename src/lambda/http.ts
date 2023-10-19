@@ -17,6 +17,15 @@ const RETRYABLE_CODES = [
     504
 ]
 
+const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36';
+
+const DEFAULT_HEADERS = {
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://leagueofcomicgeeks.com/',
+    'Upgrade-Insecure-Requests': '1'
+}
+
 export async function httpsGet(url: string, userAgent?: string, attempts: number = 3, headers: any = {}): Promise<string> {
     // try {
     const response = await innerHttpsGet(url, userAgent, attempts, headers);
@@ -47,11 +56,12 @@ async function innerHttpsGet(url: string, userAgent?: string, attempts: number =
 
     return new Promise(function (resolve, reject) {
 
-        const userAgentHeader = { 'User-Agent': userAgent || 'Mozilla/5.0' };
+        const userAgentHeader = { 'User-Agent': userAgent || DEFAULT_USER_AGENT };
 
         const options = {
             headers: {
                 ...userAgentHeader,
+                ...DEFAULT_HEADERS,
                 ...headers
             }
         };
