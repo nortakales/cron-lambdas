@@ -1,4 +1,7 @@
 import * as HTTPS from 'https';
+import * as SM from './secrets';
+
+const API_KEY_SECRET_SCRAPERAPI = process.env.API_KEY_SECRET_SCRAPERAPI;
 
 export interface Status {
     readonly statusCode: number
@@ -15,21 +18,21 @@ const RETRYABLE_CODES = [
     502,
     503,
     504
-]
+];
 
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36';
 
 const DEFAULT_HEADERS = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    //'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     //'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'Referer': 'https://leagueofcomicgeeks.com/',
-    'Upgrade-Insecure-Requests': '1'
-}
+    //'Accept-Language': 'en-US,en;q=0.9',
+    //'Referer': 'https://google.com/',
+    //'Upgrade-Insecure-Requests': '1'
+};
 
-export async function httpsGet(url: string, userAgent?: string, attempts: number = 3, headers: any = {}): Promise<string> {
+export async function httpsGet(url: string, userAgent?: string, attempts: number = 3, headers: any = {}, useProxy: boolean = false): Promise<string> {
     // try {
-    const response = await innerHttpsGet(url, userAgent, attempts, headers);
+    const response = await innerHttpsGet(url, userAgent, attempts, headers, useProxy);
     if (typeof response === 'string') {
         return response as string;
     } else {
@@ -47,7 +50,14 @@ export async function httpsGet(url: string, userAgent?: string, attempts: number
     // }
 }
 
-async function innerHttpsGet(url: string, userAgent?: string, attempts: number = 3, headers: any = {}): Promise<string | Status> {
+async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: number = 3, headers: any = {}, useProxy: boolean = false): Promise<string | Status> {
+
+    let url = originalUrl;
+    if (useProxy) {
+        console.log("Using proxy for URL: " + url);
+        const key = await SM.getSecretString(API_KEY_SECRET_SCRAPERAPI!);
+        url = `http://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(originalUrl)}`;
+    }
 
     if (attempts < 3) {
         console.log(`Getting this URL with ${attempts} attempts left: ${url}`);
@@ -79,7 +89,7 @@ async function innerHttpsGet(url: string, userAgent?: string, attempts: number =
 
                 if (RETRYABLE_CODES.includes(response.statusCode) && attempts > 1) {
                     console.log(`Received StatusCode: ${response.statusCode} ${statusCodes[response.statusCode]}, will retry`);
-                    return resolve(innerHttpsGet(url, userAgent, --attempts));
+                    return resolve(innerHttpsGet(originalUrl, userAgent, --attempts, headers, useProxy));
                 }
 
                 // if (response.statusCode < 200 || response.statusCode >= 300) {

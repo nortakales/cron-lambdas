@@ -34,7 +34,8 @@ export class AutoxReminderCron extends Construct {
                 ENABLED: config.autoxReminder.enabled,
                 REGION: config.base.region,
                 PUSH_NOTIFICATION_LAMBDA_ARN: config.autoxReminder.pushNotificationLambdaArn,
-                PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey
+                PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey,
+                API_KEY_SECRET_SCRAPERAPI: config.base.apiKeyScraperApi,
             },
             timeout: cdk.Duration.seconds(60),
             retryAttempts: 2,

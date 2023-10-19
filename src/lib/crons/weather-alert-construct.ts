@@ -44,6 +44,7 @@ export class WeatherAlertCron extends Construct {
                 API_CREDENTIALS_SECRET_METEOMATICS: config.weatherAlert.apiCredentialsSecretMeteomatics,
                 API_KEY_ACCUWEATHER: config.weatherAlert.apiKeyAccuWeather,
                 API_KEY_ACCUWEATHER_ALTERNATE: config.weatherAlert.apiKeyAccuWeatherAlternate,
+                API_KEY_SECRET_SCRAPERAPI: config.base.apiKeyScraperApi,
             },
             timeout: cdk.Duration.seconds(60),
             retryAttempts: 2,
