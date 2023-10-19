@@ -99,7 +99,7 @@ async function innerHttpsGet(url: string, userAgent?: string, attempts: number =
                         resolve({
                             statusCode: response.statusCode,
                             statusMessage: errorMessage,
-                            payload: data.length < 2000 ? data : 'Payload too large'
+                            payload: data.length < 100000 ? data : 'Payload too large (greater than 100,000 characters)'
                         });
                     } else {
                         resolve(data);
