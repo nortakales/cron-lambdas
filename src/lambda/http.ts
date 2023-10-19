@@ -56,7 +56,7 @@ async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: 
     if (useProxy) {
         console.log("Using proxy for URL: " + url);
         const key = await SM.getSecretString(API_KEY_SECRET_SCRAPERAPI!);
-        url = `http://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(originalUrl)}`;
+        url = `https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(originalUrl)}`;
     }
 
     if (attempts < 3) {
