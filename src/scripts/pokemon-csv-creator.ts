@@ -4,12 +4,17 @@ import { parse, HTMLElement } from 'node-html-parser';
 
 
 const baseUrl = 'https://www.serebii.net/';
-const generationNumber = 4;
+const generationNumber = 2;
 const generations = {
     1: {
         start: 1,
         end: 151,
-        generationString: 'pokedex'
+        generationString: 'pokedex',
+        games: [
+            'Red',
+            'Blue (Intl.)',
+            'Yellow'
+        ]
     },
     2: {
         start: 1,
@@ -63,10 +68,13 @@ async function main() {
 
         const data: { [key: string]: string } = {};
 
-        let tableRow = getFirstRowOfLocationTable(dom);
+        let tableRow = getFirstRowOfLocationTable(dom, generationNumber);
         while (tableRow?.tagName === 'TR') {
             for (let game of generation.games) {
-                const firstTD = tableRow.querySelector('td');
+                let firstTD = tableRow.querySelector('td');
+                if (game === 'Blue (Intl.)') {
+                    firstTD = firstTD!.nextElementSibling;
+                }
                 if (firstTD?.innerText.includes(game)) {
                     const secondTD = firstTD.nextElementSibling;
                     //console.log(game + ", " + secondTD.innerText);
@@ -81,7 +89,11 @@ async function main() {
         for (let game of generation.games) {
             outputLine += '|' + data[game];
         }
-        console.log(outputLine);
+        console.log(
+            outputLine.replace(/&eacute;/g, 'é')
+                .replace(/&#9792;/g, '♀')
+                .replace(/&#9794;/g, '♂')
+        );
     }
 }
 
@@ -108,8 +120,12 @@ function logHtml(html: string) {
     console.log(output);
 }
 
-function getFirstRowOfLocationTable(dom: HTMLElement) {
-    return dom.querySelector('tr > td > b:contains("Location")')?.parentNode.parentNode.nextElementSibling.nextElementSibling;
+function getFirstRowOfLocationTable(dom: HTMLElement, generationNumber: number) {
+    if (generationNumber <= 2) {
+        return dom.querySelector('tr > td:contains("Locations")')?.parentNode.nextElementSibling;
+    } else {
+        return dom.querySelector('tr > td > b:contains("Location")')?.parentNode.parentNode.nextElementSibling.nextElementSibling;
+    }
 }
 
 function getName(dom: HTMLElement, number: number) {
