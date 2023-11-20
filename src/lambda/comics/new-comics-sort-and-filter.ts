@@ -40,6 +40,7 @@ const KEYWORDS_TO_EXCLUDE = [
 // Top Cow Productions
 // Millarworld
 // Titan Books
+// Vertigo Comics
 
 // Blizzard?
 // Evil Ink?
@@ -114,7 +115,6 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Source Point Press",
     "Star Fruit Books",
     "Strangers Fanzine",
-    "Titan Books",
     "TwoMorrows",
     "UDON",
     "Uncivilized Books",
@@ -192,7 +192,16 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Europe Comics",
     "Voyage Comics",
     "Desert Island",
-    "Gold Key Comics"
+    "Gold Key Comics",
+    "10 Ton Press",
+    "Conundrum Press",
+    "The Comix Company",
+    "Big Dog Ink",
+    "Tribute Press",
+    "eigoMANGA",
+    "Critical Entertainment",
+    "Casterman",
+    "Comics2Movies"
 ];
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
@@ -275,7 +284,10 @@ const SERIES_TO_EXCLUDE = [
     "Ghost Rider",
     "X-Men: Red",
     "My Little Pony",
-    "Immortal X-Men"
+    "Immortal X-Men",
+    "Manga Z",
+    "Rick and Morty",
+
 ]
 function removeNumber(title: string) {
     return title.replace(/\s#\d+$/, '');
