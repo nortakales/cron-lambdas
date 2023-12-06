@@ -1,4 +1,4 @@
-import { httpsGet } from "../../http";
+import { httpsGet, httpsGetRefactorMe } from "../../http";
 import { Product, Website } from "../product";
 import { parse, HTMLElement } from 'node-html-parser';
 
@@ -122,7 +122,7 @@ function getPromotion(dom: HTMLElement) {
 
 async function getRetirementDateFromBrickset(product: Product) {
 
-    const html = await httpsGet(BRICKSET_BASE_URL + getLegoModelNumber(product));
+    const html = await httpsGetRefactorMe(BRICKSET_BASE_URL + getLegoModelNumber(product), 2, false, true);
     const dom = parse(html);
 
     return getRetirementDate(dom);

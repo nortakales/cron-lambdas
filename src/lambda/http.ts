@@ -17,7 +17,8 @@ const RETRYABLE_CODES = [
     500,
     502,
     503,
-    504
+    504,
+    429
 ];
 
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36';
@@ -29,10 +30,13 @@ const DEFAULT_HEADERS = {
     //'Referer': 'https://google.com/',
     //'Upgrade-Insecure-Requests': '1'
 };
+export async function httpsGetRefactorMe(url: string, attempts: number = 3, useProxy: boolean = false, useProxyOnFinalAttempt: boolean = false): Promise<string> {
+    return httpsGet(url, DEFAULT_USER_AGENT, attempts, {}, useProxy, useProxyOnFinalAttempt);
+}
 
-export async function httpsGet(url: string, userAgent?: string, attempts: number = 3, headers: any = {}, useProxy: boolean = false): Promise<string> {
+export async function httpsGet(url: string, userAgent?: string, attempts: number = 3, headers: any = {}, useProxy: boolean = false, useProxyOnFinalAttempt: boolean = false): Promise<string> {
     // try {
-    const response = await innerHttpsGet(url, userAgent, attempts, headers, useProxy);
+    const response = await innerHttpsGet(url, userAgent, attempts, headers, useProxy, useProxyOnFinalAttempt);
     if (typeof response === 'string') {
         return response as string;
     } else {
@@ -50,10 +54,15 @@ export async function httpsGet(url: string, userAgent?: string, attempts: number
     // }
 }
 
-async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: number = 3, headers: any = {}, useProxy: boolean = false): Promise<string | Status> {
+async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: number = 3, headers: any = {}, useProxy: boolean = false, useProxyOnFinalAttempt: boolean = false, delay: number = 0): Promise<string | Status> {
+
+    if (delay > 0) {
+        console.log("Sleeping for " + delay + "ms");
+        await new Promise(r => setTimeout(r, delay));
+    }
 
     let url = originalUrl;
-    if (useProxy) {
+    if (useProxy || (attempts === 1 && useProxyOnFinalAttempt)) {
         console.log("Using proxy for URL: " + url);
         const key = await SM.getSecretString(API_KEY_SECRET_SCRAPERAPI!);
         url = `https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(originalUrl)}`;
@@ -89,7 +98,7 @@ async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: 
 
                 if (RETRYABLE_CODES.includes(response.statusCode) && attempts > 1) {
                     console.log(`Received StatusCode: ${response.statusCode} ${statusCodes[response.statusCode]}, will retry`);
-                    return resolve(innerHttpsGet(originalUrl, userAgent, --attempts, headers, useProxy));
+                    return resolve(innerHttpsGet(originalUrl, userAgent, --attempts, headers, useProxy, useProxyOnFinalAttempt, delay + 1000));
                 }
 
                 // if (response.statusCode < 200 || response.statusCode >= 300) {

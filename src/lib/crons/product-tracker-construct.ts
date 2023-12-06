@@ -37,7 +37,7 @@ export class ProductTrackerCron extends Construct {
                 DYNAMO_ACCESS_ENDPOINT: config.base.dynamoAccessEndpoint,
                 API_KEY_SECRET_SCRAPERAPI: config.base.apiKeyScraperApi,
             },
-            timeout: cdk.Duration.minutes(5),
+            timeout: cdk.Duration.minutes(10),
             memorySize: 512,
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
