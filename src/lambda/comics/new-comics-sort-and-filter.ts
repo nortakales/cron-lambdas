@@ -201,7 +201,10 @@ const PUBLISHERS_TO_EXCLUDE = [
     "eigoMANGA",
     "Critical Entertainment",
     "Casterman",
-    "Comics2Movies"
+    "Comics2Movies",
+    "Massive Publishing",
+    "Planet Land Comics",
+    "Space Between Entertainment"
 ];
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
