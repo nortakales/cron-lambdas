@@ -54,11 +54,11 @@ export class ProductTrackerCron extends Construct {
             effect: iam.Effect.ALLOW,
         }));
         // // Lambda must be able to retrieve secrets
-        // lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
-        //     actions: ['secretsmanager:GetSecretValue'],
-        //     resources: ['*'],
-        //     effect: iam.Effect.ALLOW,
-        // }));
+        lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['secretsmanager:GetSecretValue'],
+            resources: ['*'],
+            effect: iam.Effect.ALLOW,
+        }));
         // // Lambda must be able to create Cloudwatch rules and add targets
         // lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
         //     actions: ['events:PutRule', 'events:PutTargets'],
