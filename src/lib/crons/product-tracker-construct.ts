@@ -23,7 +23,7 @@ export class ProductTrackerCron extends Construct {
 
         const lambdaFunction = new nodejslambda.NodejsFunction(this, 'ProductTrackerLambdaFunction', {
             functionName: 'ProductTrackerLambda',
-            runtime: lambda.Runtime.NODEJS_14_X,
+            runtime: lambda.Runtime.NODEJS_18_X,
             entry: __dirname + '/../../lambda/product/product-tracker-lambda.ts',
             handler: 'handler',
             environment: {
