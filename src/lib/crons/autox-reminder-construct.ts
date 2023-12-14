@@ -23,7 +23,7 @@ export class AutoxReminderCron extends Construct {
 
         const lambdaFunction = new nodejslambda.NodejsFunction(this, 'AutoxReminderLambdaFunction', {
             functionName: 'AutoxReminderLambda',
-            runtime: lambda.Runtime.NODEJS_14_X,
+            runtime: lambda.Runtime.NODEJS_18_X,
             entry: __dirname + '/../../lambda/autox/autox-reminder-lambda.ts',
             handler: 'handler',
             environment: {
@@ -100,7 +100,7 @@ export class AutoxReminderCron extends Construct {
 
         const pushNotificationLambdaFunction = new nodejslambda.NodejsFunction(this, 'AutoxPushLambdaFunction', {
             functionName: 'AutoxPushLambdaFunction',
-            runtime: lambda.Runtime.NODEJS_14_X,
+            runtime: lambda.Runtime.NODEJS_18_X,
             entry: __dirname + '/../../lambda/autox/autox-push-lambda.ts',
             handler: 'handler',
             environment: {

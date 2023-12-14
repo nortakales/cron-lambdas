@@ -1,13 +1,9 @@
 {
-  "name": "cdk-workshop",
-  "version": "0.1.0",
-  "bin": {
-    "cdk-workshop": "out/bin/cdk-workshop.js"
-  },
+  "name": "cron-lambdas",
+  "version": "0.1.1",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
     "cdk": "cdk"
   },
   "devDependencies": {

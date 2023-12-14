@@ -21,7 +21,7 @@ export class DeleteTimerConstruct extends Construct {
 
         const lambdaFunction = new nodejslambda.NodejsFunction(this, 'DeleteTimerLambdaFunction', {
             functionName: 'DeleteTimerLambdaFunction',
-            runtime: lambda.Runtime.NODEJS_14_X,
+            runtime: lambda.Runtime.NODEJS_18_X,
             entry: __dirname + '/../../lambda/utility-lambda/delete-timer-lambda.ts',
             handler: 'handler',
             environment: {
