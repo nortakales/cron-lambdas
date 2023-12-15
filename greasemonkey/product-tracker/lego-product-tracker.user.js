@@ -13,6 +13,8 @@
 (function() {
     'use strict';
 
+    const apiKey = 'PUT_API_KEY_HERE_IN_BROWSER_DO_NOT_COMMIT';
+
     const regex = /lego\.com\/en-us\/product\/([a-z0-9\-]+)/;
     const url = window.location.href;
     const match = regex.exec(url);
@@ -36,7 +38,7 @@
     function showTrackingUI(data) {
         $('body').prepend(`
             <div style="z-index:999;position:absolute;background-color:#84a246;">
-            Tracked <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=DELETE&table=products&hashKeyName=title&hashKey=${encodeURIComponent(data.title)}">Remove</a>
+            Tracked <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=DELETE&table=products&hashKeyName=title&hashKey=${encodeURIComponent(data.title)}&apiKey=${apiKey}">Remove</a>
             </div>
         `.trim());
     }
@@ -56,7 +58,7 @@
         let website = 'LEGO';
         $('body').prepend(`
             <div style="z-index:999;position:absolute;background-color:#dc7b72;">
-            NOT tracked. <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=PUT&table=products&a1=title&a2=${title}&a3=urlKey&a4=${encodedUrlKey}&a5=website&a6=${website}">Add</a>
+            NOT tracked. <a href="https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=PUT&table=products&a1=title&a2=${title}&a3=urlKey&a4=${encodedUrlKey}&a5=website&a6=${website}&apiKey=${apiKey}">Add</a>
             </div>
         `.trim());
     }
@@ -65,7 +67,7 @@
         let encodedUrlKey = encodeURIComponent(urlKey);
         GM_xmlhttpRequest({
             method: "GET",
-            url: `https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=QUERY&table=products&indexName=urlKey-index&hashKeyName=urlKey&hashKey=${encodedUrlKey}&rangeKeyName=website&rangeKey=LEGO`,
+            url: `https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod?operation=QUERY&table=products&indexName=urlKey-index&hashKeyName=urlKey&hashKey=${encodedUrlKey}&rangeKeyName=website&rangeKey=LEGO&apiKey=${apiKey}`,
             onload: showUI,
             onrror: logError,
             ontimeout: logError

@@ -56,8 +56,8 @@ export enum Website {
     LEGO = 'LEGO'
 }
 
-export function generateDeleteUrl(product: Product) {
-    return `${DYNAMO_ACCESS_ENDPOINT}?operation=DELETE&table=products&hashKeyName=title&hashKey=${encodeURIComponent(product.title)}`;
+export function generateDeleteUrl(product: Product, apiKey: string) {
+    return `${DYNAMO_ACCESS_ENDPOINT}?operation=DELETE&table=products&hashKeyName=title&hashKey=${encodeURIComponent(product.title)}&apiKey=${apiKey}`;
 }
 
 export function generateDiff(oldProduct: Product, newProduct: Product): ProductDiff {
@@ -94,7 +94,7 @@ export function generateDiff(oldProduct: Product, newProduct: Product): ProductD
     }
 }
 
-export function generateDiffText(diff: ProductDiff, commonDiffMetadata: CommonDiffMetadata) {
+export function generateDiffText(diff: ProductDiff, commonDiffMetadata: CommonDiffMetadata, apiKey: string) {
 
     const oldProduct = diff.oldProduct;
     const newProduct = diff.newProduct;
@@ -106,7 +106,7 @@ export function generateDiffText(diff: ProductDiff, commonDiffMetadata: CommonDi
     if (oldProduct.url !== newProduct.url) {
         text += ` (new URL)`;
     }
-    text += ` <a href="${generateDeleteUrl(newProduct)}" style="color:black;">X</a>`
+    text += ` <a href="${generateDeleteUrl(newProduct, apiKey)}" style="color:black;">X</a>`
 
     text += `<br>Price:`;
     if (oldProduct.price !== newProduct.price) {
@@ -163,8 +163,8 @@ export function generateDiffText(diff: ProductDiff, commonDiffMetadata: CommonDi
     return text;
 }
 
-export function generateText(product: Product) {
-    return `<b><a href="${product.url}">${product.title}</a></b> <a href="${generateDeleteUrl(product)}" style="color:black;">X</a><br>
+export function generateText(product: Product, apiKey: string) {
+    return `<b><a href="${product.url}">${product.title}</a></b> <a href="${generateDeleteUrl(product, apiKey)}" style="color:black;">X</a><br>
             Price: ${product.price || ''}<br>
             Status: ${product.status || ''}<br>
             Promotion: ${product.promotion || ''}<br>

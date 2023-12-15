@@ -3,12 +3,16 @@ import { sendEmail } from "../emailer";
 import { startLambdaLog } from "../utilities/logging";
 import { diffCount, diffIsOnlyCommon, generateCommonDiffMetadata, generateDiff, generateDiffText, generateText, Product, Website } from "./product";
 import { getLatestProductData } from "./trackers/lego-tracker";
+import * as SM from '../secrets';
 
 const ENABLED = process.env.ENABLED!;
 const EMAIL_LIST = process.env.EMAIL_LIST!;
 const SUBJECT = process.env.SUBJECT!;
 const FROM = process.env.FROM!;
 const PRODUCT_TABLE_NAME = process.env.PRODUCT_TABLE_NAME!;
+const API_KEY_DYNAMO_ACCESS_LAMBDA = process.env.API_KEY_DYNAMO_ACCESS_LAMBDA!;
+
+
 
 exports.handler = async (event: any = {}, context: any = {}) => {
     startLambdaLog(event, context, process.env);
@@ -64,6 +68,8 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
     const commonDiffMetadata = generateCommonDiffMetadata(productDiffs);
 
+    const apiKey = await SM.getSecretString(API_KEY_DYNAMO_ACCESS_LAMBDA) as string;
+
     let diffBody = '';
     let sameBody = '';
     for (const diff of productDiffs) {
@@ -71,12 +77,12 @@ exports.handler = async (event: any = {}, context: any = {}) => {
             await put(PRODUCT_TABLE_NAME, diff.newProduct);
             // TODO save history
             if (diffIsOnlyCommon(diff, commonDiffMetadata)) {
-                sameBody += generateText(diff.newProduct) + '<br><br>';
+                sameBody += generateText(diff.newProduct, apiKey) + '<br><br>';
             } else {
-                diffBody += generateDiffText(diff, commonDiffMetadata) + '<br><br>';
+                diffBody += generateDiffText(diff, commonDiffMetadata, apiKey) + '<br><br>';
             }
         } else {
-            sameBody += generateText(diff.newProduct) + '<br><br>';
+            sameBody += generateText(diff.newProduct, apiKey) + '<br><br>';
         }
     }
 

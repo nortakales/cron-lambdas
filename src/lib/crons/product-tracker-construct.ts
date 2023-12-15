@@ -35,6 +35,7 @@ export class ProductTrackerCron extends Construct {
                 ENABLED: config.productTracker.enabled,
                 REGION: config.base.region,
                 DYNAMO_ACCESS_ENDPOINT: config.base.dynamoAccessEndpoint,
+                API_KEY_DYNAMO_ACCESS_LAMBDA: config.base.dynamoAccessApiKey,
                 API_KEY_SECRET_SCRAPERAPI: config.base.apiKeyScraperApi,
             },
             timeout: cdk.Duration.minutes(10),

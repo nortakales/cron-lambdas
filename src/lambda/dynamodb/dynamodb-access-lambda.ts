@@ -1,5 +1,8 @@
 import * as DDB from "../dynamo";
+import * as SM from '../secrets';
 import { startLambdaLog } from "../utilities/logging";
+
+const API_KEY_DYNAMO_ACCESS_LAMBDA = process.env.API_KEY_DYNAMO_ACCESS_LAMBDA!;
 
 const BLANK_SUCCESS = {
     statusCode: 200,
@@ -29,7 +32,9 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 
 async function httpGet(event: any) {
     required(event.queryStringParameters, "event.queryStringParameters");
+    required(event.queryStringParameters.apiKey, "event.apiKey");
     required(event.queryStringParameters.operation, "event.queryStringParameters.operation");
+    verifyApiKey(event.queryStringParameters.apiKey);
 
     switch (event.queryStringParameters.operation) {
         case "PUT":
@@ -143,6 +148,13 @@ function required(thing: any, name: string) {
     }
 }
 
+async function verifyApiKey(apiKey: string) {
+    const actualApiKey = await SM.getSecretString(API_KEY_DYNAMO_ACCESS_LAMBDA);
+    if (apiKey !== actualApiKey) {
+        throw new Error(`Missing or incorrect API key`);
+    }
+}
+
 async function httpPost(event: any) {
     const body = event.body;
     required(body, "event.body");
@@ -151,6 +163,8 @@ async function httpPost(event: any) {
     const table = payload.table as string;
     required(operation, "event.body.operation");
     required(table, "event.body.table");
+    required(payload.apiKey, "event.body.apiKey");
+    verifyApiKey(payload.apiKey);
 
     switch (operation) {
         case "PUT":
@@ -187,7 +201,7 @@ async function del(table: string, key: { [key: string]: any }) {
     await DDB.del(table, key);
 }
 
-//Uncomment this to call locally
+//Uncomment this to call locally (has not been updated fro apiKey)
 // exports.handler({
 //     "resource": "/",
 //     "path": "/",

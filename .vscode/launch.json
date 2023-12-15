@@ -104,6 +104,7 @@
                 "PRODUCT_TABLE_NAME": "products",
                 "PRODUCT_HISTORY_TABLE_NAME": "product_history",
                 "DYNAMO_ACCESS_ENDPOINT": "https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod",
+                "API_KEY_DYNAMO_ACCESS_LAMBDA": "dynamo-access-lambda-api-key",
                 "API_KEY_SECRET_SCRAPERAPI": "scraperapi-api-key",
             },
             "internalConsoleOptions": "openOnSessionStart"

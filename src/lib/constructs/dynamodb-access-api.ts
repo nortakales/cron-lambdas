@@ -34,7 +34,8 @@ export class DynamoDBAccessAPI extends Construct {
             entry: __dirname + '/../../lambda/dynamodb/dynamodb-access-lambda.ts',
             handler: 'handler',
             environment: {
-                REGION: config.base.region
+                REGION: config.base.region,
+                API_KEY_DYNAMO_ACCESS_LAMBDA: config.base.dynamoAccessApiKey,
             },
             timeout: cdk.Duration.seconds(5),
             retryAttempts: 2,
@@ -44,6 +45,12 @@ export class DynamoDBAccessAPI extends Construct {
         // Lambda must be able to do all DynamoDB operations to all tables
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
             actions: ['dynamodb:*'],
+            resources: ['*'],
+            effect: iam.Effect.ALLOW,
+        }));
+        // Lambda must be able to retrieve secrets
+        lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['secretsmanager:GetSecretValue'],
             resources: ['*'],
             effect: iam.Effect.ALLOW,
         }));
