@@ -6,6 +6,15 @@ const REGION = process.env.REGION!;
 const EMAIL_LIST = process.env.EMAIL_LIST!;
 const FROM = process.env.FROM!;
 
+const KNOWN_ANDIGNORED_ISSUES = [
+    {
+        signature: "Non-success status code getting URL: https://api.weather.gov/gridpoints/SEW/130,76 StatusCode: 502 Bad Gateway",
+        until: new Date('2024-01-02T00:00:00.000Z')
+    }
+]
+
+const NOW = new Date().getTime();
+
 exports.handler = async (event: any = {}, context: any = {}) => {
     startLambdaLog(event, context, process.env);
 
@@ -24,18 +33,45 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         emailBody += "\nLog Stream: " + payload.logStream;
         emailBody += "\nLogs:\n";
 
+        var addedAnyLogMessage = false;
         for (const logEvent of payload.logEvents) {
-            emailBody += "\n"
-            emailBody += logEvent.message;
+
+            if (isKnownAndIgnoredIssue(logEvent.message)) {
+                continue;
+            } else {
+                emailBody += "\n"
+                emailBody += logEvent.message;
+                addedAnyLogMessage = true;
+            }
         }
 
-        await sendEmail({
-            toAddresses: EMAIL_LIST.split(','),
-            fromAddress: FROM,
-            subject: "Errors in " + payload.logGroup,
-            textBody: emailBody
-        });
+        if (addedAnyLogMessage) {
+
+            console.log("Sending email");
+
+            await sendEmail({
+                toAddresses: EMAIL_LIST.split(','),
+                fromAddress: FROM,
+                subject: "Errors in " + payload.logGroup,
+                textBody: emailBody
+            });
+
+        } else {
+            console.log("Skipping email since errors were all ignored");
+        }
     } else {
         throw new Error("event.awslogs.data was not present");
     }
 };
+
+function isKnownAndIgnoredIssue(message: string) {
+    for (const knownIssue of KNOWN_ANDIGNORED_ISSUES) {
+        if (knownIssue.until.getTime() > NOW) {
+            if (message.includes(knownIssue.signature)) {
+                console.log("Ignoring error with signature: " + knownIssue.signature);
+                return true;
+            }
+        }
+    }
+    return false;
+}
