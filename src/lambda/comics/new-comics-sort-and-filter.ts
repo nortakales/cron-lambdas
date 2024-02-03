@@ -204,7 +204,12 @@ const PUBLISHERS_TO_EXCLUDE = [
     "Comics2Movies",
     "Massive Publishing",
     "Planet Land Comics",
-    "Space Between Entertainment"
+    "Space Between Entertainment",
+    "Still Ill Princess",
+    "Konkret Comics",
+    "Dead Gremlin Comix",
+    "Comicsburgh",
+    "Panini Comics"
 ];
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
