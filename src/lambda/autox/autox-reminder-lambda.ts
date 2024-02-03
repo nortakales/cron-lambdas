@@ -20,6 +20,7 @@ interface UrlMatch {
     firstTimerId: string | null
     secondTimerId: string | null
     registrationDate: Date | null
+    timePresent: boolean
     registrationAlreadyOpen: boolean
 }
 
@@ -67,6 +68,7 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
             firstTimerId: null,
             secondTimerId: null,
             registrationDate: null,
+            timePresent: false,
             registrationAlreadyOpen: false
         }
 
@@ -89,7 +91,9 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
             console.log("New Autox URL!");
 
             const autoxPageHtml = await httpsGet(urlMatch.url);
-            urlMatch.registrationDate = getRegistrationTimeFromHtml(autoxPageHtml);
+            const registrationDateTimeInfo = getRegistrationTimeFromHtml(autoxPageHtml);
+            urlMatch.registrationDate = registrationDateTimeInfo.registrationDateTime;
+            urlMatch.timePresent = registrationDateTimeInfo.timePresent;
             urlMatch.registrationAlreadyOpen = isRegistrationAlreadyOpen(autoxPageHtml);
 
             if (urlMatch.registrationDate !== null) {
@@ -128,6 +132,9 @@ function createEmailBody(urls: UrlMatch[]): string {
         let registrationDate = "Oops, couldn't parse registration date... you won't get a push notification";
         if (url.registrationDate) {
             registrationDate = url.registrationDate?.toLocaleString('en-us', { timeZone: 'America/Los_Angeles' });
+            if (!url.timePresent) {
+                registrationDate += '(time was missing, assumed 6PM)'
+            }
         }
         if (url.registrationAlreadyOpen) {
             registrationDate = "Registration is already open!";
@@ -196,20 +203,43 @@ exports.handler = async (event: any = {}, context: any = {}) => {
 };
 
 const registrationRegex = /[Rr]egistration.{0,30}(?:go live|open).{0,20}?(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4})(?: at)? (\d{1,2}:\d{2}) ?([AaPp][Mm])/;
+const registrationRegexNoTime = /[Rr]egistration.{0,30}(?:go live|open).{0,20}?(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4})/;
 function getRegistrationTimeFromHtml(html: string) {
 
-    const match = registrationRegex.exec(html);
+    let match = registrationRegex.exec(html);
 
     if (match) {
         console.log(JSON.stringify(match, null, 2));
         const dateTimeString = match[1] + ' ' + match[2] + match[3].toUpperCase();
         const dateTime = moment.tz(dateTimeString, 'MM/DD/YYYY hh:mma', 'America/Los_Angeles');
         console.log("Found registration date: " + dateTime.format());
-        return dateTime.toDate();
+        return {
+            registrationDateTime: dateTime.toDate(),
+            timePresent: true
+        }
     } else {
-        console.log("Could not find registration date/time");
-        return null;
+
+        // Fallback to regex that grabs date but no time
+        match = registrationRegexNoTime.exec(html);
+
+        if (match) {
+            console.log(JSON.stringify(match, null, 2));
+            console.log("Could not find time, assuming 6:00 PM");
+            const dateTimeString = match[1] + ' 6:00PM';
+            const dateTime = moment.tz(dateTimeString, 'MM/DD/YYYY hh:mma', 'America/Los_Angeles');
+            console.log("Found registration date: " + dateTime.format());
+            return {
+                registrationDateTime: dateTime.toDate(),
+                timePresent: false
+            }
+        }
     }
+
+    console.log("Could not find registration date/time");
+    return {
+        registrationDateTime: null,
+        timePresent: false
+    };
 }
 
 function isRegistrationAlreadyOpen(html: string) {
