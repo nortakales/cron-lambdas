@@ -23,194 +23,27 @@ const KEYWORDS_TO_EXCLUDE = [
     "Vampirella"
 ]
 
-// TODO - switch to allow list
-// Antarctic Press
-// BOOM! Studios
-// Comixology
-// Dark Horse Comics
-// DC Comics
-// Dynamite
-// IDW Publishing
-// Image Comics
-// Marvel Comics
-// Oni Press
-// Other
-// Red 5
-// Skybound
-// Top Cow Productions
-// Millarworld
-// Titan Books
-// Vertigo Comics
-
-// Blizzard?
-// Evil Ink?
-
-const PUBLISHERS_TO_EXCLUDE = [
-    "A Wave Blue World Inc",
-    "Ablaze",
-    "Abstract Studio",
-    "AC Comics",
-    "Acme Ink",
-    "Action Lab Comics",
-    "Advent Comics",
-    "AfterShock Comics",
-    "Ahoy Comics",
-    "Albatross Funnybooks",
-    "American Mythology",
-    "Archie Comics",
-    "ARH Comix",
-    "Artists Writers & Artisans Inc",
-    "Astonishing Comics",
-    "Asylum Press",
-    "Bad Idea Comics",
-    "Bad Kids Press",
-    "Battle Quest Comics",
-    "Behemoth Comics",
-    "Bilibili Comics",
-    "Binge Books",
-    "Black Josei Press",
-    "Black Mask Studios",
-    "BlackBox Comics",
-    "Bliss On Tap Publishing",
-    "Blood Moon Comics",
-    "Blue Juice Comics",
-    "Boundless Comics",
-    "BroadSword Comics",
-    "Bubble Comics",
-    "Clover Press",
-    "Coffin Comics",
-    "Comic Shop News",
-    "Comics Experience Publishing",
-    "ComixTribe",
-    "Cosmic Times",
-    "Counterpoint Comics",
-    "Crusade Comics",
-    "Cutaway Comics",
-    "Domino Books",
-    "Egmont",
-    "Fantagraphics Books",
-    "Floating World Comics",
-    "Fluke Publishing",
-    "Frew Publications",
-    "Heavy Metal",
-    "Humanoids",
-    "It's Alive",
-    "Keenspot",
-    "Kenzer & Company",
-    "King Features Comics",
-    "LINE Webtoon",
-    "Mad Cave Studios",
-    "Merc Magazine",
-    "Milestone",
-    "Opus Comics",
-    "Papercutz",
-    "PaperFilms",
-    "Parody Press",
-    "Rebellion",
-    "Scout Comics",
-    "Second Sight Publishing",
-    "Shueisha",
-    "Silver Sprocket",
-    "Sitcomics",
-    "Source Point Press",
-    "Star Fruit Books",
-    "Strangers Fanzine",
-    "TwoMorrows",
-    "UDON",
-    "Uncivilized Books",
-    "Valiant",
-    "Vault Comics",
-    "VIZ Media",
-    "Wake Entertainment",
-    "Warrant Publishing",
-    "Zenescope",
-    "AAA Pop",
-    "Aardvark-Vanaheim",
-    "Invader Comics",
-    "Literati Press",
-    "Merc Publishing",
-    "Storm King Comics",
-    "Sumerian Comics",
-    "Blacktooth Comics",
-    "Iconic Comics",
-    "Panel Syndicate",
-    "Bad Bug Media",
-    "Evoluzione Publishing",
-    "Whatnot Publishing",
-    "Comely Comix",
-    "Comics Experience Publishing",
-    "Zine Panique",
-    "Artists Elite Comics",
-    "Boing Being",
-    "Comics Experience Publishing",
-    "Really Easy Press",
-    "American Nature",
-    "Dupuis",
-    "Kodansha",
-    "Lev Gleason - Comic House",
-    "Living the Line",
-    "Band of Bards",
-    "Basement Comics",
-    "Drawn and Quarterly",
-    "Frank Miller Presents",
-    "Sergio Bonelli Editore",
-    "Arcana Studio",
-    "First Second Books",
-    "Gemstone",
-    "Graphix",
-    "Kodansha Comics",
-    "Random House",
-    "Shogakukan Asia",
-    "Sigmate Studio",
-    "Ten Speed Press",
-    "Dell",
-    "Glenat",
-    "Hillman Periodicals",
-    "Seven Seas Entertainment",
-    "Chapterhouse Comics",
-    "Diamond Publications",
-    "Dren Productions",
-    "Fair Square Comics",
-    "Ape Entertainment",
-    "Visi8 Entertainment",
-    "Tokyopop",
-    "Stranger Comics",
-    "Be Amazed Studios",
-    "Bubbles Zine",
-    "Apex Comics Group",
-    "DSTLRY",
-    "Glacier Bay Books",
-    "Lev Gleason - New Friday",
-    "Soaring Penguin Press",
-    "D.C. Thomson & Co.",
-    "Strangers Publishing",
-    "Black Eye Books",
-    "Devil's Due Publishing",
-    "Peow Studio",
-    "Recoil Comics",
-    "Yen Press",
-    "Europe Comics",
-    "Voyage Comics",
-    "Desert Island",
-    "Gold Key Comics",
-    "10 Ton Press",
-    "Conundrum Press",
-    "The Comix Company",
-    "Big Dog Ink",
-    "Tribute Press",
-    "eigoMANGA",
-    "Critical Entertainment",
-    "Casterman",
-    "Comics2Movies",
-    "Massive Publishing",
-    "Planet Land Comics",
-    "Space Between Entertainment",
-    "Still Ill Princess",
-    "Konkret Comics",
-    "Dead Gremlin Comix",
-    "Comicsburgh",
-    "Panini Comics"
-];
+const PUBLISHER_ALLOW_LIST = [
+    "Antarctic Press",
+    "Blizzard Publishing",
+    "BOOM! Studios",
+    "Comixology",
+    "Dark Horse Comics",
+    "DC Comics",
+    "Dynamite",
+    "Evil Ink Comics",
+    "IDW Publishing",
+    "Image Comics",
+    "Marvel Comics",
+    "Millarworld",
+    "Oni Press",
+    "Other",
+    "Red 5",
+    "Skybound",
+    "Titan Books",
+    "Top Cow Productions",
+    "Vertigo Comics",
+]
 
 // The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
 const SERIES_TO_EXCLUDE = [
@@ -295,8 +128,8 @@ const SERIES_TO_EXCLUDE = [
     "Immortal X-Men",
     "Manga Z",
     "Rick and Morty",
-
 ]
+
 function removeNumber(title: string) {
     return title.replace(/\s#\d+$/, '');
 }
@@ -305,10 +138,9 @@ export async function getFilteredAndSortedComics() {
     const newComics = await getNewComics();
 
     // Apply filters
-    const filtered = newComics.filter(comic => !PUBLISHERS_TO_EXCLUDE.includes(comic.publisher))
+    const filtered = newComics.filter(comic => PUBLISHER_ALLOW_LIST.includes(comic.publisher))
         .filter(comic => !SERIES_TO_EXCLUDE.includes(removeNumber(comic.title)))
         .filter(comic => !KEYWORDS_TO_EXCLUDE.some(keyword => comic.title.toLowerCase().includes(keyword.toLowerCase())));
-
 
     // Include must search keywords
     let mustInclude: Comic[] = [];
