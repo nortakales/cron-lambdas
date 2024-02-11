@@ -8,8 +8,8 @@ const FROM = process.env.FROM!;
 
 const KNOWN_ANDIGNORED_ISSUES = [
     {
-        signature: "Non-success status code getting URL: https://api.weather.gov/gridpoints/SEW/130,76 StatusCode: 502 Bad Gateway",
-        until: new Date('2024-01-02T00:00:00.000Z')
+        signature: "Non-success status code getting URL: https://brickranker.com/rankings",
+        until: new Date('2024-04-01T00:00:00.000Z')
     }
 ]
 
