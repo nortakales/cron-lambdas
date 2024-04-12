@@ -9,7 +9,7 @@ export async function getNewComics() {
     const html = await httpsGet("https://leagueofcomicgeeks.com/comics/new-comics", userAgent, 3, {}, true);
     const root = dom.parse(html);
 
-    const comicList = root.querySelectorAll("#comic-list-issues > li");
+    const comicList = root.querySelectorAll("#comic-list-issues > li:not(.variant-collapsed)");
 
     let newComics: Comic[] = [];
 

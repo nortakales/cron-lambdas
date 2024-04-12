@@ -20,7 +20,8 @@ const KEYWORDS_TO_ALWAYS_INCLUDE = [
 ]
 
 const KEYWORDS_TO_EXCLUDE = [
-    "Vampirella"
+    "Vampirella",
+    "Power Rangers"
 ]
 
 const PUBLISHER_ALLOW_LIST = [
