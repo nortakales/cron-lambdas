@@ -98,7 +98,7 @@ async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: 
 
                 if (RETRYABLE_CODES.includes(response.statusCode) && attempts > 1) {
                     console.log(`Received StatusCode: ${response.statusCode} ${statusCodes[response.statusCode]}, will retry`);
-                    return resolve(innerHttpsGet(originalUrl, userAgent, --attempts, headers, useProxy, useProxyOnFinalAttempt, delay + 1000));
+                    return resolve(innerHttpsGet(originalUrl, userAgent, --attempts, headers, useProxy, useProxyOnFinalAttempt, delay + 1500));
                 }
 
                 // if (response.statusCode < 200 || response.statusCode >= 300) {

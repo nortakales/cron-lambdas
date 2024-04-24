@@ -9,7 +9,7 @@ const FROM = process.env.FROM!;
 const KNOWN_ANDIGNORED_ISSUES = [
     {
         signature: "Non-success status code getting URL: https://brickranker.com/rankings",
-        until: new Date('2024-04-01T00:00:00.000Z')
+        until: new Date('2024-06-01T00:00:00.000Z')
     }
 ]
 
