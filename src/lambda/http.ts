@@ -78,12 +78,13 @@ async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: 
 
         const userAgentHeader = { 'User-Agent': userAgent || DEFAULT_USER_AGENT };
 
-        const options = {
+        const options: HTTPS.RequestOptions = {
             headers: {
                 ...userAgentHeader,
                 ...DEFAULT_HEADERS,
                 ...headers
-            }
+            },
+            timeout: 5000 // 5 seconds timeout
         };
 
         try {
