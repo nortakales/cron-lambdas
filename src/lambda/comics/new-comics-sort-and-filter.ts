@@ -21,7 +21,9 @@ const KEYWORDS_TO_ALWAYS_INCLUDE = [
 
 const KEYWORDS_TO_EXCLUDE = [
     "Vampirella",
-    "Power Rangers"
+    "Power Rangers",
+    "Gold Digger",
+    "My Little Pony"
 ]
 
 const PUBLISHER_ALLOW_LIST = [
@@ -129,6 +131,10 @@ const SERIES_TO_EXCLUDE = [
     "Immortal X-Men",
     "Manga Z",
     "Rick and Morty",
+    "Shazam!",
+    "Captain America",
+    "Daredevil",
+    "Doctor Strange"
 ]
 
 function removeNumber(title: string) {
