@@ -125,6 +125,7 @@
             "preLaunchTask": "${defaultBuildTask}",
             "internalConsoleOptions": "openOnSessionStart",
             "env": {
+                "PUSHOVER_CONFIG_SECRET_KEY": "pushover-users-groups-apps",
                 "API_KEY_SECRET_OPEN_WEATHER": "openweathermap-apikey",
                 "API_KEY_SECRET_TOMORROW_IO": "tomorrowio-apikey",
                 "API_KEY_SECRET_VISUAL_CROSSING": "visualcrossing-apikey",

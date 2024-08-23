@@ -134,7 +134,9 @@ const SERIES_TO_EXCLUDE = [
     "Shazam!",
     "Captain America",
     "Daredevil",
-    "Doctor Strange"
+    "Doctor Strange",
+    "Fables",
+    "Thundercats",
 ]
 
 function removeNumber(title: string) {
