@@ -97,7 +97,7 @@ function getSalePrice(dom: HTMLElement) {
 }
 
 function getAddToCartButton(dom: HTMLElement) {
-    let text = dom.querySelector('button[data-test="add-to-bag"]')?.innerText;
+    let text = dom.querySelector('button[data-test="add-to-cart-skroll-cta"]')?.innerText;
     return text;
 }
 
