@@ -81,7 +81,8 @@ export async function getLatestProductData(product: Product, attempts: number = 
 }
 
 function getPrice(dom: HTMLElement) {
-    let text = dom.querySelector('div[class*="ProductDetailsPagestyles__ProductOverviewContainer"] span[data-test="product-price"]')?.innerText;
+    // <meta property="product:price:amount" content="69.99"/>
+    let text = dom.querySelector('meta[property="product:price:amount"]')?.attributes['content'];
     if (text) {
         text = text.toLowerCase().replace('price', '');
     }
@@ -89,6 +90,7 @@ function getPrice(dom: HTMLElement) {
 }
 
 function getSalePrice(dom: HTMLElement) {
+    // See above, this probably no longer works, need to check a sale item
     let text = dom.querySelector('div[class*="ProductDetailsPagestyles__ProductOverviewContainer"] span[data-test="product-price-sale"]')?.innerText;
     if (text) {
         text = text.toLowerCase().replace('sale price', '');

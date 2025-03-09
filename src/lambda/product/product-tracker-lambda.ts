@@ -53,6 +53,10 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         if (newProduct.onSale) {
             saleBody += `<b><a href="${product.url}">${product.title}</a></b><br>`;
         }
+
+        // Pause in between to help with all of the URLs we call
+        console.log("Pausing for 5s before next product");
+        await new Promise(r => setTimeout(r, 5000));
     }
 
     // Sort by # of changes then title
