@@ -48,7 +48,8 @@
             .text()
             .replace(/[^\x20-\x7E]/g, "")
             .replace(/\s+/g, " ");
-        let productNumber = $('span[itemprop="mpn"]').text();
+        // <meta property="product:retailer_item_id" content="75429"/>
+        let productNumber = $('meta[property="product:retailer_item_id"]').attr('content');
         return `LEGO ${productNumber} - ${productName}`;
     }
 
