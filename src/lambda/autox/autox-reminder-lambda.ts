@@ -91,7 +91,7 @@ async function parseSchedulePageForNewUrls(html: string): Promise<UrlMatch[]> {
             console.log("New Autox URL!");
 
             const autoxPageHtml = await httpsGet(urlMatch.url);
-            const registrationDateTimeInfo = getRegistrationTimeFromHtml(autoxPageHtml);
+            const registrationDateTimeInfo = getRegistrationTimeFromHtmlNew(autoxPageHtml);
             urlMatch.registrationDate = registrationDateTimeInfo.registrationDateTime;
             urlMatch.timePresent = registrationDateTimeInfo.timePresent;
             urlMatch.registrationAlreadyOpen = isRegistrationAlreadyOpen(autoxPageHtml);
@@ -202,35 +202,67 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     });
 };
 
-const registrationRegex = /[Rr]egistration.{0,30}(?:go live|open).{0,20}?(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4})(?: at)? (\d{1,2}:\d{2}) ?([AaPp][Mm])/;
-const registrationRegexNoTime = /[Rr]egistration.{0,30}(?:go live|open).{0,20}?(\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4})/;
-function getRegistrationTimeFromHtml(html: string) {
 
-    let match = registrationRegex.exec(html);
+const registrationLineRegex = /[Rr]egistration.{0,30}(?:live|open)[^</]{0,50}/;
+const dateRegex = /\d{1,2}[\.\/]\d{1,2}[\.\/]\d{2,4}/;
+const dateWithMonthRegex = /(january|february|march|april|may|june|july|august|september|october|november|december) (\d{1,2})/i;
+const timeRegex = /(\d{1,2}:\d{2}) ?([AaPp][Mm])/;
+const smallerTimeRegex = /(\d{1,2}) ?([AaPp][Mm])/;
+function getRegistrationTimeFromHtmlNew(html: string) {
+    let lineMatch = registrationLineRegex.exec(html);
 
-    if (match) {
-        console.log(JSON.stringify(match, null, 2));
-        const dateTimeString = match[1] + ' ' + match[2] + match[3].toUpperCase();
-        const dateTime = moment.tz(dateTimeString, 'MM/DD/YYYY hh:mma', 'America/Los_Angeles');
-        console.log("Found registration date: " + dateTime.format());
-        return {
-            registrationDateTime: dateTime.toDate(),
-            timePresent: true
+    if (lineMatch) {
+        const line = lineMatch[0];
+        console.log("Found registration line: " + line);
+
+        let timeString = '6:00PM'; // Assume default
+        let timePresent = false;
+        let timeMatch = timeRegex.exec(line);
+        if (timeMatch) {
+            console.log("Found time: " + timeMatch[0]);
+            timeString = timeMatch[1] + timeMatch[2];
+            timePresent = true;
+        } else {
+            timeMatch = smallerTimeRegex.exec(line);
+            if (timeMatch) {
+                console.log("Found time: " + timeMatch[0]);
+                timeString = timeMatch[1] + ':00' + timeMatch[2];
+                timePresent = true;
+            }
         }
-    } else {
 
-        // Fallback to regex that grabs date but no time
-        match = registrationRegexNoTime.exec(html);
-
-        if (match) {
-            console.log(JSON.stringify(match, null, 2));
-            console.log("Could not find time, assuming 6:00 PM");
-            const dateTimeString = match[1] + ' 6:00PM';
+        let dateMatch = dateRegex.exec(line);
+        if (dateMatch) {
+            const dateTimeString = dateMatch[1] + ' ' + timeString;
             const dateTime = moment.tz(dateTimeString, 'MM/DD/YYYY hh:mma', 'America/Los_Angeles');
             console.log("Found registration date: " + dateTime.format());
             return {
                 registrationDateTime: dateTime.toDate(),
-                timePresent: false
+                timePresent: timePresent
+            }
+        } else {
+            dateMatch = dateWithMonthRegex.exec(line)
+
+
+            if (dateMatch) {
+                let year = new Date().getFullYear();
+                let dateTimeString = `${dateMatch[1]} ${dateMatch[2]} ${year} ${timeString}`;
+                console.log(dateTimeString);
+                let dateTime = moment.tz(dateTimeString, 'MMMM DD YYYY hh:mma', 'America/Los_Angeles');
+                console.log(dateTime.format());
+
+                if (dateTime.isBefore()) {
+                    console.log("Date seems to be in the past, incrementing year by 1")
+                    year++;
+                    dateTimeString = `${dateMatch[1]} ${dateMatch[2]} ${year} ${timeString}`;
+                    dateTime = moment.tz(dateTimeString, 'MMMM DD YYYY hh:mma', 'America/Los_Angeles');
+                }
+
+                console.log("Found registration date: " + dateTime.format());
+                return {
+                    registrationDateTime: dateTime.toDate(),
+                    timePresent: timePresent
+                }
             }
         }
     }
@@ -240,7 +272,9 @@ function getRegistrationTimeFromHtml(html: string) {
         registrationDateTime: null,
         timePresent: false
     };
+
 }
+
 
 function isRegistrationAlreadyOpen(html: string) {
 
@@ -262,3 +296,10 @@ function getSecondNotificationDate(registrationDate: Date) {
 
 // Uncomment this to call locally
 // exports.handler();
+
+// async function test() {
+//     const html = await httpsGet("https://evergreenspeedway.com/events/2025-may-11th-auto-x-powered-by-425-motorsports/");
+//     console.log(getRegistrationTimeFromHtmlNew(html));
+// }
+
+// test();
