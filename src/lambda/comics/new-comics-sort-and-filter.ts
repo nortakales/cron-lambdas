@@ -137,6 +137,12 @@ const SERIES_TO_EXCLUDE = [
     "Doctor Strange",
     "Fables",
     "Thundercats",
+    "Absolute Green Lantern",
+    "Absolute Superman",
+    "Batgirl",
+    "Birds of Prey",
+    "ThunderCats",
+    "The Immortal Thor",
 ]
 
 function removeNumber(title: string) {
