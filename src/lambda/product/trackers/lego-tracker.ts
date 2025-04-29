@@ -1,4 +1,4 @@
-import { httpsGet, httpsGetRefactorMe } from "../../http";
+import { httpsGet } from "../../http";
 import { Product, Website } from "../product";
 import { parse, HTMLElement } from 'node-html-parser';
 
@@ -11,6 +11,7 @@ const BRICKRANKER_BASE_URL = 'https://brickranker.com/rankings/set/';
 export async function getLatestProductData(product: Product, attempts: number = 3): Promise<Product> {
 
     const legoHtml = await httpsGet(LEGO_BASE_URL + product.urlKey);
+    // TODO the above should not error.. but for some reason 301 is happening
     const legoDom = parse(legoHtml);
 
     let price = getPrice(legoDom);
@@ -48,7 +49,9 @@ export async function getLatestProductData(product: Product, attempts: number = 
     // }
 
     try {
-        const brickRankerHtml = await httpsGet(BRICKRANKER_BASE_URL + getLegoModelNumber(product) + '-1');
+        const brickRankerHtml = await httpsGet(BRICKRANKER_BASE_URL + getLegoModelNumber(product) + '-1', {
+            downgrade404Logging: true
+        });
         const brickRankerDom = parse(brickRankerHtml);
 
         const brickRankerStatus = getStatusFromBrickRanker(brickRankerDom);
@@ -124,7 +127,10 @@ function getPromotion(dom: HTMLElement) {
 
 async function getRetirementDateFromBrickset(product: Product) {
 
-    const html = await httpsGetRefactorMe(BRICKSET_BASE_URL + getLegoModelNumber(product), 2, false, true);
+    const html = await httpsGet(BRICKSET_BASE_URL + getLegoModelNumber(product), {
+        attempts: 2,
+        useProxyOnFinalAttempt: true
+    });
     const dom = parse(html);
 
     return getRetirementDate(dom);

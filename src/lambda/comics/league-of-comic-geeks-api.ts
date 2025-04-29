@@ -1,12 +1,13 @@
 import { httpsGet } from '../http';
 import * as dom from 'node-html-parser';
 
-const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36";
 const baseComicUrl = "https://leagueofcomicgeeks.com";
 
 export async function getNewComics() {
 
-    const html = await httpsGet("https://leagueofcomicgeeks.com/comics/new-comics", userAgent, 3, {}, true);
+    const html = await httpsGet("https://leagueofcomicgeeks.com/comics/new-comics", {
+        useProxy: true
+    });
     const root = dom.parse(html);
 
     const comicList = root.querySelectorAll("#comic-list-issues > li:not(.variant-collapsed)");

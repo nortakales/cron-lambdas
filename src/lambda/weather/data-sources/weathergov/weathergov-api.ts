@@ -11,7 +11,9 @@ export async function getOpenWeatherData() {
     //const url = `https://www.nortakales.com/thisisjustmetestingweatherapp`;
     const userAgent = '(Custom Weather App, nortakales@gmail.com)';
 
-    const data = await httpsGet(url, userAgent);
+    const data = await httpsGet(url, {
+        userAgent
+    });
 
     try {
         const weatherData: WeatherGovData = JSON.parse(data);

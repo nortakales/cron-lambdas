@@ -13,6 +13,15 @@ export function isStatusObject(thing: unknown) {
     return thing && typeof thing === 'object' && thing.hasOwnProperty('statusCode') && thing.hasOwnProperty('statusMessage');
 }
 
+export interface HttpGetOptions {
+    userAgent?: string
+    attempts?: number,
+    useProxy?: boolean,
+    useProxyOnFinalAttempt?: boolean,
+    headers?: any,
+    downgrade404Logging?: boolean
+}
+
 const RETRYABLE_CODES = [
     500,
     502,
@@ -21,7 +30,7 @@ const RETRYABLE_CODES = [
     429
 ];
 
-const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36';
+const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
 
 const DEFAULT_HEADERS = {
     //'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -30,13 +39,13 @@ const DEFAULT_HEADERS = {
     //'Referer': 'https://google.com/',
     //'Upgrade-Insecure-Requests': '1'
 };
-export async function httpsGetRefactorMe(url: string, attempts: number = 3, useProxy: boolean = false, useProxyOnFinalAttempt: boolean = false): Promise<string> {
-    return httpsGet(url, DEFAULT_USER_AGENT, attempts, {}, useProxy, useProxyOnFinalAttempt);
-}
 
-export async function httpsGet(url: string, userAgent?: string, attempts: number = 3, headers: any = {}, useProxy: boolean = false, useProxyOnFinalAttempt: boolean = false): Promise<string> {
+const DEFAULT_HTTP_CONNECTION_TIMEOUT = 5000;
+
+export async function httpsGet(url: string, options?: HttpGetOptions): Promise<string> {
+
     // try {
-    const response = await innerHttpsGet(url, userAgent, attempts, headers, useProxy, useProxyOnFinalAttempt);
+    const response = await innerHttpsGet(url, options);
     if (typeof response === 'string') {
         return response as string;
     } else {
@@ -45,7 +54,11 @@ export async function httpsGet(url: string, userAgent?: string, attempts: number
         //     console.log("Payload is small enough, dumping payload:")
         //     console.log(status.payload);
         // }
-        console.error(JSON.stringify(status, null, 2))
+        if (status.statusCode != 404 || !options?.downgrade404Logging) {
+            console.error(JSON.stringify(status, null, 2));
+        } else {
+            console.info(JSON.stringify(status, null, 2));
+        }
         throw status;
     }
     // } catch (error) {
@@ -54,7 +67,13 @@ export async function httpsGet(url: string, userAgent?: string, attempts: number
     // }
 }
 
-async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: number = 3, headers: any = {}, useProxy: boolean = false, useProxyOnFinalAttempt: boolean = false, delay: number = 0): Promise<string | Status> {
+async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, delay: number = 0): Promise<string | Status> {
+
+    const userAgent = options?.userAgent || DEFAULT_USER_AGENT;
+    const attempts = options?.attempts || 3;
+    const headers = options?.headers || DEFAULT_HEADERS;
+    const useProxy = options?.useProxy || false;
+    const useProxyOnFinalAttempt = options?.useProxyOnFinalAttempt || false;
 
     if (delay > 0) {
         console.log("Sleeping for " + delay + "ms");
@@ -76,7 +95,7 @@ async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: 
 
     return new Promise(function (resolve, reject) {
 
-        const userAgentHeader = { 'User-Agent': userAgent || DEFAULT_USER_AGENT };
+        const userAgentHeader = { 'User-Agent': userAgent };
 
         const options: HTTPS.RequestOptions = {
             headers: {
@@ -84,7 +103,7 @@ async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: 
                 ...DEFAULT_HEADERS,
                 ...headers
             },
-            timeout: 5000 // 5 seconds timeout
+            timeout: DEFAULT_HTTP_CONNECTION_TIMEOUT
         };
 
         try {
@@ -99,7 +118,13 @@ async function innerHttpsGet(originalUrl: string, userAgent?: string, attempts: 
 
                 if (RETRYABLE_CODES.includes(response.statusCode) && attempts > 1) {
                     console.log(`Received StatusCode: ${response.statusCode} ${statusCodes[response.statusCode]}, will retry`);
-                    return resolve(innerHttpsGet(originalUrl, userAgent, --attempts, headers, useProxy, useProxyOnFinalAttempt, delay + 1500));
+                    return resolve(innerHttpsGet(originalUrl, {
+                        userAgent,
+                        attempts: attempts - 1,
+                        headers,
+                        useProxy,
+                        useProxyOnFinalAttempt
+                    }, delay + 1500));
                 }
 
                 // if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -216,3 +241,10 @@ const statusCodes: { [key: number]: string } = {
     507: "Insufficient Storage",
     511: "Network Authentication Required"
 }
+
+// async function test() {
+//     const html = await httpsGet('https://www.lego.com/en-us/product/lotr-10316');
+//     console.log(html);
+// }
+
+// test();

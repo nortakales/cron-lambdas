@@ -18,7 +18,9 @@ export async function getMeteomaticsData() {
         'Authorization': 'Basic ' + Buffer.from(credentials.username + ":" + credentials.password).toString('base64')
     };
 
-    const authObject = JSON.parse(await httpsGet('https://login.meteomatics.com/api/v1/token', undefined, 3, authHeader));
+    const authObject = JSON.parse(await httpsGet('https://login.meteomatics.com/api/v1/token', {
+        headers: authHeader
+    }));
 
     const now = Date.now();
     const start = moment(now).startOf('day').format('YYYY-MM-DDTHH:mm:ssZ');
