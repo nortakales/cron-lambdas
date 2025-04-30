@@ -102,7 +102,7 @@ function getSalePrice(dom: HTMLElement) {
 }
 
 function getAddToCartButton(dom: HTMLElement) {
-    let text = dom.querySelector('button[data-test="add-to-cart-skroll-cta"]')?.innerText;
+    let text = dom.querySelector('div[data-test="add-to-bag-sticky-container"] button[data-test="add-to-cart-skroll-cta"]')?.innerText;
     return text;
 }
 
@@ -199,12 +199,17 @@ async function test() {
     // const returnedProduct = await getLatestProductData(testProduct);
     // console.log(JSON.stringify(returnedProduct, null, 2));
     console.log("Testing...");
-    //console.log(await getRetiringSoonNumbersFromBrickEconomy());
-    let html = await httpsGet('https://brickranker.com/rankings/set/40539-1');
-    let dom = parse(html);
+    console.log(await getRetiringSoonNumbersFromBrickEconomy());
+    // let html = await httpsGet('https://brickranker.com/rankings/set/40539-1');
+    // let dom = parse(html);
 
-    console.log(getStatusFromBrickRanker(dom));
-    console.log(getRetirementDateFromBrickRanker(html));
+    // console.log(getStatusFromBrickRanker(dom));
+    // console.log(getRetirementDateFromBrickRanker(html));
+
+    // let html = await httpsGet("https://www.brickeconomy.com/set/31109-1/lego-creator-3-in-1-pirate-ship");
+    // let dom = parse(html);
+    // let element = dom.querySelector('div.row:contains("Retirement")');
+    // console.log(element);
 }
 
 // Uncomment to test

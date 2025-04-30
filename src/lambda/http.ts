@@ -33,11 +33,11 @@ const RETRYABLE_CODES = [
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36';
 
 const DEFAULT_HEADERS = {
-    //'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-    //'Accept-Encoding': 'gzip, deflate, br',
-    //'Accept-Language': 'en-US,en;q=0.9',
-    //'Referer': 'https://google.com/',
-    //'Upgrade-Insecure-Requests': '1'
+    // 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    // 'Accept-Encoding': 'gzip, deflate, br',
+    // 'Accept-Language': 'en-US,en;q=0.9',
+    // 'Referer': 'https://google.com/',
+    // 'Upgrade-Insecure-Requests': '1'
 };
 
 const DEFAULT_HTTP_CONNECTION_TIMEOUT = 5000;
@@ -118,6 +118,10 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
 
                 if (RETRYABLE_CODES.includes(response.statusCode) && attempts > 1) {
                     console.log(`Received StatusCode: ${response.statusCode} ${statusCodes[response.statusCode]}, will retry`);
+                    if (response.statusCode === 429) {
+                        // Add extra delay for too many requests
+                        delay += 5000;
+                    }
                     return resolve(innerHttpsGet(originalUrl, {
                         userAgent,
                         attempts: attempts - 1,
