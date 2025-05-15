@@ -69,7 +69,9 @@ async function main() {
 
     for (let number = generation.start; number <= generation.end; number++) {
         const fullUrl = baseUrl + generation.generationString + '/' + padWithZeroes(number) + '.shtml';
-        let html = await httpsGet(fullUrl, undefined, undefined, { "Accept-Charset": "utf-8" });
+        let html = await httpsGet(fullUrl, {
+            headers: { "Accept-Charset": "utf-8" }
+        });
         html = correctHtml(html);
         //logHtml(html);
         const dom = parse(html);
