@@ -4,7 +4,7 @@ import { parse, HTMLElement } from 'node-html-parser';
 
 
 const baseUrl = 'https://www.serebii.net/';
-const generationNumber = 2;
+const generationNumber = 5;
 const generations = {
     1: {
         start: 1,
@@ -49,6 +49,17 @@ const generations = {
             'HeartGold',
             'SoulSilver'
         ]
+    },
+    5: {
+        start: 1,
+        end: 649,
+        generationString: 'pokedex-bw',
+        games: [
+            'Black',
+            'White',
+            'Black 2',
+            'White 2'
+        ]
     }
 }
 const generation = generations[generationNumber];
@@ -58,12 +69,12 @@ async function main() {
 
     for (let number = generation.start; number <= generation.end; number++) {
         const fullUrl = baseUrl + generation.generationString + '/' + padWithZeroes(number) + '.shtml';
-        let html = await httpsGet(fullUrl);
+        let html = await httpsGet(fullUrl, undefined, undefined, { "Accept-Charset": "utf-8" });
         html = correctHtml(html);
         //logHtml(html);
         const dom = parse(html);
 
-        const name = getName(dom, number);
+        const name = getName(dom, number, generationNumber);
         //console.log(getName(dom, number));
 
         const data: { [key: string]: string } = {};
@@ -75,7 +86,7 @@ async function main() {
                 if (game === 'Blue (Intl.)') {
                     firstTD = firstTD!.nextElementSibling;
                 }
-                if (firstTD?.innerText.includes(game)) {
+                if (firstTD?.innerText.trim() == game) {
                     const secondTD = firstTD.nextElementSibling;
                     //console.log(game + ", " + secondTD.innerText);
                     data[game] = secondTD.innerText.trim();
@@ -85,7 +96,7 @@ async function main() {
             tableRow = tableRow.nextElementSibling;
         }
 
-        let outputLine = name;
+        let outputLine = number + "|" + name;
         for (let game of generation.games) {
             outputLine += '|' + data[game];
         }
@@ -93,6 +104,7 @@ async function main() {
             outputLine.replace(/&eacute;/g, 'é')
                 .replace(/&#9792;/g, '♀')
                 .replace(/&#9794;/g, '♂')
+                .replace(/�/g, 'é')
         );
     }
 }
@@ -122,19 +134,31 @@ function logHtml(html: string) {
 
 function getFirstRowOfLocationTable(dom: HTMLElement, generationNumber: number) {
     if (generationNumber <= 2) {
+        return dom.querySelector('tr > td:contains("Location")')?.parentNode.nextElementSibling;
+    } else if (generationNumber == 5) {
         return dom.querySelector('tr > td:contains("Locations")')?.parentNode.nextElementSibling;
+
     } else {
         return dom.querySelector('tr > td > b:contains("Location")')?.parentNode.parentNode.nextElementSibling.nextElementSibling;
     }
 }
 
-function getName(dom: HTMLElement, number: number) {
+function getName(dom: HTMLElement, number: number, generation: number) {
     const text = dom.querySelector('title:contains("#' + padWithZeroes(number) + '")')?.innerText
-    const match = text?.match(new RegExp('#' + padWithZeroes(number) + ' .*'));
-    if (match) {
-        return match[0];
+    if (generation == 5) {
+        const match = text?.match(new RegExp('(.*) - #' + padWithZeroes(number) + ' .*'));
+        if (match) {
+            return match[1];
+        } else {
+            return '';
+        }
     } else {
-        return '';
+        const match = text?.match(new RegExp('#' + padWithZeroes(number) + ' .*'));
+        if (match) {
+            return match[0];
+        } else {
+            return '';
+        }
     }
 }
 
