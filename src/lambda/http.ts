@@ -6,6 +6,7 @@ const API_KEY_SECRET_SCRAPERAPI = process.env.API_KEY_SECRET_SCRAPERAPI;
 export interface Status {
     readonly statusCode: number
     readonly statusMessage: string,
+    readonly location?: string,
     readonly payload?: string
 }
 
@@ -152,7 +153,28 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                     //console.log("Ended data transfer");
 
                     // TODO Handle 301/302 moved status code
-                    if (response.statusCode !== undefined && (response.statusCode < 200 || response.statusCode >= 300)) {
+
+                    if (response.statusCode !== undefined && response.statusCode === 301) {
+                        const newLocation = response.headers.location;
+                        const logMessage = "HTTP 301: " + originalUrl + " moved to " + newLocation;
+                        console.info(logMessage);
+                        if (newLocation !== undefined) {
+                            resolve(innerHttpsGet(newLocation, {
+                                userAgent,
+                                attempts,
+                                headers,
+                                useProxy,
+                                useProxyOnFinalAttempt
+                            }, delay + 1000));
+                        } else {
+                            resolve({
+                                statusCode: response.statusCode,
+                                statusMessage: logMessage,
+                                payload: data.length < 100000 ? data : 'Payload too large (greater than 100,000 characters)'
+                            });
+
+                        }
+                    } else if (response.statusCode !== undefined && (response.statusCode < 200 || response.statusCode >= 300)) {
                         const errorMessage = 'Non-success status code getting URL: ' + url +
                             ' StatusCode: ' + response.statusCode + " " + statusCodes[response.statusCode];
                         console.log(errorMessage);
