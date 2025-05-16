@@ -1,5 +1,6 @@
 import * as HTTPS from 'https';
 import * as SM from './secrets';
+import { get } from 'http';
 
 const API_KEY_SECRET_SCRAPERAPI = process.env.API_KEY_SECRET_SCRAPERAPI;
 
@@ -152,13 +153,21 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                 response.on('end', () => {
                     //console.log("Ended data transfer");
 
-                    // TODO Handle 301/302 moved status code
-
                     if (response.statusCode !== undefined && response.statusCode === 301) {
-                        const newLocation = response.headers.location;
+
+                        let newLocation = response.headers.location;
+
                         const logMessage = "HTTP 301: " + originalUrl + " moved to " + newLocation;
                         console.info(logMessage);
                         if (newLocation !== undefined) {
+
+
+                            // Sometimes the new location does not include the domain name, just the path
+                            const parts = getPartsOfUrl(originalUrl);
+                            if (!newLocation.includes(parts.domain!)) {
+                                newLocation = parts.protocol! + parts.domain! + (newLocation.startsWith('/') ? '' : '/') + newLocation;
+                            }
+
                             resolve(innerHttpsGet(newLocation, {
                                 userAgent,
                                 attempts,
@@ -166,6 +175,7 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                                 useProxy,
                                 useProxyOnFinalAttempt
                             }, delay + 1000));
+
                         } else {
                             resolve({
                                 statusCode: response.statusCode,
@@ -267,6 +277,31 @@ const statusCodes: { [key: number]: string } = {
     507: "Insufficient Storage",
     511: "Network Authentication Required"
 }
+
+function getPartsOfUrl(url: string) {
+    let tempUrl = url;
+    const protocol = /^https:\/\//g.exec(tempUrl)?.[0];
+    if (protocol) {
+        tempUrl = tempUrl.replace(protocol, '');
+    }
+    const domain = /^[^/?]+/.exec(tempUrl)?.[0];
+    if (domain) {
+        tempUrl = tempUrl.replace(domain, '');
+    }
+    const path = /^[^?]+/.exec(tempUrl)?.[0];
+    if (path) {
+        tempUrl = tempUrl.replace(path, '');
+    }
+    const queryString = /^\?.*/.exec(tempUrl)?.[0];
+    return {
+        protocol,
+        domain,
+        path,
+        queryString
+    }
+}
+
+
 
 // async function test() {
 //     const html = await httpsGet('https://www.lego.com/en-us/product/lotr-10316');
