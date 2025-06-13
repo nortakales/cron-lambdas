@@ -137,7 +137,7 @@ async function getRetirementDateFromBrickset(product: Product) {
 }
 
 function getRetirementDate(dom: HTMLElement) {
-    let text = dom.querySelector('dt:contains("Launch/exit")')?.nextElementSibling.innerText;
+    let text = dom.querySelector('dt:contains("Launch/exit")')?.nextElementSibling?.innerText;
     if (text) {
         text = text.replace(/^\d+ \w+ \d+ \- /, '');
         text = text.replace("{t.b.a}", "TBA")
@@ -172,7 +172,7 @@ function getLegoModelNumber(product: Product) {
 }
 
 function getStatusFromBrickRanker(dom: HTMLElement) {
-    let text = dom.querySelector('strong:contains("Status:")')?.nextElementSibling.innerText;
+    let text = dom.querySelector('strong:contains("Status:")')?.nextElementSibling?.innerText;
     return text;
 }
 function getRetirementDateFromBrickRanker(html: string) {

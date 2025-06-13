@@ -91,7 +91,7 @@ async function main() {
                 if (firstTD?.innerText.trim() == game) {
                     const secondTD = firstTD.nextElementSibling;
                     //console.log(game + ", " + secondTD.innerText);
-                    data[game] = secondTD.innerText.trim();
+                    data[game] = secondTD!.innerText.trim();
                     continue;
                 }
             }
@@ -141,7 +141,7 @@ function getFirstRowOfLocationTable(dom: HTMLElement, generationNumber: number) 
         return dom.querySelector('tr > td:contains("Locations")')?.parentNode.nextElementSibling;
 
     } else {
-        return dom.querySelector('tr > td > b:contains("Location")')?.parentNode.parentNode.nextElementSibling.nextElementSibling;
+        return dom.querySelector('tr > td > b:contains("Location")')?.parentNode.parentNode.nextElementSibling!.nextElementSibling;
     }
 }
 
