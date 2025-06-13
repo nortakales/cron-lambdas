@@ -51,7 +51,16 @@ export class CDKPipelineStack extends cdk.Stack {
             codeBuildDefaults: {
                 buildEnvironment: {
                     buildImage: LinuxBuildImage.STANDARD_6_0
-                }
+                },
+                partialBuildSpec: BuildSpec.fromObject({
+                    phases: {
+                        install: {
+                            "runtime-versions": {
+                                nodejs: 18
+                            }
+                        }
+                    }
+                })
             }
         });
 
