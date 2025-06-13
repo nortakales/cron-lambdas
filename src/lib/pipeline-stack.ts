@@ -39,31 +39,13 @@ export class CDKPipelineStack extends cdk.Stack {
             selfMutation: true,
             selfMutationCodeBuildDefaults: {
                 buildEnvironment: {
-                    buildImage: LinuxBuildImage.STANDARD_6_0
-                },
-                partialBuildSpec: BuildSpec.fromObject({
-                    phases: {
-                        install: {
-                            "runtime-versions": {
-                                nodejs: 18
-                            }
-                        }
-                    }
-                })
+                    buildImage: LinuxBuildImage.STANDARD_7_0
+                }
             },
             codeBuildDefaults: {
                 buildEnvironment: {
-                    buildImage: LinuxBuildImage.STANDARD_6_0
-                },
-                partialBuildSpec: BuildSpec.fromObject({
-                    phases: {
-                        install: {
-                            "runtime-versions": {
-                                nodejs: 18
-                            }
-                        }
-                    }
-                })
+                    buildImage: LinuxBuildImage.STANDARD_7_0
+                }
             }
         });
 

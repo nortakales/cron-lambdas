@@ -7,26 +7,26 @@
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.111",
-    "@types/node": "^18.15.0",
-    "aws-cdk": "2.68.0",
-    "esbuild": "^0.17.11",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "@types/aws-lambda": "^8.10.149",
+    "@types/node": "^24.0.1",
+    "aws-cdk": "2.1018.1",
+    "esbuild": "^0.25.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.68.0",
-    "constructs": "^10.1.274",
-    "@aws-sdk/client-cloudwatch-events": "^3.289.0",
-    "@aws-sdk/client-dynamodb": "^3.289.0",
-    "@aws-sdk/client-secrets-manager": "^3.289.0",
-    "@aws-sdk/lib-dynamodb": "^3.289.0",
-    "aws-sdk": "^2.1333.0",
-    "moment": "^2.29.4",
-    "moment-timezone": "^0.5.41",
-    "node-html-parser": "^6.1.5",
-    "pushover-notifications": "^1.2.2",
-    "query-string": "^7.0.1",
-    "typed-duration": "^1.0.13"
+    "aws-cdk-lib": "^2.200.2",
+    "constructs": "^10.4.2",
+    "@aws-sdk/client-cloudwatch-events": "^3.828.0",
+    "@aws-sdk/client-dynamodb": "^3.828.0",
+    "@aws-sdk/client-secrets-manager": "^3.828.0",
+    "@aws-sdk/lib-dynamodb": "^3.828.0",
+    "aws-sdk": "^2.1692.0",
+    "moment": "^2.30.1",
+    "moment-timezone": "^0.6.0",
+    "node-html-parser": "^7.0.1",
+    "pushover-notifications": "^1.2.3",
+    "query-string": "^9.2.0",
+    "typed-duration": "^2.0.0"
   }
 }
