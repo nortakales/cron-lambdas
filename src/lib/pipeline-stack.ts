@@ -13,7 +13,7 @@ import { ErrorLogNotifier } from './constructs/error-log-notifier';
 import * as destinations from 'aws-cdk-lib/aws-logs-destinations';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
-import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
+import { BuildSpec, LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 
 export class CDKPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -37,6 +37,17 @@ export class CDKPipelineStack extends cdk.Stack {
                 ]
             }),
             selfMutation: true,
+            selfMutationCodeBuildDefaults: {
+                partialBuildSpec: BuildSpec.fromObject({
+                    phases: {
+                        install: {
+                            "runtime-versions": {
+                                nodejs: 18
+                            }
+                        }
+                    }
+                })
+            },
             codeBuildDefaults: {
                 buildEnvironment: {
                     buildImage: LinuxBuildImage.STANDARD_6_0
