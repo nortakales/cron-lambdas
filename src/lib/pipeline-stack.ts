@@ -33,6 +33,8 @@ export class CDKPipelineStack extends cdk.Stack {
                 ],
                 commands: [
                     "npm run build",
+                    'node --version',
+                    'npx cdk --version',
                     'npx cdk synth'
                 ]
             }),
