@@ -112,7 +112,7 @@ function getStatus(dom: HTMLElement) {
 }
 
 function getTags(dom: HTMLElement) {
-    const tags = dom.querySelectorAll('div[class*="ProductOverviewstyles__ProductBadgesRow"] span[data-test="product-flag"]').map(element => element.innerText);
+    const tags = dom.querySelectorAll('div[class*="ProductOverviewstyles__ProductBadgesRow"] div[data-test="product-badges"] span').map(element => element.innerText);
     return tags;
 }
 
@@ -191,15 +191,15 @@ function getRetirementDateFromBrickRanker(html: string) {
 }
 
 async function test() {
-    // const testProduct: Product = {
-    //     title: "LEGO 75342 - Republic Fighter Tank",
-    //     website: Website.LEGO,
-    //     urlKey: "hogwarts-moment-charms-class-76385"
-    // }
-    // const returnedProduct = await getLatestProductData(testProduct);
-    // console.log(JSON.stringify(returnedProduct, null, 2));
-    console.log("Testing...");
-    console.log(await getRetiringSoonNumbersFromBrickEconomy());
+    const testProduct: Product = {
+        title: "LEGO 40796 - Testing",
+        website: Website.LEGO,
+        urlKey: "revenge-of-the-sith-heroes-villains-40796"
+    }
+    const returnedProduct = await getLatestProductData(testProduct);
+    console.log(JSON.stringify(returnedProduct, null, 2));
+    // console.log("Testing...");
+    // console.log(await getRetiringSoonNumbersFromBrickEconomy());
     // let html = await httpsGet('https://brickranker.com/rankings/set/40539-1');
     // let dom = parse(html);
 
