@@ -169,9 +169,9 @@ export async function getFilteredAndSortedComics() {
     const filtered = newComics
         // Using query string now .filter(comic => PUBLISHER_ALLOW_LIST.includes(comic.publisher))
         .filter(comic => !SERIES_TO_EXCLUDE.includes(removeNumber(comic.title)))
-        .filter(comic => !KEYWORDS_TO_EXCLUDE.some(keyword => comic.title.toLowerCase().includes(keyword.toLowerCase())));
-
-    // TODO filter "xth Printing"
+        .filter(comic => !KEYWORDS_TO_EXCLUDE.some(keyword => comic.title.toLowerCase().includes(keyword.toLowerCase())))
+        // Remove xth printing
+        .filter(comic => !/(2nd|3rd|\dth) [Pp]rinting/.test(comic.title));
 
     // Include must search keywords
     let mustInclude: Comic[] = [];
