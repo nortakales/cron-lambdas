@@ -16,7 +16,9 @@ const KEYWORDS_TO_ALWAYS_INCLUDE = [
     "BPRD",
     "TMNT",
     "James Bond",
-    "007"
+    "007",
+    "Sonic the Hedgehog",
+    "Teenage Mutant Ninja Turtles"
 ]
 
 const KEYWORDS_TO_EXCLUDE = [
@@ -143,6 +145,17 @@ const SERIES_TO_EXCLUDE = [
     "Birds of Prey",
     "ThunderCats",
     "The Immortal Thor",
+    "Furrlough",
+    "Tomorrow Girl",
+    "Absolute Wonder Woman",
+    "DC Connect",
+    "Green Arrow",
+    "Justice League Unlimited",
+    "Superman",
+    "Gunslinger Spawn",
+    "Spider-Boy",
+    "The Incredible Hulk",
+    "Uncanny X-Men"
 ]
 
 function removeNumber(title: string) {
@@ -153,9 +166,12 @@ export async function getFilteredAndSortedComics() {
     const newComics = await getNewComics();
 
     // Apply filters
-    const filtered = newComics.filter(comic => PUBLISHER_ALLOW_LIST.includes(comic.publisher))
+    const filtered = newComics
+        // Using query string now .filter(comic => PUBLISHER_ALLOW_LIST.includes(comic.publisher))
         .filter(comic => !SERIES_TO_EXCLUDE.includes(removeNumber(comic.title)))
         .filter(comic => !KEYWORDS_TO_EXCLUDE.some(keyword => comic.title.toLowerCase().includes(keyword.toLowerCase())));
+
+    // TODO filter "xth Printing"
 
     // Include must search keywords
     let mustInclude: Comic[] = [];

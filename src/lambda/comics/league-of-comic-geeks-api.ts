@@ -5,7 +5,55 @@ const baseComicUrl = "https://leagueofcomicgeeks.com";
 
 export async function getNewComics() {
 
-    const html = await httpsGet("https://leagueofcomicgeeks.com/comics/new-comics", {
+
+    // This doesn't work
+    const formats = [
+        1, // Regular issues
+        3, // TPBs
+        4, // Hardcover
+        6 // Annuals
+    ]
+
+    /*
+     Missing below
+        "Blizzard Publishing",
+        "Comixology",
+        "Evil Ink Comics",
+        "Millarworld",
+        "Red 5",
+        "Skybound",
+        "Titan Books",
+        "Top Cow Productions",
+        "Vertigo Comics",
+    */
+
+    const publishers = [
+        1, // DC Comics
+        2, // Marvel Comics
+        5, // Dark Horse Comics
+        6, // IDW Publishing
+        7, // Image Comics
+        8,
+        9,
+        10,
+        12, // Dynamite
+        13, // BOOM! Studios
+        15,
+        16,
+        23, // Antarctic Press
+        28,
+        29, // Oni Press
+        33, // Other
+        202,
+        592
+    ];
+
+    let queryString = '';
+    for (let index in publishers) {
+        queryString += `publisher[${index}]=${publishers[index]}&`
+    }
+
+    const html = await httpsGet("https://leagueofcomicgeeks.com/comics/new-comics?" + queryString, {
         useProxy: true
     });
     const root = dom.parse(html);
