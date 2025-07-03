@@ -18,7 +18,8 @@ const KEYWORDS_TO_ALWAYS_INCLUDE = [
     "James Bond",
     "007",
     "Sonic the Hedgehog",
-    "Teenage Mutant Ninja Turtles"
+    "Teenage Mutant Ninja Turtles",
+    "Baltimore"
 ]
 
 const KEYWORDS_TO_EXCLUDE = [
@@ -155,7 +156,21 @@ const SERIES_TO_EXCLUDE = [
     "Gunslinger Spawn",
     "Spider-Boy",
     "The Incredible Hulk",
-    "Uncanny X-Men"
+    "Uncanny X-Men",
+    "Grim",
+    "JSA",
+    "All-New Venom",
+    "Hellverine",
+    "The Avengers",
+    "Ultimate Wolverine",
+    "X-Men",
+    "Adventure Time",
+    "Furrlough",
+    "Tomorrow Girl",
+    "Green Arrow",
+    "Harley Quinn",
+    "Justice League Unlimited",
+    "Superman",
 ]
 
 function removeNumber(title: string) {
