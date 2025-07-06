@@ -30,7 +30,7 @@ export class DynamoDBAccessAPI extends Construct {
 
         const lambdaFunction = new nodejslambda.NodejsFunction(this, id + '-Lambda', {
             functionName: 'DynamoDBAccessLambdaFunction',
-            runtime: lambda.Runtime.NODEJS_18_X,
+            runtime: lambda.Runtime.NODEJS_22_X,
             entry: __dirname + '/../../lambda/dynamodb/dynamodb-access-lambda.ts',
             handler: 'handler',
             environment: {

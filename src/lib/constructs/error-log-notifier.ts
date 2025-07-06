@@ -21,7 +21,7 @@ export class ErrorLogNotifier extends Construct {
         });
         this.lambda = new nodejslambda.NodejsFunction(this, prefix + 'ErrorLogNotifierLambda', {
             functionName: prefix + 'ErrorLogNotifierLambda',
-            runtime: lambda.Runtime.NODEJS_18_X,
+            runtime: lambda.Runtime.NODEJS_22_X,
             entry: __dirname + '/../../lambda/utility-lambda/error-log-notifier.ts',
             handler: 'handler',
             environment: {

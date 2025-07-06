@@ -63,7 +63,7 @@ export class CDKPipelineStack extends cdk.Stack {
 
         const pipelineNotificationLambda = new nodejslambda.NodejsFunction(this, 'CronPipelineNotificationLambdaFunction', {
             functionName: 'CronPipelineNotificationLambda',
-            runtime: lambda.Runtime.NODEJS_18_X,
+            runtime: lambda.Runtime.NODEJS_22_X,
             entry: __dirname + '/../lambda/pipeline/pipeline-notification-lambda.ts',
             handler: 'handler',
             environment: {

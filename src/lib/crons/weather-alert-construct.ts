@@ -25,7 +25,7 @@ export class WeatherAlertCron extends Construct {
 
         this.lambda = new nodejslambda.NodejsFunction(this, 'WeatherAlertLambdaFunction', {
             functionName: 'WeatherAlertCronLambda',
-            runtime: lambda.Runtime.NODEJS_18_X,
+            runtime: lambda.Runtime.NODEJS_22_X,
             entry: __dirname + '/../../lambda/weather/weather-alert-lambda.ts',
             handler: 'handler',
             environment: {

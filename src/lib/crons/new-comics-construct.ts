@@ -24,7 +24,7 @@ export class NewComicsCron extends Construct {
 
         this.lambda = new nodejslambda.NodejsFunction(this, 'NewComicsLambdaFunction', {
             functionName: 'NewComicsCronLambda',
-            runtime: lambda.Runtime.NODEJS_18_X,
+            runtime: lambda.Runtime.NODEJS_22_X,
             entry: __dirname + '/../../lambda/comics/new-comics-lambda.ts',
             handler: 'handler',
             environment: {
