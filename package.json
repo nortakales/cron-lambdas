@@ -15,7 +15,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.204.0",
+    "aws-cdk-lib": "2.203.1",
     "constructs": "^10.4.2",
     "@aws-sdk/client-cloudwatch-events": "^3.840.0",
     "@aws-sdk/client-dynamodb": "^3.840.0",

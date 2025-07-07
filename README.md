@@ -3,6 +3,8 @@
 Install AWS CLI: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 Many instructions in imessage node app readme
 
+Upgrade dependencies: https://stackoverflow.com/questions/16073603/how-can-i-update-each-dependency-in-package-json-to-the-latest-version
+
 # Lambda Crons
 
 ## AutoX Reminder
