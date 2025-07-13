@@ -171,6 +171,9 @@ const SERIES_TO_EXCLUDE = [
     "Harley Quinn",
     "Justice League Unlimited",
     "Superman",
+    "Aquaman",
+    "Green Lantern Corps",
+    "Supergirl"
 ]
 
 function removeNumber(title: string) {
