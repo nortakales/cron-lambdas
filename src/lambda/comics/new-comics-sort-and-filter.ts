@@ -173,7 +173,13 @@ const SERIES_TO_EXCLUDE = [
     "Superman",
     "Aquaman",
     "Green Lantern Corps",
-    "Supergirl"
+    "Supergirl",
+    "Absolute Flash",
+    "The New Gods",
+    "Titans",
+    "Zatanna",
+    "G.I. Joe",
+    "Ultimate Black Panther"
 ]
 
 function removeNumber(title: string) {
