@@ -19,7 +19,7 @@
             "env": {
                 "EMAIL_LIST": "nortakales@gmail.com",
                 "SUBJECT": "Test Weather Alert",
-                "FROM": "nortakales@gmail.com",
+                "FROM": "automation@nortakales.com",
                 "LATITUDE": "47.806994",
                 "LONGITUDE": "-122.192443",
                 "ENABLED": "true",
@@ -53,7 +53,7 @@
             "env": {
                 "EMAIL_LIST": "nortakales@gmail.com",
                 "SUBJECT": "Test Autox Alert",
-                "FROM": "nortakales@gmail.com",
+                "FROM": "automation@nortakales.com",
                 "TABLE_NAME": "autox_reminder_urls",
                 "ENABLED": "true",
                 "REGION": "us-west-2",
@@ -78,7 +78,7 @@
             "env": {
                 "EMAIL_LIST": "nortakales@gmail.com",
                 "SUBJECT": "New Comics",
-                "FROM": "nortakales@gmail.com",
+                "FROM": "automation@nortakales.com",
                 "ENABLED": "true",
                 "REGION": "us-west-2",
                 "API_KEY_SECRET_SCRAPERAPI": "scraperapi-api-key"
@@ -100,7 +100,7 @@
             "env": {
                 "EMAIL_LIST": "nortakales@gmail.com",
                 "SUBJECT": "Product Tracker - Test",
-                "FROM": "nortakales@gmail.com",
+                "FROM": "automation@nortakales.com",
                 "ENABLED": "true",
                 "REGION": "us-west-2",
                 "PRODUCT_TABLE_NAME": "products",
