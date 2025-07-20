@@ -1,12 +1,11 @@
-import * as AWS from 'aws-sdk';
+import { SESv2Client, SendEmailCommand, SendEmailCommandInput } from "@aws-sdk/client-sesv2";
+import { send } from "process";
 
 const REGION = process.env.REGION!;
 
-const awsOptions: AWS.ConfigurationOptions = {
-    region: REGION
-};
-AWS.config.update(awsOptions);
-const SES = new AWS.SES(awsOptions);
+const SES = new SESv2Client({
+    region: REGION,
+});
 
 export async function sendEmail(options: SendEmailOptions) {
 
@@ -31,18 +30,24 @@ export async function sendEmail(options: SendEmailOptions) {
         throw new Error("Must specify either text or html email body");
     }
 
-    var params: AWS.SES.SendEmailRequest = {
+    var params: SendEmailCommandInput = {
+        FromEmailAddress: options.fromAddress,
         Destination: {
             ToAddresses: options.toAddresses,
         },
-        Message: {
-            Body: body,
-            Subject: { Data: options.subject },
+        Content: {
+            Simple: {
+                Subject: {
+                    Data: options.subject,
+                    Charset: 'UTF-8'
+                },
+                Body: body
+            }
         },
-        Source: options.fromAddress,
+
     };
 
-    await SES.sendEmail(params).promise();
+    await SES.send(new SendEmailCommand(params));
 }
 
 export interface SendEmailOptions {
@@ -52,3 +57,12 @@ export interface SendEmailOptions {
     subject: string,
     fromAddress: string
 }
+
+// sendEmail({
+//     toAddresses: ['nortakales@gmail.com'],
+//     fromAddress: 'automation@nortakales.com',
+//     subject: 'Test Email',
+//     textBody: 'This is a test email'
+// })
+//     .then(() => { console.log("Email sent") })
+//     .catch(err => { console.error("Error sending email", err) });
