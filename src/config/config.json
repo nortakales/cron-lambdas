@@ -28,10 +28,10 @@
     "weatherAlert": {
         "enabled": "true",
         "rate": "rate(1 hour)",
-        "fromEmail": "nortakales@gmail.com",
+        "fromEmail": "automation@cidernerd.com",
         "emailSubject": "Weather Alert",
         "emailList": [
-            "nortakales@gmail.com"
+            "automation@cidernerd.com"
         ],
         "latitude": "47.806994",
         "longitude": "-122.192443",
