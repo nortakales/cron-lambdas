@@ -60,7 +60,7 @@ export interface SendEmailOptions {
 
 // sendEmail({
 //     toAddresses: ['nortakales@gmail.com'],
-//     fromAddress: 'automation@nortakales.com',
+//     fromAddress: '"Automation" <automation@nortakales.com>',
 //     subject: 'Test Email',
 //     textBody: 'This is a test email'
 // })

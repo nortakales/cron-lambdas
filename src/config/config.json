@@ -11,7 +11,7 @@
         "enabled": "true",
         "rate": "rate(30 minutes)",
         "dynamoTableName": "autox_reminder_urls",
-        "fromEmail": "automation@nortakales.com",
+        "fromEmail": "\"Autox Alert\" <automation@nortakales.com>",
         "emailSubject": "Evergreen Autox Alert",
         "emailList": [
             "nortakales@gmail.com",
@@ -28,7 +28,7 @@
     "weatherAlert": {
         "enabled": "true",
         "rate": "rate(1 hour)",
-        "fromEmail": "automation@mail.nortakales.com",
+        "fromEmail": "\"Weather Alert\" <automation@nortakales.com>",
         "emailSubject": "Weather Alert",
         "emailList": [
             "nortakales@gmail.com"
@@ -47,7 +47,7 @@
     "newComics": {
         "enabled": "true",
         "rate": "cron(0 18 ? * WED *)",
-        "fromEmail": "automation@nortakales.com",
+        "fromEmail": "\"New Comics\" <automation@nortakales.com>",
         "emailSubject": "New Comics",
         "emailList": [
             "nortakales@gmail.com"
@@ -58,7 +58,7 @@
         "rate": "cron(0 18 ? * * *)",
         "productsDynamoTableName": "products",
         "productHistoryDynamoTableName": "product_history",
-        "fromEmail": "automation@nortakales.com",
+        "fromEmail": "\"Product Tracker\" <automation@nortakales.com>",
         "emailSubject": "Product Tracker",
         "emailList": [
             "nortakales@gmail.com"
