@@ -35,7 +35,7 @@ export class NewComicsCron extends Construct {
                 REGION: config.base.region,
                 API_KEY_SECRET_SCRAPERAPI: config.base.apiKeyScraperApi,
             },
-            timeout: cdk.Duration.seconds(10),
+            timeout: cdk.Duration.seconds(60),
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
