@@ -107,7 +107,7 @@ function getAddToCartButton(dom: HTMLElement) {
 }
 
 function getStatus(dom: HTMLElement) {
-    let text = dom.querySelector('p[data-test="product-overview-availability"]')?.innerText;
+    let text = dom.querySelector('span[data-test="product-overview-availability"]')?.innerText;
     return text;
 }
 
