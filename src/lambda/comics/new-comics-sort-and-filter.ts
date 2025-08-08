@@ -26,7 +26,9 @@ const KEYWORDS_TO_EXCLUDE = [
     "Vampirella",
     "Power Rangers",
     "Gold Digger",
-    "My Little Pony"
+    "My Little Pony",
+    "Powerpuff",
+    "ThunderCats"
 ]
 
 const PUBLISHER_ALLOW_LIST = [
