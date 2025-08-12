@@ -49,6 +49,7 @@ export class DLQWithMonitor extends Construct {
             threshold: props.alarmThreshold,
             evaluationPeriods: props.alarmEvaluationPeriods,
             comparisonOperator: props.alarmComparisonOperator,
+            treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
         });
         alarm.addAlarmAction(new actions.SnsAction(snsTopic));
     }
