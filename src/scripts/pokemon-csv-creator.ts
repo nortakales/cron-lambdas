@@ -4,8 +4,8 @@ import { parse, HTMLElement } from 'node-html-parser';
 
 
 const baseUrl = 'https://www.serebii.net/';
-const generationNumber = 5;
-const generations = {
+const generationNumber = 6;
+const generations: { [key: number]: Generation } = {
     1: {
         start: 1,
         end: 151,
@@ -60,6 +60,17 @@ const generations = {
             'Black 2',
             'White 2'
         ]
+    },
+    6: {
+        start: 1,
+        end: 721,
+        generationString: 'pokedex-xy',
+        games: [
+            'X',
+            'Y',
+            'Omega Ruby',
+            'Alpha Sapphire'
+        ]
     }
 }
 const generation = generations[generationNumber];
@@ -91,14 +102,14 @@ async function main() {
                 if (firstTD?.innerText.trim() == game) {
                     const secondTD = firstTD.nextElementSibling;
                     //console.log(game + ", " + secondTD.innerText);
-                    data[game] = secondTD!.innerText.trim();
+                    data[game] = secondTD!.innerText.trim().replace('\n', ', ');
                     continue;
                 }
             }
             tableRow = tableRow.nextElementSibling;
         }
 
-        let outputLine = number + "|" + name;
+        let outputLine = fullUrl + "|" + number + "|" + name;
         for (let game of generation.games) {
             outputLine += '|' + data[game];
         }
@@ -137,9 +148,8 @@ function logHtml(html: string) {
 function getFirstRowOfLocationTable(dom: HTMLElement, generationNumber: number) {
     if (generationNumber <= 2) {
         return dom.querySelector('tr > td:contains("Location")')?.parentNode.nextElementSibling;
-    } else if (generationNumber == 5) {
+    } else if (generationNumber >= 5) {
         return dom.querySelector('tr > td:contains("Locations")')?.parentNode.nextElementSibling;
-
     } else {
         return dom.querySelector('tr > td > b:contains("Location")')?.parentNode.parentNode.nextElementSibling!.nextElementSibling;
     }
@@ -147,7 +157,7 @@ function getFirstRowOfLocationTable(dom: HTMLElement, generationNumber: number) 
 
 function getName(dom: HTMLElement, number: number, generation: number) {
     const text = dom.querySelector('title:contains("#' + padWithZeroes(number) + '")')?.innerText
-    if (generation == 5) {
+    if (generation >= 5) {
         const match = text?.match(new RegExp('(.*) - #' + padWithZeroes(number) + ' .*'));
         if (match) {
             return match[1];
