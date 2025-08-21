@@ -76,7 +76,9 @@ export async function getNewComics() {
             title: title || "Untitled",
             publisher: publisher || "No Publisher",
             imageUrl: imageUrl || "No image",
-            comicUrl
+            comicUrl,
+            reprint: undefined,
+            variant: undefined
         })
     }
 

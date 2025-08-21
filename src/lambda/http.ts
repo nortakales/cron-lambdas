@@ -153,11 +153,11 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                 response.on('end', () => {
                     //console.log("Ended data transfer");
 
-                    if (response.statusCode !== undefined && response.statusCode === 301) {
+                    if (response.statusCode !== undefined && (response.statusCode === 301 || response.statusCode === 302)) {
 
                         let newLocation = response.headers.location;
 
-                        const logMessage = "HTTP 301: " + originalUrl + " moved to " + newLocation;
+                        const logMessage = `HTTP ${response.statusCode}: ${originalUrl} moved to ${newLocation}`;
                         console.info(logMessage);
                         if (newLocation !== undefined) {
 

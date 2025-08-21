@@ -1,4 +1,4 @@
-import { getNewComics } from "./league-of-comic-geeks-api";
+import { getNewComics } from "./fresh-comics-api";
 
 const KEYWORDS_TO_ALWAYS_INCLUDE = [
     "Stargate",
@@ -193,7 +193,9 @@ export async function getFilteredAndSortedComics() {
 
     // Apply filters
     const filtered = newComics
-        // Using query string now .filter(comic => PUBLISHER_ALLOW_LIST.includes(comic.publisher))
+        .filter(comic => PUBLISHER_ALLOW_LIST.includes(comic.publisher))
+        .filter(comic => comic.reprint !== true) // Remove reprints
+        .filter(comic => comic.variant !== true) // Remove variants
         .filter(comic => !SERIES_TO_EXCLUDE.includes(removeNumber(comic.title)))
         .filter(comic => !KEYWORDS_TO_EXCLUDE.some(keyword => comic.title.toLowerCase().includes(keyword.toLowerCase())))
         // Remove xth printing
