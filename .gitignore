@@ -1,5 +1,6 @@
 *.js
 !greasemonkey/**/*.js
+!google-apps-scripts/**/*.js
 !lambda/*.js
 !jest.config.js
 *.d.ts
