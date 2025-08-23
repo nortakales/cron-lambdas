@@ -205,7 +205,7 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                 console.log(errorMessage);
                 return reject(error);
             }).on('timeout', () => {
-                console.log("Request timed out, destroying request");
+                console.log("ERROR Request timed out, destroying request");
                 request.destroy();
                 return reject();
             });
