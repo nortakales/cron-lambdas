@@ -204,10 +204,10 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                     ' ErrorMessage: ' + error.message
                 console.log(errorMessage);
                 return reject(error);
-            }).on("abort", () => {
-                const errorMessage = 'ERROR Aborted getting URL: ' + url;
-                console.log(errorMessage);
-                return reject(new Error(errorMessage));
+            }).on('timeout', () => {
+                console.log("Request timed out, destroying request");
+                request.destroy();
+                return reject();
             });
 
             request.end();
