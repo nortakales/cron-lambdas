@@ -26,7 +26,7 @@ export class ErrorLogNotifier extends Construct {
             handler: 'handler',
             environment: {
                 EMAIL_LIST: config.base.infrastructureAlertEmail,
-                FROM: config.base.infrastructureAlertEmail,
+                FROM: config.base.errorLogNotifierFrom,
                 REGION: config.base.region
             },
             timeout: cdk.Duration.seconds(10),

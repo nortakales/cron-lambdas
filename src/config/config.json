@@ -2,6 +2,7 @@
     "base": {
         "region": "us-west-2",
         "infrastructureAlertEmail": "nortakales@gmail.com",
+        "errorLogNotifierFrom": "\"Error Log Notifier\" <automation@nortakales.com>",
         "pushoverConfigSecretKey": "pushover-users-groups-apps",
         "dynamoAccessEndpoint": "https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod",
         "dynamoAccessApiKey": "dynamo-access-lambda-api-key",
