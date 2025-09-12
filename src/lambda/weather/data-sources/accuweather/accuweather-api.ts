@@ -20,7 +20,7 @@ export async function getAccuWeatherData() {
     const locationKey = '41277_PC';
 
     const hourlyUrl = `https://dataservice.accuweather.com/forecasts/v1/hourly/12hour/${locationKey}?apikey=${apiKey}&details=true`;
-    const dailyUrl = `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}?apikey=${apiKey2}&details=true`;
+    const dailyUrl = `https://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}?apikey=${apiKey}&details=true`;
 
     const hourlyData = await httpsGet(hourlyUrl);
     const dailyData = await httpsGet(dailyUrl);
