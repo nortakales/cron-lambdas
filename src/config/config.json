@@ -63,6 +63,7 @@
         "emailSubject": "Product Tracker",
         "emailList": [
             "nortakales@gmail.com"
-        ]
+        ],
+        "credentialsBrickset": "brickset-credentials"
     }
 }

@@ -1,4 +1,5 @@
 import { httpsGet } from "../../http";
+import { getSet } from "../apis/brickset";
 import { Product, Website } from "../product";
 import { parse, HTMLElement } from 'node-html-parser';
 
@@ -11,7 +12,6 @@ const BRICKRANKER_BASE_URL = 'https://brickranker.com/rankings/set/';
 export async function getLatestProductData(product: Product, attempts: number = 3): Promise<Product> {
 
     const legoHtml = await httpsGet(LEGO_BASE_URL + product.urlKey);
-    // TODO the above should not error.. but for some reason 301 is happening
     const legoDom = parse(legoHtml);
 
     let price = getPrice(legoDom);
@@ -126,6 +126,11 @@ function getPromotion(dom: HTMLElement) {
 }
 
 async function getRetirementDateFromBrickset(product: Product) {
+    const bricksetData = await getSet(getLegoModelNumber(product));
+    return bricksetData?.exitDate.replace('T00:00:00Z', '');
+}
+
+async function scrapeRetirementDateFromBrickset(product: Product) {
 
     const html = await httpsGet(BRICKSET_BASE_URL + getLegoModelNumber(product), {
         attempts: 2,

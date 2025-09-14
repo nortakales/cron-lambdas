@@ -200,14 +200,23 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                 });
 
             }).on("error", (error) => {
-                const errorMessage = 'ERROR Error getting URL: ' + url +
-                    ' ErrorMessage: ' + error.message
+                const errorMessage = 'ERROR Error getting URL: ' + url + ' ErrorMessage: ' + error.message
                 console.log(errorMessage);
                 return reject(error);
             }).on('timeout', () => {
-                console.log("ERROR Request timed out, destroying request");
+                console.log("ERROR Request timed out, destroying request, will retry if attempts remain");
                 request.destroy();
-                return reject();
+                if (attempts > 1) {
+                    return resolve(innerHttpsGet(originalUrl, {
+                        userAgent,
+                        attempts: attempts - 1,
+                        headers,
+                        useProxy,
+                        useProxyOnFinalAttempt
+                    }, delay + 1500));
+                } else {
+                    reject();
+                }
             });
 
             request.end();

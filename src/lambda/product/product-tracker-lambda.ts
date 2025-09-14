@@ -12,7 +12,7 @@ const FROM = process.env.FROM!;
 const PRODUCT_TABLE_NAME = process.env.PRODUCT_TABLE_NAME!;
 const API_KEY_DYNAMO_ACCESS_LAMBDA = process.env.API_KEY_DYNAMO_ACCESS_LAMBDA!;
 
-
+const SLEEP_BETWEEN_PRODUCTS_MS = 1000;
 
 exports.handler = async (event: any = {}, context: any = {}) => {
     startLambdaLog(event, context, process.env);
@@ -55,8 +55,8 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         }
 
         // Pause in between to help with all of the URLs we call
-        console.log("Pausing for 5s before next product");
-        await new Promise(r => setTimeout(r, 5000));
+        console.log(`Pausing for ${SLEEP_BETWEEN_PRODUCTS_MS}ms before next product`);
+        await new Promise(r => setTimeout(r, SLEEP_BETWEEN_PRODUCTS_MS));
     }
 
     // Sort by # of changes then title
