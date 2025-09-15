@@ -127,7 +127,7 @@ function getPromotion(dom: HTMLElement) {
 
 async function getRetirementDateFromBrickset(product: Product) {
     const bricksetData = await getSet(getLegoModelNumber(product));
-    return bricksetData?.exitDate.replace('T00:00:00Z', '');
+    return bricksetData?.exitDate?.replace('T00:00:00Z', '');
 }
 
 async function scrapeRetirementDateFromBrickset(product: Product) {
