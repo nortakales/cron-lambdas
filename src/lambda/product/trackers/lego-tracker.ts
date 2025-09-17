@@ -112,7 +112,7 @@ function getStatus(dom: HTMLElement) {
 }
 
 function getTags(dom: HTMLElement) {
-    const tags = dom.querySelectorAll('div[class*="ProductOverviewstyles__ProductBadgesRow"] div[data-test="product-badges"] span').map(element => element.innerText);
+    const tags = dom.querySelectorAll('div[class*="ProductOverview_productBadgesRow"] div span').map(element => element.innerText);
     return tags;
 }
 
