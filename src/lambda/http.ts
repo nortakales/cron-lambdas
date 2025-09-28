@@ -42,7 +42,7 @@ const DEFAULT_HEADERS = {
     // 'Upgrade-Insecure-Requests': '1'
 };
 
-const DEFAULT_HTTP_CONNECTION_TIMEOUT = 5000;
+const DEFAULT_HTTP_CONNECTION_TIMEOUT = 10000;
 
 export async function httpsGet(url: string, options?: HttpGetOptions): Promise<string> {
 
@@ -200,11 +200,21 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                 });
 
             }).on("error", (error) => {
-                const errorMessage = 'ERROR Error getting URL: ' + url + ' ErrorMessage: ' + error.message
-                console.log(errorMessage);
-                return reject(error);
+                console.log("WARNING Unknown issue getting URL " + url + ", message is: " + error.message + ", destroying request, will retry if attempts remain");
+                request.destroy();
+                if (attempts > 1) {
+                    return resolve(innerHttpsGet(originalUrl, {
+                        userAgent,
+                        attempts: attempts - 1,
+                        headers,
+                        useProxy,
+                        useProxyOnFinalAttempt
+                    }, delay + 1500));
+                } else {
+                    return reject(error);
+                }
             }).on('timeout', () => {
-                console.log("ERROR Request timed out, destroying request, will retry if attempts remain");
+                console.log("WARNING Request for URL " + url + " timed out, destroying request, will retry if attempts remain");
                 request.destroy();
                 if (attempts > 1) {
                     return resolve(innerHttpsGet(originalUrl, {
@@ -222,7 +232,7 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
             request.end();
 
         } catch (error) {
-            console.log("Never seen this catch get hit, is it possible?");
+            console.log("ERROR Never seen this catch get hit, is it possible?");
             throw error;
         }
     });
