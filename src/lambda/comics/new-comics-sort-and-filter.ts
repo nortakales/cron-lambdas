@@ -28,7 +28,8 @@ const KEYWORDS_TO_EXCLUDE = [
     "Gold Digger",
     "My Little Pony",
     "Powerpuff",
-    "ThunderCats"
+    "ThunderCats",
+    "G.I. Joe"
 ]
 
 const PUBLISHER_ALLOW_LIST = [
