@@ -59,6 +59,15 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         await new Promise(r => setTimeout(r, SLEEP_BETWEEN_PRODUCTS_MS));
     }
 
+    // If a high percentage of products have changed, something is probably wrong
+    let updateProducts = true;
+    const numDiffs = productDiffs.filter(diff => diff.anyDiff).length;
+    if (numDiffs / productDiffs.length > 0.75) {
+        console.log(`Too many products changed (${numDiffs} of ${productDiffs.length}), not updating updating database`);
+        updateProducts = false;
+    }
+
+
     // Sort by # of changes then title
     productDiffs.sort(function (first, second) {
         const firstDiffCount = diffCount(first);
@@ -78,7 +87,9 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     let sameBody = '';
     for (const diff of productDiffs) {
         if (diff.anyDiff) {
-            await put(PRODUCT_TABLE_NAME, diff.newProduct);
+            if (updateProducts) {
+                await put(PRODUCT_TABLE_NAME, diff.newProduct);
+            }
             // TODO save history
             if (diffIsOnlyCommon(diff, commonDiffMetadata)) {
                 sameBody += generateText(diff.newProduct, apiKey) + '<br><br>';
@@ -96,6 +107,10 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     // group by website
 
     let emailBody = '';
+
+    if (!updateProducts) {
+        emailBody += `<h1 style="color:red">WARNING: Too many products changed, database not updated</h1>`;
+    }
 
     if (commonDiffMetadata.commonPromotionDiff) {
         emailBody += `<h1>Common Changes</h1>Promotion:`
