@@ -136,7 +136,8 @@
                 "API_KEY_SECRET_SCRAPERAPI": "scraperapi-api-key",
                 "LATITUDE": "47.806994",
                 "LONGITUDE": "-122.192443",
-                "REGION": "us-west-2"
+                "REGION": "us-west-2",
+                "CREDENTIALS_BRICKSET": "brickset-credentials"
             },
         }
     ]
