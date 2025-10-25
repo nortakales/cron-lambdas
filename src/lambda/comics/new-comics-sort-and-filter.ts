@@ -182,7 +182,8 @@ const SERIES_TO_EXCLUDE = [
     "Titans",
     "Zatanna",
     "G.I. Joe",
-    "Ultimate Black Panther"
+    "Ultimate Black Panther",
+    "MAD Magazine"
 ]
 
 function removeNumber(title: string) {
