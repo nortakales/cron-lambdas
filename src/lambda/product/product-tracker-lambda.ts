@@ -11,6 +11,7 @@ const SUBJECT = process.env.SUBJECT!;
 const FROM = process.env.FROM!;
 const PRODUCT_TABLE_NAME = process.env.PRODUCT_TABLE_NAME!;
 const API_KEY_DYNAMO_ACCESS_LAMBDA = process.env.API_KEY_DYNAMO_ACCESS_LAMBDA!;
+const FORCE_UPDATE = process.env.FORCE_UPDATE === 'true';
 
 const SLEEP_BETWEEN_PRODUCTS_MS = 1000;
 
@@ -63,10 +64,13 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     let updateProducts = true;
     const numDiffs = productDiffs.filter(diff => diff.anyDiff).length;
     if (numDiffs / productDiffs.length > 0.75) {
-        console.log(`Too many products changed (${numDiffs} of ${productDiffs.length}), not updating updating database`);
-        updateProducts = false;
+        if (FORCE_UPDATE) {
+            console.log(`Many products changed (${numDiffs} of ${productDiffs.length}), but FORCE_UPDATE is true, updating database anyway`);
+        } else {
+            console.log(`Too many products changed (${numDiffs} of ${productDiffs.length}), not updating updating database`);
+            updateProducts = false;
+        }
     }
-
 
     // Sort by # of changes then title
     productDiffs.sort(function (first, second) {

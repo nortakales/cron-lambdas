@@ -42,6 +42,7 @@ export async function getLatestProductData(product: Product, attempts: number = 
 
     // Now grab the expire date from Brickset
     let retirementDate = await getRetirementDateFromBrickset(product);
+
     // const retiringSoonModels = await getRetiringSoonNumbersFromBrickEconomy();
     // const retiringSoonModels = new Set();
     // if (retiringSoonModels.has(getLegoModelNumber(product))) {

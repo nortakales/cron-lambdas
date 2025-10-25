@@ -86,6 +86,7 @@ export async function getSet(setNumber: string) {
     const setData: BricketSetResponse = JSON.parse(setJson);
 
     if (setData.status !== 'success') {
+        console.error("Set data returned: " + setJson);
         throw new Error(`Brickset getSets failed with status ${setData.status}`);
     }
 
