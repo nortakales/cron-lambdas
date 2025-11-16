@@ -11,7 +11,9 @@ const BRICKRANKER_BASE_URL = 'https://brickranker.com/rankings/set/';
 
 export async function getLatestProductData(product: Product, attempts: number = 3): Promise<Product> {
 
-    const legoHtml = await httpsGet(LEGO_BASE_URL + product.urlKey);
+    const legoHtml = await httpsGet(LEGO_BASE_URL + product.urlKey, {
+        useProxy: true
+    });
     const legoDom = parse(legoHtml);
 
     let price = getPrice(legoDom);
