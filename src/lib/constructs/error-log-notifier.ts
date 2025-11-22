@@ -33,7 +33,9 @@ export class ErrorLogNotifier extends Construct {
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
-            logRetention: logs.RetentionDays.ONE_YEAR
+            logGroup: new logs.LogGroup(this, prefix + 'ErrorLogNotifierLambdaLogGroup', {
+                retention: logs.RetentionDays.ONE_YEAR
+            })
         });
 
         // Lambda must be able to send email through SES

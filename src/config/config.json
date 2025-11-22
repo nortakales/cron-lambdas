@@ -6,7 +6,8 @@
         "pushoverConfigSecretKey": "pushover-users-groups-apps",
         "dynamoAccessEndpoint": "https://2sc4ccorf3.execute-api.us-west-2.amazonaws.com/prod",
         "dynamoAccessApiKey": "dynamo-access-lambda-api-key",
-        "apiKeyScraperApi": "scraperapi-api-key"
+        "apiKeyScraperApi": "scraperapi-api-key",
+        "switchbotCredentials": "switchbot-credentials"
     },
     "autoxReminder": {
         "enabled": "true",

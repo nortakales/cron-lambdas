@@ -31,7 +31,9 @@ export class DeleteTimerConstruct extends Construct {
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
-            logRetention: logs.RetentionDays.ONE_YEAR
+            logGroup: new logs.LogGroup(this, 'DeleteTimerLambdaFunctionLogGroup', {
+                retention: logs.RetentionDays.ONE_YEAR
+            })
         });
 
         // Make sure EventBridge can call this Lambda

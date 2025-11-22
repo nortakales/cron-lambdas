@@ -39,7 +39,9 @@ export class NewComicsCron extends Construct {
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
-            logRetention: logs.RetentionDays.ONE_YEAR,
+            logGroup: new logs.LogGroup(this, 'NewComicsLambdaFunctionLogGroup', {
+                retention: logs.RetentionDays.ONE_YEAR
+            }),
             bundling: {
                 nodeModules: ['node-html-parser']
             }

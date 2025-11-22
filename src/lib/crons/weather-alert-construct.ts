@@ -50,7 +50,9 @@ export class WeatherAlertCron extends Construct {
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
-            logRetention: logs.RetentionDays.TWO_YEARS
+            logGroup: new logs.LogGroup(this, 'WeatherAlertLambdaFunctionLogGroup', {
+                retention: logs.RetentionDays.TWO_YEARS
+            })
         });
         // Lambda must be able to send email through SES
         this.lambda.addToRolePolicy(new iam.PolicyStatement({

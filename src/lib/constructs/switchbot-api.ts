@@ -9,7 +9,7 @@ import * as config from '../../config/config.json';
 import * as destinations from 'aws-cdk-lib/aws-logs-destinations';
 import * as logs from 'aws-cdk-lib/aws-logs';
 
-export class DynamoDBAccessAPI extends Construct {
+export class SwitchBotAPI extends Construct {
 
     constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function) {
         super(scope, id);
@@ -17,8 +17,8 @@ export class DynamoDBAccessAPI extends Construct {
         const logGroup = new logs.LogGroup(this, id + "-AccessLogs");
 
         const api = new apigateway.RestApi(this, id + "-API", {
-            restApiName: "DynamoDB Access API",
-            description: "Allows API access to various DynamoDB operations and all tables",
+            restApiName: "SwitchBot  API",
+            description: "Allows API access to SwitchBot devices",
             deployOptions: {
                 metricsEnabled: true,
                 loggingLevel: apigateway.MethodLoggingLevel.INFO,
@@ -29,13 +29,13 @@ export class DynamoDBAccessAPI extends Construct {
         });
 
         const lambdaFunction = new nodejslambda.NodejsFunction(this, id + '-Lambda', {
-            functionName: 'DynamoDBAccessLambdaFunction',
+            functionName: 'SwitchBotLambdaFunction',
             runtime: lambda.Runtime.NODEJS_22_X,
-            entry: __dirname + '/../../lambda/dynamodb/dynamodb-access-lambda.ts',
+            entry: __dirname + '/../../lambda/switchbot/switchbot-lambda.ts',
             handler: 'handler',
             environment: {
                 REGION: config.base.region,
-                API_KEY_DYNAMO_ACCESS_LAMBDA: config.base.dynamoAccessApiKey,
+                SWITCHBOT_CREDENTIALS_NAME: config.base.switchbotCredentials,
             },
             timeout: cdk.Duration.seconds(5),
             retryAttempts: 2,
@@ -44,12 +44,6 @@ export class DynamoDBAccessAPI extends Construct {
                 retention: logs.RetentionDays.ONE_YEAR
             })
         });
-        // Lambda must be able to do all DynamoDB operations to all tables
-        lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
-            actions: ['dynamodb:*'],
-            resources: ['*'],
-            effect: iam.Effect.ALLOW,
-        }));
         // Lambda must be able to retrieve secrets
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
             actions: ['secretsmanager:GetSecretValue'],
@@ -68,7 +62,7 @@ export class DynamoDBAccessAPI extends Construct {
             } // TODO is this even needed? what does it do?
         });
 
-        api.root.addMethod("POST", integration);
+        //api.root.addMethod("POST", integration);
         api.root.addMethod("GET", integration);
     }
 }

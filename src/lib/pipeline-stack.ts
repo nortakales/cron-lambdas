@@ -74,7 +74,9 @@ export class CDKPipelineStack extends cdk.Stack {
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
-            logRetention: logs.RetentionDays.ONE_YEAR
+            logGroup: new logs.LogGroup(this, 'CronPipelineNotificationLambdaLogGroup', {
+                retention: logs.RetentionDays.ONE_YEAR
+            })
         });
         // Lambda must be able to retrieve secrets
         pipelineNotificationLambda.addToRolePolicy(new iam.PolicyStatement({

@@ -41,7 +41,9 @@ export class AutoxReminderCron extends Construct {
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
-            logRetention: logs.RetentionDays.ONE_YEAR
+            logGroup: new logs.LogGroup(this, 'AutoxReminderLambdaFunctionLogGroup', {
+                retention: logs.RetentionDays.ONE_YEAR
+            })
         });
         // Lambda must be able to send email through SES
         lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
@@ -116,7 +118,9 @@ export class AutoxReminderCron extends Construct {
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitorForPush.dlq,
-            logRetention: logs.RetentionDays.ONE_YEAR
+            logGroup: new logs.LogGroup(this, 'AutoxPushLambdaFunctionLogGroup', {
+                retention: logs.RetentionDays.ONE_YEAR
+            })
         });
         // Cloudwatch must be able to invoke this Lambda
         pushNotificationLambdaFunction.addPermission('CloudWatchEventsPermission', {

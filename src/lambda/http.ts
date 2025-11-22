@@ -15,13 +15,15 @@ export function isStatusObject(thing: unknown) {
     return thing && typeof thing === 'object' && thing.hasOwnProperty('statusCode') && thing.hasOwnProperty('statusMessage');
 }
 
-export interface HttpGetOptions {
+export interface HttpRequestOptions {
     userAgent?: string
     attempts?: number,
     useProxy?: boolean,
     useProxyOnFinalAttempt?: boolean,
     headers?: any,
     downgrade404Logging?: boolean
+    method?: string,
+    body?: string
 }
 
 const RETRYABLE_CODES = [
@@ -44,7 +46,7 @@ const DEFAULT_HEADERS = {
 
 const DEFAULT_HTTP_CONNECTION_TIMEOUT = 10000;
 
-export async function httpsGet(url: string, options?: HttpGetOptions): Promise<string> {
+export async function httpsGet(url: string, options?: HttpRequestOptions): Promise<string> {
 
     // try {
     const response = await innerHttpsGet(url, options);
@@ -69,13 +71,15 @@ export async function httpsGet(url: string, options?: HttpGetOptions): Promise<s
     // }
 }
 
-async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, delay: number = 0): Promise<string | Status> {
+async function innerHttpsGet(originalUrl: string, options?: HttpRequestOptions, delay: number = 0): Promise<string | Status> {
 
     const userAgent = options?.userAgent || DEFAULT_USER_AGENT;
     const attempts = options?.attempts || 3;
     const headers = options?.headers || DEFAULT_HEADERS;
     const useProxy = options?.useProxy || false;
     const useProxyOnFinalAttempt = options?.useProxyOnFinalAttempt || false;
+    const method = options?.method || 'GET';
+    const body = options?.body;
 
     if (delay > 0) {
         console.log("Sleeping for " + delay + "ms");
@@ -90,26 +94,45 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
     }
 
     if (attempts < 3) {
-        console.log(`Getting this URL with ${attempts} attempts left: ${url}`);
+        console.log(`${method}-ing (with ${attempts} attempts left): ${url}`);
     } else {
-        console.log(`Getting this URL: ${url}`);
+        console.log(`${method}-ing: ${url}`);
     }
 
     return new Promise(function (resolve, reject) {
 
-        const userAgentHeader = { 'User-Agent': userAgent };
-
         const options: HTTPS.RequestOptions = {
+            method,
             headers: {
-                ...userAgentHeader,
+                'User-Agent': userAgent,
                 ...DEFAULT_HEADERS,
                 ...headers
             },
             timeout: DEFAULT_HTTP_CONNECTION_TIMEOUT
         };
 
+        // If method is POST, ensure a body is present
+        if (method === 'POST' && (!body || body.length === 0)) {
+            throw new Error('POST requests require a non-empty body');
+        }
+
+        // If a body is present, require a Content-Type header
+        if (body && !headers['Content-Type'] && !headers['content-type']) {
+            throw new Error('Requests with a body must include a Content-Type header');
+        }
+
+        // If a body is provided and Content-Length is not set, set it.
+        if (body && !headers['Content-Length'] && !headers['content-length']) {
+            try {
+                const length = Buffer.byteLength(body as string, 'utf8');
+                (options.headers as any)['Content-Length'] = length;
+            } catch (e) {
+                // ignore
+            }
+        }
+
         try {
-            var request = HTTPS.get(url, options, (response) => {
+            var request = HTTPS.request(url, options, (response) => {
 
                 if (response?.statusCode === undefined) {
                     return resolve({
@@ -129,7 +152,9 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                         attempts: attempts - 1,
                         headers,
                         useProxy,
-                        useProxyOnFinalAttempt
+                        useProxyOnFinalAttempt,
+                        method,
+                        body
                     }, delay + 1500));
                 }
 
@@ -173,7 +198,9 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                                 attempts,
                                 headers,
                                 useProxy,
-                                useProxyOnFinalAttempt
+                                useProxyOnFinalAttempt,
+                                method,
+                                body
                             }, delay + 1000));
 
                         } else {
@@ -199,7 +226,9 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                     //resolve(data);
                 });
 
-            }).on("error", (error) => {
+            });
+
+            request.on("error", (error) => {
                 console.log("WARNING Unknown issue getting URL " + url + ", message is: " + error.message + ", destroying request, will retry if attempts remain");
                 request.destroy();
                 if (attempts > 1) {
@@ -208,12 +237,16 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                         attempts: attempts - 1,
                         headers,
                         useProxy,
-                        useProxyOnFinalAttempt
+                        useProxyOnFinalAttempt,
+                        method,
+                        body
                     }, delay + 1500));
                 } else {
                     return reject(error);
                 }
-            }).on('timeout', () => {
+            });
+
+            request.on('timeout', () => {
                 console.log("WARNING Request for URL " + url + " timed out, destroying request, will retry if attempts remain");
                 request.destroy();
                 if (attempts > 1) {
@@ -222,12 +255,19 @@ async function innerHttpsGet(originalUrl: string, options?: HttpGetOptions, dela
                         attempts: attempts - 1,
                         headers,
                         useProxy,
-                        useProxyOnFinalAttempt
+                        useProxyOnFinalAttempt,
+                        method,
+                        body
                     }, delay + 1500));
                 } else {
                     reject();
                 }
             });
+
+            // If there's a body, write it to the request before ending.
+            if (body) {
+                request.write(body);
+            }
 
             request.end();
 

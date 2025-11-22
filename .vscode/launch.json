@@ -138,7 +138,8 @@
                 "LATITUDE": "47.806994",
                 "LONGITUDE": "-122.192443",
                 "REGION": "us-west-2",
-                "CREDENTIALS_BRICKSET": "brickset-credentials"
+                "CREDENTIALS_BRICKSET": "brickset-credentials",
+                "SWITCHBOT_CREDENTIALS_NAME": "switchbot-credentials"
             },
         }
     ]
