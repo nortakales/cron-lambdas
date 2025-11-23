@@ -39,6 +39,8 @@ async function httpGet(event: any) {
     const command = event.queryStringParameters.command;
     const commandType = event.queryStringParameters.commandType || 'command';
     const parameter = event.queryStringParameters.parameter || 'default';
+    // Optional repeat parameter: number of times to send the command. Default: 1
+    const repeat = parseRepeatParam(event.queryStringParameters.repeat);
 
     const authHeaders = await createAuthHeaders();
 
@@ -61,16 +63,34 @@ async function httpGet(event: any) {
         'Content-Type': 'application/json'
     };
 
-    const response = await httpsGet(url, {
-        method: 'POST',
-        headers,
-        body
-    });
+    const results: string[] = [];
+    for (let i = 0; i < repeat; i++) {
+        console.log(`Sending SwitchBot command (${i + 1}/${repeat}) to device ${device.deviceId}`);
+        // send POST
+        // reuse the same body/headers for each request
+        // httpsGet will throw on non-2xx responses, which will surface as a failure
+        // and stop further repetitions
+        // If you want to continue on errors, catch per-iteration and record the error instead.
+        const res = await httpsGet(url, {
+            method: 'POST',
+            headers,
+            body
+        });
+        results.push(res);
+    }
+
+    if (repeat === 1) {
+        return {
+            statusCode: 200,
+            headers: {},
+            body: results[0]
+        };
+    }
 
     return {
         statusCode: 200,
         headers: {},
-        body: response
+        body: JSON.stringify({ repeat, results })
     };
 
 }
@@ -117,6 +137,17 @@ async function getDeviceByName(name: string, authHeaders: {}) {
     if (Array.isArray(body.meterList)) lists.push(...body.meterList);
 
     return lists.find((d: any) => d.deviceName === name || d.deviceId === name);
+}
+
+function parseRepeatParam(repeatParam: any): number {
+    let repeat = 1;
+    if (repeatParam !== undefined && repeatParam !== null && repeatParam !== '') {
+        const parsed = parseInt(repeatParam, 10);
+        if (!isNaN(parsed) && parsed > 0) {
+            repeat = parsed;
+        }
+    }
+    return repeat;
 }
 
 function required(thing: any, name: string) {
