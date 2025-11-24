@@ -3,6 +3,9 @@ import * as SM from '../secrets';
 import { startLambdaLog } from "../utilities/logging";
 import crypto from 'crypto';
 
+// https://github.com/OpenWonderLabs/SwitchBotAPI?tab=readme-ov-file#command-set-for-virtual-infrared-remote-devices
+
+
 const SWITCHBOT_CREDENTIALS_NAME = process.env.SWITCHBOT_CREDENTIALS_NAME!;
 
 const BLANK_SUCCESS = {
@@ -66,6 +69,7 @@ async function httpGet(event: any) {
     const results: string[] = [];
     for (let i = 0; i < repeat; i++) {
         console.log(`Sending SwitchBot command (${i + 1}/${repeat}) to device ${device.deviceId}`);
+        console.log(body);
         // send POST
         // reuse the same body/headers for each request
         // httpsGet will throw on non-2xx responses, which will surface as a failure

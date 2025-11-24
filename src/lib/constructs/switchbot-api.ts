@@ -24,7 +24,21 @@ export class SwitchBotAPI extends Construct {
                 loggingLevel: apigateway.MethodLoggingLevel.INFO,
                 dataTraceEnabled: true,
                 accessLogDestination: new apigateway.LogGroupLogDestination(logGroup),
-                accessLogFormat: apigateway.AccessLogFormat.jsonWithStandardFields()
+                accessLogFormat: apigateway.AccessLogFormat.custom(
+                    JSON.stringify({
+                        requestId: '$context.requestId',
+                        ip: '$context.identity.sourceIp',
+                        caller: '$context.identity.caller',
+                        user: '$context.identity.user',
+                        requestTime: '$context.requestTime',
+                        httpMethod: '$context.httpMethod',
+                        resourcePath: '$context.resourcePath',
+                        status: '$context.status',
+                        protocol: '$context.protocol',
+                        responseLength: '$context.responseLength',
+                        userAgent: '$context.identity.userAgent', // Capture User-Agent
+                    })
+                ),
             }
         });
 
