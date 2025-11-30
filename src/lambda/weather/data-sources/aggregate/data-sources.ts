@@ -53,7 +53,7 @@ export const dataSources: DataSource[] = [
         getData: async function () {
             return await meteomatics.getAsCommonData();
         },
-        enabled: true
+        enabled: false // No more free plan
     },
     {
         fullName: "OpenMeteo",
