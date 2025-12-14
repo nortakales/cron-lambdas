@@ -32,6 +32,7 @@ export class DeleteTimerConstruct extends Construct {
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
             logGroup: new logs.LogGroup(this, 'DeleteTimerLambdaFunctionLogGroup', {
+                logGroupName: 'DeleteTimerLambdaFunctionLogGroup',
                 retention: logs.RetentionDays.ONE_YEAR
             })
         });

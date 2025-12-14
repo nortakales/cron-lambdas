@@ -51,6 +51,7 @@ export class WeatherAlertCron extends Construct {
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
             logGroup: new logs.LogGroup(this, 'WeatherAlertLambdaFunctionLogGroup', {
+                logGroupName: 'WeatherAlertLambdaFunctionLogGroup',
                 retention: logs.RetentionDays.TWO_YEARS
             })
         });

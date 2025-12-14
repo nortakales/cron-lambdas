@@ -41,6 +41,7 @@ export class DynamoDBAccessAPI extends Construct {
             retryAttempts: 2,
             deadLetterQueueEnabled: false,
             logGroup: new logs.LogGroup(this, id + '-LambdaLogGroup', {
+                logGroupName: id + '-LambdaLogGroup',
                 retention: logs.RetentionDays.ONE_YEAR
             })
         });

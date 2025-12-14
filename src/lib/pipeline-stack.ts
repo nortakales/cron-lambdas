@@ -75,6 +75,7 @@ export class CDKPipelineStack extends cdk.Stack {
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
             logGroup: new logs.LogGroup(this, 'CronPipelineNotificationLambdaLogGroup', {
+                logGroupName: 'CronPipelineNotificationLambdaLogGroup',
                 retention: logs.RetentionDays.ONE_YEAR
             })
         });

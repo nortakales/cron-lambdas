@@ -45,6 +45,7 @@ export class ProductTrackerCron extends Construct {
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
             logGroup: new logs.LogGroup(this, 'ProductTrackerLambdaFunctionLogGroup', {
+                logGroupName: 'ProductTrackerLambdaFunctionLogGroup',
                 retention: logs.RetentionDays.ONE_YEAR
             }),
             bundling: {

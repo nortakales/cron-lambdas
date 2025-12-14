@@ -34,6 +34,7 @@ export class ErrorLogNotifier extends Construct {
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
             logGroup: new logs.LogGroup(this, prefix + 'ErrorLogNotifierLambdaLogGroup', {
+                logGroupName: prefix + 'ErrorLogNotifierLambdaLogGroup',
                 retention: logs.RetentionDays.ONE_YEAR
             })
         });

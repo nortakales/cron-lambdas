@@ -40,6 +40,7 @@ export class NewComicsCron extends Construct {
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
             logGroup: new logs.LogGroup(this, 'NewComicsLambdaFunctionLogGroup', {
+                logGroupName: 'NewComicsLambdaFunctionLogGroup',
                 retention: logs.RetentionDays.ONE_YEAR
             }),
             bundling: {

@@ -42,6 +42,7 @@ export class AutoxReminderCron extends Construct {
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
             logGroup: new logs.LogGroup(this, 'AutoxReminderLambdaFunctionLogGroup', {
+                logGroupName: 'AutoxReminderLambdaFunctionLogGroup',
                 retention: logs.RetentionDays.ONE_YEAR
             })
         });
@@ -119,6 +120,7 @@ export class AutoxReminderCron extends Construct {
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitorForPush.dlq,
             logGroup: new logs.LogGroup(this, 'AutoxPushLambdaFunctionLogGroup', {
+                logGroupName: 'AutoxPushLambdaFunctionLogGroup',
                 retention: logs.RetentionDays.ONE_YEAR
             })
         });
