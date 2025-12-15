@@ -9,6 +9,7 @@ import { Construct } from 'constructs';
 import { ProductTrackerCron } from './crons/product-tracker-construct';
 import { DynamoDBAccessAPI } from './constructs/dynamodb-access-api';
 import { SwitchBotAPI } from './constructs/switchbot-api';
+import { AlexaSkillLambda } from './constructs/alexa-skill-lambda';
 
 export class CronLambdaStack extends cdk.Stack {
 
@@ -26,5 +27,6 @@ export class CronLambdaStack extends cdk.Stack {
         new AdhocWeatherReportAPI(this, 'AdhocWeatherAPI', weatherAlertCron.lambda);
         new DynamoDBAccessAPI(this, 'DynamoDBAccessAPI', errorLogNotifier.lambda);
         new SwitchBotAPI(this, 'SwitchBotAPI', errorLogNotifier.lambda);
+        new AlexaSkillLambda(this, 'AlexaSkillLambda', errorLogNotifier.lambda);
     }
 }
