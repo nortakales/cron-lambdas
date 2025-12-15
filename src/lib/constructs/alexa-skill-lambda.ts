@@ -15,23 +15,23 @@ export class AlexaSkillLambda extends Construct {
         super(scope, id);
 
 
-        // const lambdaFunction = new nodejslambda.NodejsFunction(this, id + '-Lambda', {
-        //     functionName: 'AlexaSkillLambdaFunction',
-        //     runtime: lambda.Runtime.NODEJS_22_X,
-        //     entry: __dirname + '/../../lambda/alexa/alexa-skill.ts',
-        //     handler: 'handler',
-        //     environment: {
-        //         REGION: config.base.region,
-        //         SWITCHBOT_CREDENTIALS_NAME: config.base.switchbotCredentials,
-        //     },
-        //     timeout: cdk.Duration.seconds(5),
-        //     retryAttempts: 2,
-        //     deadLetterQueueEnabled: false,
-        //     logGroup: new logs.LogGroup(this, id + '-LambdaLogGroup', {
-        //         logGroupName: id + '-LambdaLogGroup',
-        //         retention: logs.RetentionDays.ONE_YEAR
-        //     })
-        // });
+        const lambdaFunction = new nodejslambda.NodejsFunction(this, 'AlexaSkillLambdaFunction', {
+            functionName: 'AlexaSkillLambda',
+            runtime: lambda.Runtime.NODEJS_22_X,
+            entry: __dirname + '/../../lambda/alexa/alexa-skill.ts',
+            handler: 'handler',
+            environment: {
+                REGION: config.base.region,
+                SWITCHBOT_CREDENTIALS_NAME: config.base.switchbotCredentials,
+            },
+            timeout: cdk.Duration.seconds(5),
+            retryAttempts: 2,
+            deadLetterQueueEnabled: false,
+            logGroup: new logs.LogGroup(this, 'AlexaSkillLambdaFunction-LogGroup', {
+                logGroupName: 'AlexaSkillLambdaFunction-LogGroup',
+                retention: logs.RetentionDays.ONE_YEAR
+            })
+        });
         // // Lambda must be able to retrieve secrets
         // lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
         //     actions: ['secretsmanager:GetSecretValue'],
