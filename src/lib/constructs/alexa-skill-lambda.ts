@@ -38,11 +38,11 @@ export class AlexaSkillLambda extends Construct {
             resources: ['*'],
             effect: iam.Effect.ALLOW,
         }));
-        // // Stream logs to the error notifier
-        // lambdaFunction.logGroup.addSubscriptionFilter(id + '-LambdaFunctionLogSubscription', {
-        //     destination: new destinations.LambdaDestination(errorLogNotifierLambda),
-        //     filterPattern: logs.FilterPattern.anyTerm('ERROR')
-        // });
+        // Stream logs to the error notifier
+        lambdaFunction.logGroup.addSubscriptionFilter(id + '-LambdaFunctionLogSubscription', {
+            destination: new destinations.LambdaDestination(errorLogNotifierLambda),
+            filterPattern: logs.FilterPattern.anyTerm('ERROR')
+        });
         // lambdaFunction.addPermission('AlexaInvocationPermission', {
         //     //principal: new iam.ServicePrincipal('alexa-skills-kit.amazon.com'),
         //     principal: new iam.ServicePrincipal('alexa-appkit.amazon.com'),
