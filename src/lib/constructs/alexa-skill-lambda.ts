@@ -32,12 +32,12 @@ export class AlexaSkillLambda extends Construct {
                 retention: logs.RetentionDays.ONE_YEAR
             })
         });
-        // // Lambda must be able to retrieve secrets
-        // lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
-        //     actions: ['secretsmanager:GetSecretValue'],
-        //     resources: ['*'],
-        //     effect: iam.Effect.ALLOW,
-        // }));
+        // Lambda must be able to retrieve secrets
+        lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+            actions: ['secretsmanager:GetSecretValue'],
+            resources: ['*'],
+            effect: iam.Effect.ALLOW,
+        }));
         // // Stream logs to the error notifier
         // lambdaFunction.logGroup.addSubscriptionFilter(id + '-LambdaFunctionLogSubscription', {
         //     destination: new destinations.LambdaDestination(errorLogNotifierLambda),
