@@ -27,6 +27,6 @@ export class CronLambdaStack extends cdk.Stack {
         new AdhocWeatherReportAPI(this, 'AdhocWeatherAPI', weatherAlertCron.lambda);
         new DynamoDBAccessAPI(this, 'DynamoDBAccessAPI', errorLogNotifier.lambda);
         new SwitchBotAPI(this, 'SwitchBotAPI', errorLogNotifier.lambda);
-        new AlexaSkillLambda(this, 'AlexaSkillLambda', errorLogNotifier.lambda);
+        //new AlexaSkillLambda(this, 'AlexaSkillLambda', errorLogNotifier.lambda);
     }
 }
