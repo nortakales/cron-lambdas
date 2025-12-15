@@ -46,7 +46,7 @@ export class AlexaSkillLambda extends Construct {
         lambdaFunction.addPermission('AlexaInvocationPermission', {
             //principal: new iam.ServicePrincipal('alexa-skills-kit.amazon.com'),
             principal: new iam.ServicePrincipal('alexa-appkit.amazon.com'),
-            action: 'lambda:InvokeFunction',
+            //action: 'lambda:InvokeFunction',
             eventSourceToken: 'amzn1.ask.skill.9ce748c1-2381-424b-b90a-e7f64b6aefcd',
         });
     }
