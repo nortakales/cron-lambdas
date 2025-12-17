@@ -1,6 +1,7 @@
 import { httpsGet } from '../http';
 import * as SM from '../secrets';
 import { startLambdaLog } from "../utilities/logging";
+import { handleControlDeviceIntent } from './handlers/control-device-intent-handler';
 import crypto from 'crypto';
 
 // https://github.com/OpenWonderLabs/SwitchBotAPI?tab=readme-ov-file#command-set-for-virtual-infrared-remote-devices
@@ -14,165 +15,53 @@ const BLANK_SUCCESS = {
     body: "Success"
 };
 
+// TODO list
+// handler per intent
+// ControlDeviceIntent handler
+// above handler uses switchbot-api to send commands
+// reasonable response message (or sound?!)
+// document the switcbot API commands supported
+
 exports.handler = async (event: any = {}, context: any = {}) => {
     try {
         startLambdaLog(event, context, process.env);
 
-        console.log("Hello world");
 
-        return {
-            "version": "1.0",
-            "response": {
-                "outputSpeech": {
-                    "type": "PlainText",
-                    "text": "Nick is the best",
-                    "playBehavior": "REPLACE_ENQUEUED"
-                },
-                "shouldEndSession": true
+        // Route based on Alexa request type / intent
+        const reqType = event?.request?.type;
+        if (reqType === 'IntentRequest') {
+            const intentName = event.request.intent?.name;
+            if (intentName === 'ControlDeviceIntent') {
+                const speech = await handleControlDeviceIntent(event);
+                return responseSpeech(speech);
+            } else {
+                const name = intentName || 'unknown';
+                return responseSpeech(`Unable to handle intent ${name}`);
             }
         }
 
+        return responseSpeech("Unable to parse request");
+
     } catch (e) {
         console.error(e);
-        return failureResponse((e as Error).message);
+        return responseSpeech("Something went wrong, check the logs");
     }
 };
 
-async function httpGet(event: any) {
-    required(event.queryStringParameters, "event.queryStringParameters");
-    required(event.queryStringParameters.deviceName, "event.queryStringParameters.deviceName");
-    required(event.queryStringParameters.command, "event.queryStringParameters.command");
-    // parameter is optional in some commands, default to 'default' if not provided
 
-    const deviceName = event.queryStringParameters.deviceName;
-    const command = event.queryStringParameters.command;
-    const commandType = event.queryStringParameters.commandType || 'command';
-    const parameter = event.queryStringParameters.parameter || 'default';
-    // Optional repeat parameter: number of times to send the command. Default: 1
-    const repeat = parseRepeatParam(event.queryStringParameters.repeat);
-
-    const authHeaders = await createAuthHeaders();
-
-    // Find the device
-    const device = await getDeviceByName(deviceName, authHeaders);
-    if (!device) {
-        return failureResponse(`Device not found: ${deviceName}`);
-    }
-    console.log(`Found device: ${JSON.stringify(device, null, 2)}`);
-
-    const url = `https://api.switch-bot.com/v1.1/devices/${device.deviceId}/commands`;
-    const body = JSON.stringify({
-        command,
-        parameter,
-        commandType
-    });
-
-    const headers = {
-        ...authHeaders,
-        'Content-Type': 'application/json'
-    };
-
-    const results: string[] = [];
-    for (let i = 0; i < repeat; i++) {
-        console.log(`Sending SwitchBot command (${i + 1}/${repeat}) to device ${device.deviceId}`);
-        console.log(body);
-        // send POST
-        // reuse the same body/headers for each request
-        // httpsGet will throw on non-2xx responses, which will surface as a failure
-        // and stop further repetitions
-        // If you want to continue on errors, catch per-iteration and record the error instead.
-        const res = await httpsGet(url, {
-            method: 'POST',
-            headers,
-            body
-        });
-        results.push(res);
-    }
-
-    if (repeat === 1) {
-        return {
-            statusCode: 200,
-            headers: {},
-            body: results[0]
-        };
-    }
-
+function responseSpeech(speech: string) {
+    console.log("responding with speech: " + speech);
     return {
-        statusCode: 200,
-        headers: {},
-        body: JSON.stringify({ repeat, results })
-    };
-
-}
-
-async function createAuthHeaders() {
-
-    const credentials = await SM.getSecretObject(SWITCHBOT_CREDENTIALS_NAME);
-    const token = credentials?.token;
-    const secret = credentials?.secret;
-
-    if (!token || !secret) {
-        throw new Error('Missing SwitchBot token/secret: provide env vars or Secrets Manager names');
-    }
-
-    const t = Date.now().toString();
-    const nonce = crypto.randomUUID();
-    const signData = token + t + nonce;
-    const sign = crypto.createHmac('sha256', secret).update(signData).digest('base64');
-
-    return {
-        Authorization: token,
-        sign,
-        nonce,
-        t
-    };
-}
-
-async function getDeviceByName(name: string, authHeaders: {}) {
-    const response = await httpsGet('https://api.switch-bot.com/v1.1/devices', {
-        headers: authHeaders
-    });
-    let parsed: any;
-    try {
-        parsed = JSON.parse(response);
-    } catch (e) {
-        console.error('Failed to parse devices response', e);
-        return undefined;
-    }
-
-    const body = parsed.body || {};
-    const lists: any[] = [];
-    if (Array.isArray(body.deviceList)) lists.push(...body.deviceList);
-    if (Array.isArray(body.infraredRemoteList)) lists.push(...body.infraredRemoteList);
-    if (Array.isArray(body.meterList)) lists.push(...body.meterList);
-
-    return lists.find((d: any) => d.deviceName === name || d.deviceId === name);
-}
-
-function parseRepeatParam(repeatParam: any): number {
-    let repeat = 1;
-    if (repeatParam !== undefined && repeatParam !== null && repeatParam !== '') {
-        const parsed = parseInt(repeatParam, 10);
-        if (!isNaN(parsed) && parsed > 0) {
-            repeat = parsed;
+        "version": "1.0",
+        "response": {
+            "outputSpeech": {
+                "type": "PlainText",
+                "text": speech,
+                "playBehavior": "REPLACE_ENQUEUED"
+            },
+            "shouldEndSession": true
         }
     }
-    return repeat;
-}
-
-function required(thing: any, name: string) {
-    if (!thing) {
-        throw new Error(`Missing ${name}`);
-    }
-}
-
-function failureResponse(message: string) {
-    console.error(message);
-    return {
-        statusCode: 400,
-        headers: {},
-        body: message
-    };
 }
 
 

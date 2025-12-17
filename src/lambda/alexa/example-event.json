@@ -1,0 +1,164 @@
+{
+    "version": "1.0",
+    "session": {
+        "new": true,
+        "sessionId": "amzn1.echo-api.session.aa654dbb-aae6-43ed-957c-2801ec1c1074",
+        "application": {
+            "applicationId": "amzn1.ask.skill.9ce748c1-2381-424b-b90a-e7f64b6aefcd"
+        },
+        "attributes": {},
+        "user": {
+            "userId": "amzn1.ask.account.AMA3S3FEOD3DXRVK6NDDLOT3TNAEDKLLI24FJMSUDWGZKQ5T2ZPRAFI5EEM2FENYJBFBEBTYKTJHNSF4VS2YBADHD2R46LINZZ5FOKKQ2FUBND37NLM3ZAB72IEDF223XN2RNYCNF6SM3SXRV6VIOKF6BMMG2RDQPQQNRK7IN27X3EEE4U7STQYPIQMYUJTUYBRBVD7F3BUTYPXGYINL7HOY5TNZCCRLPUMZMWOHJUXQ"
+        },
+        "affiliatedResources": []
+    },
+    "context": {
+        "Viewports": [
+            {
+                "type": "APL",
+                "id": "medHub",
+                "shape": "RECTANGLE",
+                "dpi": 160,
+                "presentationType": "OVERLAY",
+                "canRotate": false,
+                "configuration": {
+                    "current": {
+                        "mode": "HUB",
+                        "video": {
+                            "codecs": [
+                                "H_264_42",
+                                "H_264_41"
+                            ]
+                        },
+                        "size": {
+                            "type": "DISCRETE",
+                            "pixelWidth": 1280,
+                            "pixelHeight": 800
+                        }
+                    }
+                }
+            }
+        ],
+        "Viewport": {
+            "experiences": [
+                {
+                    "arcMinuteWidth": 221,
+                    "arcMinuteHeight": 162,
+                    "canRotate": false,
+                    "canResize": false
+                }
+            ],
+            "mode": "HUB",
+            "shape": "RECTANGLE",
+            "pixelWidth": 1280,
+            "pixelHeight": 800,
+            "dpi": 160,
+            "currentPixelWidth": 1280,
+            "currentPixelHeight": 800,
+            "touch": [
+                "SINGLE"
+            ],
+            "keyboard": [
+                "DIRECTION"
+            ],
+            "video": {
+                "codecs": [
+                    "H_264_42",
+                    "H_264_41"
+                ]
+            }
+        },
+        "Extensions": {
+            "available": {
+                "aplext:backstack:10": {}
+            }
+        },
+        "System": {
+            "application": {
+                "applicationId": "amzn1.ask.skill.9ce748c1-2381-424b-b90a-e7f64b6aefcd"
+            },
+            "user": {
+                "userId": "amzn1.ask.account.AMA3S3FEOD3DXRVK6NDDLOT3TNAEDKLLI24FJMSUDWGZKQ5T2ZPRAFI5EEM2FENYJBFBEBTYKTJHNSF4VS2YBADHD2R46LINZZ5FOKKQ2FUBND37NLM3ZAB72IEDF223XN2RNYCNF6SM3SXRV6VIOKF6BMMG2RDQPQQNRK7IN27X3EEE4U7STQYPIQMYUJTUYBRBVD7F3BUTYPXGYINL7HOY5TNZCCRLPUMZMWOHJUXQ"
+            },
+            "device": {
+                "deviceId": "amzn1.ask.device.AMAXG4WEVCI2N7MXUABA24NGGMBD3LTGNUDOG522FCSTQTKTQTXFS5WNBYVABTWGCSJPIR2SJS2FHHW5XZQLHH3MVGZAHWC2HTIZBFSQIYVYVWPLEHMKHSFKD7A3Z5ET2X5KF5F6AVI6QAJ2OC7X7YUC3MREUE7B7UKWKVB4PZ7B33UH3P2BJYYGA4WFFO5X67CJH3RHWAS2OADY",
+                "supportedInterfaces": {}
+            },
+            "apiEndpoint": "https://api.amazonalexa.com",
+            "apiAccessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjEifQ.eyJhdWQiOiJodHRwczovL2FwaS5hbWF6b25hbGV4YS5jb20iLCJpc3MiOiJBbGV4YVNraWxsS2l0Iiwic3ViIjoiYW16bjEuYXNrLnNraWxsLjljZTc0OGMxLTIzODEtNDI0Yi1iOTBhLWU3ZjY0YjZhZWZjZCIsImV4cCI6MTc2NTg2NDE0OSwiaWF0IjoxNzY1ODY0MDg5LCJuYmYiOjE3NjU4NjQwODksInByaXZhdGVDbGFpbXMiOnsiaXNGb3JSQSI6ImZhbHNlIiwiY29udGV4dCI6IkFBQUFBQUFBQUFCTTZKSHhXTkFEbnBMOS8zS1RadVR0ZUFFQUFBQUFBQUF6a2ZiMGJwc3MwRkhhZEpQUmRaUjEzNFQyOTBGenNHNHJ4RjF2UEhNVGJ5dGdLeS9DdzBGYjNiUnVXWlZvT0hrY1dhN3FpdndsZHNJNE9sanBqaWlubC9vUzM5S3NBZmZjM3craFUzcDJtQUt2K1JDVUt3MDdFWGpUZ1NhWG1jTTgwRTcrS3cvOHR3NjhuakJTbE02L2t5SzdkZDJ4aXNOWHdaSDRtaU5vUlZjc3lXeXNKVlFzdnVZSHNmTU13MHZtWEFiQWc4Znc4eTNQYVlMZWh2UFgrK0dERVNwLzQwUVBoakxySDhwNmlpVzFxcHBxUHNBTWRnK3BwV1dFM2l2MWlvL3NSKzBmOFFaR0xRdEsyL09tVHZHZk03V2NZSXk4alcxWjQ3TDRpN085dGdtREtWbVBtdHBMZlRyaTdSQklhbEZzUHZQVGVrak8wMUJJYzVVeEdxMXhGblAxMW5aTEtzK2prL1pRaTRUb0Z6T3hHVTdMcEN2L09uZmhnVmlnU3FmblFUbS9QTEVIMXhZZTZBNXM0MWNGRU5Vdkg4amNBY0Q2Wm9ENTh6Vk1kNGtreXFDWG92Si9Ob25RMW5WcnpzU2M5TGlQMnlzNmhqbnRtMk5NdFByVnMzNkRYYjBzbitkdGhMV0lKZWZIV3RVamFhVzUiLCJkZXZpY2VJZCI6ImFtem4xLmFzay5kZXZpY2UuQU1BWEc0V0VWQ0kyTjdNWFVBQkEyNE5HR01CRDNMVEdOVURPRzUyMkZDU1RRVEtUUVRYRlM1V05CWVZBQlRXR0NTSlBJUjJTSlMyRkhIVzVYWlFMSEgzTVZHWkFIV0MySFRJWkJGU1FJWVZZVldQTEVITUtIU0ZLRDdBM1o1RVQyWDVLRjVGNkFWSTZRQUoyT0M3WDdZVUMzTVJFVUU3QjdVS1dLVkI0UFo3QjMzVUgzUDJCSllZR0E0V0ZGTzVYNjdDSkgzUkhXQVMyT0FEWSIsInVzZXJJZCI6ImFtem4xLmFzay5hY2NvdW50LkFNQTNTM0ZFT0QzRFhSVks2TkRETE9UM1ROQUVES0xMSTI0RkpNU1VEV0daS1E1VDJaUFJBRkk1RUVNMkZFTllKQkZCRUJUWUtUSkhOU0Y0VlMyWUJBREhEMlI0NkxJTlpaNUZPS0tRMkZVQk5EMzdOTE0zWkFCNzJJRURGMjIzWE4yUk5ZQ05GNlNNM1NYUlY2VklPS0Y2Qk1NRzJSRFFQUVFOUks3SU4yN1gzRUVFNFU3U1RRWVBJUU1ZVUpUVVlCUkJWRDdGM0JVVFlQWEdZSU5MN0hPWTVUTlpDQ1JMUFVNWk1XT0hKVVhRIn19.B0uvABpbkaPyBKncypOvDu70i5FenyPH6bIS0eePW1vAm7-n7SltGjHZHCQvgt2eZnakdVPDHB9VWygDUm_K2H65viZ_PTasTQ4elIlhCKLp-EeqaWeazbYehCg5-rW6gG7UYzYqnc819ayhPMFqc4BrUxB9zGNl8e1mcIC8L4ZyT2266YheFbmCmuAArlZZmfdGWtbQtctjH-QcUoB7uciSOBLqlhgdTYyxAtQ2HNAuyEEcdLDK7E1QpB_JeHlaNzFZcSBJk0GYSJdhMcCVc3bZgXuJXHpyjJMRmdI_rAZxt0dtLj5eP0RneaWZ0c0t-70jpP8a_yztDMfnEozM7Q"
+        }
+    },
+    "request": {
+        "type": "IntentRequest",
+        "requestId": "amzn1.echo-api.request.5355337b-0d68-48ad-9afc-18af42e0799e",
+        "locale": "en-US",
+        "timestamp": "2025-12-16T05:48:09Z",
+        "intent": {
+            "name": "ControlDeviceIntent",
+            "confirmationStatus": "NONE",
+            "slots": {
+                "action": {
+                    "name": "action",
+                    "value": "volume up",
+                    "resolutions": {
+                        "resolutionsPerAuthority": [
+                            {
+                                "authority": "amzn1.er-authority.echo-sdk.amzn1.ask.skill.9ce748c1-2381-424b-b90a-e7f64b6aefcd.action",
+                                "status": {
+                                    "code": "ER_SUCCESS_MATCH"
+                                },
+                                "values": [
+                                    {
+                                        "value": {
+                                            "name": "volume up",
+                                            "id": "94cdaa0470753e5097f5ebb729b2387d"
+                                        }
+                                    },
+                                    {
+                                        "value": {
+                                            "name": "volume down",
+                                            "id": "4f27abb939d2941b7554aee40f2441b4"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "confirmationStatus": "NONE",
+                    "source": "USER"
+                },
+                "times": {
+                    "name": "times",
+                    "value": "10",
+                    "confirmationStatus": "NONE",
+                    "source": "USER"
+                },
+                "device": {
+                    "name": "device",
+                    "value": "TV",
+                    "resolutions": {
+                        "resolutionsPerAuthority": [
+                            {
+                                "authority": "amzn1.er-authority.echo-sdk.amzn1.ask.skill.9ce748c1-2381-424b-b90a-e7f64b6aefcd.device",
+                                "status": {
+                                    "code": "ER_SUCCESS_MATCH"
+                                },
+                                "values": [
+                                    {
+                                        "value": {
+                                            "name": "tv",
+                                            "id": "c9a1fdac6e082dd89e7173244f34d7b3"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "confirmationStatus": "NONE",
+                    "source": "USER"
+                }
+            }
+        },
+        "dialogState": "COMPLETED"
+    }
+}
