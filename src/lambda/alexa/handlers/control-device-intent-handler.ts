@@ -1,5 +1,5 @@
 import { sendSwitchBotCommand } from '../../switchbot/switchbot-api';
-import { matchDevice, matchCommand } from '../fuzzy-match';
+import { matchDevice, matchCommand } from '../../switchbot/devices-and-commands';
 
 function getResolvedSlotValue(slot: any): string | undefined {
     if (!slot) return undefined;
@@ -36,7 +36,7 @@ export async function handleControlDeviceIntent(event: any): Promise<string> {
 
         try {
             await sendSwitchBotCommand(canonicalDevice, canonicalCommand, repeat);
-            return 'Sent ' + actionSlot + ' to ' + canonicalDevice;
+            return 'Done';
         } catch (e: any) {
             const msg = (e && e.message) ? e.message : String(e);
             if (msg.toLowerCase().includes('device not found')) {

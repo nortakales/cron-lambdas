@@ -24,10 +24,10 @@ export const KNOWN_COMMANDS = [
 ];
 
 const COMMAND_SYNONYMS: { [k: string]: string } = {
-    'volume up': 'volumeAdd',
-    'volume increase': 'volumeAdd',
-    'volume down': 'volumeSub',
-    'volume decrease': 'volumeSub',
+    'volumeup': 'volumeAdd',
+    'volumeincrease': 'volumeAdd',
+    'volumedown': 'volumeSub',
+    'volumedecrease': 'volumeSub',
     'mute': 'setMute',
     'on': 'turnOn',
     'off': 'turnOff',
