@@ -33,7 +33,7 @@ function responseSpeech(speech: string) {
         "response": {
             "outputSpeech": {
                 "type": "SSML",
-                "text": `<speak>${speech}</speak>`,
+                "ssml": `<speak>${speech}</speak>`,
                 "playBehavior": "REPLACE_ENQUEUED"
             },
             "shouldEndSession": true
