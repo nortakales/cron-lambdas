@@ -38,7 +38,7 @@ export async function handleControlDeviceIntent(event: any): Promise<string> {
             await sendSwitchBotCommand(canonicalDevice, canonicalCommand, repeat);
 
             // let successMessage = '<audio src="https://cron-lambdas-public-bucket.s3.us-west-2.amazonaws.com/audio/confirmation.mp3"/>'
-            let successMessage = 'Done'
+            let successMessage = 'Done. <audio src=\'soundbank://soundlibrary/animals/amzn_sfx_bear_groan_roar_01.mp3\'/>';
             // 1 in 10 chance to add this message
             if (Math.random() < 0.1) successMessage += ' Nick is awesome!';
             return successMessage;
