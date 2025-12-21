@@ -37,10 +37,11 @@ export async function handleControlDeviceIntent(event: any): Promise<string> {
         try {
             await sendSwitchBotCommand(canonicalDevice, canonicalCommand, repeat);
 
-            // let successMessage = '<audio src="https://cron-lambdas-public-bucket.s3.us-west-2.amazonaws.com/audio/confirmation.mp3"/>'
-            let successMessage = 'Done. <audio src=\'soundbank://soundlibrary/animals/amzn_sfx_bear_groan_roar_01.mp3\'/>';
+            // Audio files have very strict requirements
+            // See https://developer.amazon.com/en-US/docs/alexa/custom-skills/speech-synthesis-markup-language-ssml-reference.html#h3_converting_mp3
+            let successMessage = '<audio src="https://cron-lambdas-public-bucket.s3.us-west-2.amazonaws.com/audio/confirmation.mp3"/>'
             // 1 in 10 chance to add this message
-            if (Math.random() < 0.1) successMessage += ' Nick is awesome!';
+            if (Math.random() < 0.1) successMessage += '<amazon:effect name="whispered">Nick is awesome</amazon:effect>';
             return successMessage;
         } catch (e: any) {
             const msg = (e && e.message) ? e.message : String(e);
