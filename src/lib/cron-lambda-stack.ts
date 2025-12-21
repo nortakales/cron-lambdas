@@ -10,6 +10,8 @@ import { ProductTrackerCron } from './crons/product-tracker-construct';
 import { DynamoDBAccessAPI } from './constructs/dynamodb-access-api';
 import { SwitchBotAPI } from './constructs/switchbot-api';
 import { AlexaSkillLambda } from './constructs/alexa-skill-lambda';
+import { S3Bucket } from 'aws-cdk-lib/aws-kinesisfirehose';
+import { CronLambdasS3Buckets } from './constructs/s3-buckets';
 
 export class CronLambdaStack extends cdk.Stack {
 
@@ -28,5 +30,7 @@ export class CronLambdaStack extends cdk.Stack {
         new DynamoDBAccessAPI(this, 'DynamoDBAccessAPI', errorLogNotifier.lambda);
         new SwitchBotAPI(this, 'SwitchBotAPI', errorLogNotifier.lambda);
         new AlexaSkillLambda(this, 'AlexaSkillLambda', errorLogNotifier.lambda);
+
+        new CronLambdasS3Buckets(this, 'CronLambdasS3Buckets');
     }
 }
