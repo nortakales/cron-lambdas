@@ -36,7 +36,11 @@ export async function handleControlDeviceIntent(event: any): Promise<string> {
 
         try {
             await sendSwitchBotCommand(canonicalDevice, canonicalCommand, repeat);
-            return 'Done';
+
+            let successMessage = '<audio src="https://cron-lambdas-public-bucket.s3.us-west-2.amazonaws.com/audio/confirmation.mp3"/>'
+            // 1 in 10 chance to add this message
+            if (Math.random() < 0.1) successMessage += ' Nick is awesome!';
+            return successMessage;
         } catch (e: any) {
             const msg = (e && e.message) ? e.message : String(e);
             if (msg.toLowerCase().includes('device not found')) {

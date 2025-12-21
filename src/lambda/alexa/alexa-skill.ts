@@ -1,31 +1,9 @@
-import { httpsGet } from '../http';
-import * as SM from '../secrets';
 import { startLambdaLog } from "../utilities/logging";
 import { handleControlDeviceIntent } from './handlers/control-device-intent-handler';
-import crypto from 'crypto';
-
-// https://github.com/OpenWonderLabs/SwitchBotAPI?tab=readme-ov-file#command-set-for-virtual-infrared-remote-devices
-
-
-const SWITCHBOT_CREDENTIALS_NAME = process.env.SWITCHBOT_CREDENTIALS_NAME!;
-
-const BLANK_SUCCESS = {
-    statusCode: 200,
-    headers: {},
-    body: "Success"
-};
-
-// TODO list
-// handler per intent
-// ControlDeviceIntent handler
-// above handler uses switchbot-api to send commands
-// reasonable response message (or sound?!)
-// document the switcbot API commands supported
 
 exports.handler = async (event: any = {}, context: any = {}) => {
     try {
         startLambdaLog(event, context, process.env);
-
 
         // Route based on Alexa request type / intent
         const reqType = event?.request?.type;
@@ -47,7 +25,6 @@ exports.handler = async (event: any = {}, context: any = {}) => {
         return responseSpeech("Something went wrong, check the logs");
     }
 };
-
 
 function responseSpeech(speech: string) {
     console.log("responding with speech: " + speech);
