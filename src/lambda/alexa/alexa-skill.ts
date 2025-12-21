@@ -32,8 +32,8 @@ function responseSpeech(speech: string) {
         "version": "1.0",
         "response": {
             "outputSpeech": {
-                "type": "PlainText",
-                "text": speech,
+                "type": "SSML",
+                "text": `<speak>${speech}</speak>`,
                 "playBehavior": "REPLACE_ENQUEUED"
             },
             "shouldEndSession": true
