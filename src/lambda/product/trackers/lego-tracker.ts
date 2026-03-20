@@ -191,11 +191,16 @@ function getRetirementDateFromBrickRanker(html: string) {
     if (!match || !match[0]) {
         throw Error("Could not parse retirement date from BrickRanker");
     }
-    return match[0]
+    const text = match[0]
         .replace(/<.+?>/g, '')
         .replace('Retired:', '')
         .replace(/\s+/g, ' ')
         .trim();
+
+    // BrickRanker now shows per-region dates (US/UK/CA/EU) in the same block;
+    // extract only the first date to avoid duplicates like "Jul 31, 2027 (est.) Jul 31, 2027 (est.)..."
+    const firstDate = text.match(/[A-Z][a-z]+ (?:\d+, )?\d{4} \(est(?:imated)?\.\)/);
+    return firstDate ? firstDate[0] : undefined;
 }
 
 async function test() {
