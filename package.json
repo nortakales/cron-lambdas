@@ -22,6 +22,7 @@
     "@aws-sdk/lib-dynamodb": "^3.840.0",
     "aws-cdk-lib": "2.203.1",
     "constructs": "^10.4.2",
+    "csv-parse": "^6.1.0",
     "moment": "^2.30.1",
     "moment-timezone": "^0.6.0",
     "node-html-parser": "^7.0.1",
