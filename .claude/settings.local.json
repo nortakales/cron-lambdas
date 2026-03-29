@@ -3,7 +3,24 @@
     "allow": [
       "Bash(find:*)",
       "WebSearch",
-      "WebFetch(domain:brickranker.com)"
+      "WebFetch(domain:brickranker.com)",
+      "WebFetch(domain:www.scraperapi.com)",
+      "WebFetch(domain:docs.scraperapi.com)",
+      "WebFetch(domain:brickset.com)",
+      "WebFetch(domain:rebrickable.com)",
+      "WebFetch(domain:bricklink.com)",
+      "WebFetch(domain:www.bricklink.com)",
+      "WebFetch(domain:developers.bricklink.com)",
+      "WebFetch(domain:community.scraperapi.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:help.scraperapi.com)",
+      "WebFetch(domain:api.brickset.com)",
+      "WebFetch(domain:scraperapi.com)",
+      "WebFetch(domain:www.lego.com)",
+      "WebFetch(domain:www.brickeconomy.com)",
+      "WebFetch(domain:brickeconomy.com)",
+      "WebFetch(domain:affiliates.lego.com)",
+      "WebFetch(domain:docs.zyte.com)"
     ]
   }
 }

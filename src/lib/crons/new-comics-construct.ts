@@ -33,7 +33,7 @@ export class NewComicsCron extends Construct {
                 SUBJECT: config.newComics.emailSubject,
                 ENABLED: config.newComics.enabled,
                 REGION: config.base.region,
-                API_KEY_SECRET_SCRAPERAPI: config.base.apiKeyScraperApi,
+                API_KEY_SECRET_ZYTE: config.base.apiKeyZyte,
             },
             timeout: cdk.Duration.seconds(60),
             retryAttempts: 2,

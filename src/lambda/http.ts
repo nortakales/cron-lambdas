@@ -2,7 +2,8 @@ import * as HTTPS from 'https';
 import * as SM from './secrets';
 import { get } from 'http';
 
-const API_KEY_SECRET_SCRAPERAPI = process.env.API_KEY_SECRET_SCRAPERAPI;
+const API_KEY_SECRET_ZYTE = process.env.API_KEY_SECRET_ZYTE;
+let zyteApiKey: string | undefined;
 
 export interface Status {
     readonly statusCode: number
@@ -71,6 +72,61 @@ export async function httpsGet(url: string, options?: HttpRequestOptions): Promi
     // }
 }
 
+async function zyteGet(url: string): Promise<string> {
+    console.log("Using Zyte for URL: " + url);
+    if (!zyteApiKey) {
+        zyteApiKey = await SM.getSecretString(API_KEY_SECRET_ZYTE!) as string;
+    }
+    const auth = Buffer.from(`${zyteApiKey}:`).toString('base64');
+
+    const requestBody = JSON.stringify({ url, httpResponseBody: true, followRedirect: true });
+
+    return new Promise((resolve, reject) => {
+        const reqOptions: HTTPS.RequestOptions = {
+            method: 'POST',
+            headers: {
+                'Authorization': `Basic ${auth}`,
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(requestBody)
+            },
+            timeout: 30000
+        };
+
+        const request = HTTPS.request('https://api.zyte.com/v1/extract', reqOptions, (response) => {
+            let data = '';
+            response.on('data', chunk => data += chunk);
+            response.on('end', () => {
+                if (response.statusCode !== 200) {
+                    console.error(`Zyte API returned ${response.statusCode} for ${url}: ${data}`);
+                    return reject({
+                        statusCode: response.statusCode,
+                        statusMessage: `Zyte API error for ${url}`,
+                        payload: data.length < 100000 ? data : 'Payload too large'
+                    });
+                }
+                try {
+                    const json = JSON.parse(data);
+                    resolve(Buffer.from(json.httpResponseBody, 'base64').toString('utf8'));
+                } catch (e) {
+                    reject(new Error('Failed to parse Zyte response: ' + data));
+                }
+            });
+        });
+
+        request.on('error', (error) => {
+            console.error(`Zyte request error for ${url}: ${error.message}`);
+            reject(error);
+        });
+        request.on('timeout', () => {
+            console.error(`Zyte request timed out for ${url}`);
+            request.destroy();
+            reject(new Error(`Zyte request timed out for ${url}`));
+        });
+        request.write(requestBody);
+        request.end();
+    });
+}
+
 async function innerHttpsGet(originalUrl: string, options?: HttpRequestOptions, delay: number = 0): Promise<string | Status> {
 
     const userAgent = options?.userAgent || DEFAULT_USER_AGENT;
@@ -86,17 +142,16 @@ async function innerHttpsGet(originalUrl: string, options?: HttpRequestOptions, 
         await new Promise(r => setTimeout(r, delay));
     }
 
-    let url = originalUrl;
-    if (useProxy || (attempts === 1 && useProxyOnFinalAttempt)) {
-        console.log("Using proxy for URL: " + url);
-        const key = await SM.getSecretString(API_KEY_SECRET_SCRAPERAPI!);
-        url = `https://api.scraperapi.com?api_key=${key}&url=${encodeURIComponent(originalUrl)}`;
-    }
+    const url = originalUrl;
 
     if (attempts < 3) {
         console.log(`${method}-ing (with ${attempts} attempts left): ${url}`);
     } else {
         console.log(`${method}-ing: ${url}`);
+    }
+
+    if (useProxy || (attempts === 1 && useProxyOnFinalAttempt)) {
+        return zyteGet(originalUrl);
     }
 
     return new Promise(function (resolve, reject) {
