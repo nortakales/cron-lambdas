@@ -72,7 +72,7 @@ export async function httpsGet(url: string, options?: HttpRequestOptions): Promi
     // }
 }
 
-async function zyteGet(url: string): Promise<string> {
+async function zyteGet(url: string, attempts: number = 3, delay: number = 0): Promise<string> {
     console.log("Using Zyte for URL: " + url);
     if (!zyteApiKey) {
         zyteApiKey = await SM.getSecretString(API_KEY_SECRET_ZYTE!) as string;
@@ -81,50 +81,63 @@ async function zyteGet(url: string): Promise<string> {
 
     const requestBody = JSON.stringify({ url, httpResponseBody: true, followRedirect: true });
 
-    return new Promise((resolve, reject) => {
-        const reqOptions: HTTPS.RequestOptions = {
-            method: 'POST',
-            headers: {
-                'Authorization': `Basic ${auth}`,
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(requestBody)
-            },
-            timeout: 30000
-        };
+    if (delay > 0) {
+        console.log("Sleeping for " + delay + "ms before Zyte retry");
+        await new Promise(r => setTimeout(r, delay));
+    }
 
-        const request = HTTPS.request('https://api.zyte.com/v1/extract', reqOptions, (response) => {
-            let data = '';
-            response.on('data', chunk => data += chunk);
-            response.on('end', () => {
-                if (response.statusCode !== 200) {
-                    console.error(`Zyte API returned ${response.statusCode} for ${url}: ${data}`);
-                    return reject({
-                        statusCode: response.statusCode,
-                        statusMessage: `Zyte API error for ${url}`,
-                        payload: data.length < 100000 ? data : 'Payload too large'
-                    });
-                }
-                try {
-                    const json = JSON.parse(data);
-                    resolve(Buffer.from(json.httpResponseBody, 'base64').toString('utf8'));
-                } catch (e) {
-                    reject(new Error('Failed to parse Zyte response: ' + data));
-                }
+    try {
+        return await new Promise((resolve, reject) => {
+            const reqOptions: HTTPS.RequestOptions = {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Basic ${auth}`,
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(requestBody)
+                },
+                timeout: 30000
+            };
+
+            const request = HTTPS.request('https://api.zyte.com/v1/extract', reqOptions, (response) => {
+                let data = '';
+                response.on('data', chunk => data += chunk);
+                response.on('end', () => {
+                    if (response.statusCode !== 200) {
+                        console.error(`Zyte API returned ${response.statusCode} for ${url}: ${data}`);
+                        return reject({
+                            statusCode: response.statusCode,
+                            statusMessage: `Zyte API error for ${url}`,
+                            payload: data.length < 100000 ? data : 'Payload too large'
+                        });
+                    }
+                    try {
+                        const json = JSON.parse(data);
+                        resolve(Buffer.from(json.httpResponseBody, 'base64').toString('utf8'));
+                    } catch (e) {
+                        reject(new Error('Failed to parse Zyte response: ' + data));
+                    }
+                });
             });
-        });
 
-        request.on('error', (error) => {
-            console.error(`Zyte request error for ${url}: ${error.message}`);
-            reject(error);
+            request.on('error', (error) => {
+                console.error(`Zyte request error for ${url}: ${error.message}`);
+                reject(error);
+            });
+            request.on('timeout', () => {
+                console.error(`Zyte request timed out for ${url}`);
+                request.destroy();
+                reject(new Error(`Zyte request timed out for ${url}`));
+            });
+            request.write(requestBody);
+            request.end();
         });
-        request.on('timeout', () => {
-            console.error(`Zyte request timed out for ${url}`);
-            request.destroy();
-            reject(new Error(`Zyte request timed out for ${url}`));
-        });
-        request.write(requestBody);
-        request.end();
-    });
+    } catch (error) {
+        if (attempts > 1) {
+            console.log(`Zyte request failed for ${url}, retrying (${attempts - 1} attempts left)`);
+            return zyteGet(url, attempts - 1, delay + 1500);
+        }
+        throw error;
+    }
 }
 
 async function innerHttpsGet(originalUrl: string, options?: HttpRequestOptions, delay: number = 0): Promise<string | Status> {
@@ -151,7 +164,7 @@ async function innerHttpsGet(originalUrl: string, options?: HttpRequestOptions, 
     }
 
     if (useProxy || (attempts === 1 && useProxyOnFinalAttempt)) {
-        return zyteGet(originalUrl);
+        return zyteGet(originalUrl, attempts);
     }
 
     return new Promise(function (resolve, reject) {
