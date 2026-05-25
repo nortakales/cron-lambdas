@@ -183,7 +183,22 @@ const SERIES_TO_EXCLUDE = [
     "Zatanna",
     "G.I. Joe",
     "Ultimate Black Panther",
-    "MAD Magazine"
+    "MAD Magazine",
+    "Alice Forever After",
+    "Absolute Green Arrow",
+    "Archie x End of Life",
+    "Batman / Superman: World's Finest",
+    "Deathstroke: The Terminator",
+    "Lobo",
+    "New Titans",
+    "Superman Unlimited",
+    "Monster High: Boomuda Triangle",
+    "Zorro",
+    "The Darkness",
+    "Alias: Red Band",
+    "Sai: Dimensional Rivals",
+    "Sorcerer Supreme",
+    "Ultimate Impact: Reborn",
 ]
 
 function removeNumber(title: string) {
