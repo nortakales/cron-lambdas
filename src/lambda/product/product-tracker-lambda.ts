@@ -14,6 +14,7 @@ const API_KEY_DYNAMO_ACCESS_LAMBDA = process.env.API_KEY_DYNAMO_ACCESS_LAMBDA!;
 const FORCE_UPDATE = process.env.FORCE_UPDATE === 'true';
 
 const SLEEP_BETWEEN_PRODUCTS_MS = 1000;
+const PRODUCT_CONCURRENCY = 2;
 
 exports.handler = async (event: any = {}, context: any = {}) => {
     startLambdaLog(event, context, process.env);
@@ -40,24 +41,32 @@ exports.handler = async (event: any = {}, context: any = {}) => {
     const productDiffs = [];
     let saleBody = '';
 
-    for (const product of products) {
-        console.log("Looking up latest details for product:");
-        console.log(JSON.stringify(product, null, 2));
-        let newProduct;
-        switch (product.website) {
-            case Website.LEGO:
-                newProduct = await getLatestProductData(product);
-                break;
-        }
-        productDiffs.push(generateDiff(product, newProduct));
+    for (let i = 0; i < products.length; i += PRODUCT_CONCURRENCY) {
+        const batch = products.slice(i, i + PRODUCT_CONCURRENCY);
+        const results = await Promise.all(batch.map(async product => {
+            console.log("Looking up latest details for product:");
+            console.log(JSON.stringify(product, null, 2));
+            let newProduct;
+            switch (product.website) {
+                case Website.LEGO:
+                    newProduct = await getLatestProductData(product);
+                    break;
+            }
+            return { product, newProduct };
+        }));
 
-        if (newProduct.onSale) {
-            saleBody += `<b><a href="${product.url}">${product.title}</a></b><br>`;
+        for (const { product, newProduct } of results) {
+            productDiffs.push(generateDiff(product, newProduct));
+            if (newProduct?.onSale) {
+                saleBody += `<b><a href="${product.url}">${product.title}</a></b><br>`;
+            }
         }
 
         // Pause in between to help with all of the URLs we call
-        console.log(`Pausing for ${SLEEP_BETWEEN_PRODUCTS_MS}ms before next product`);
-        await new Promise(r => setTimeout(r, SLEEP_BETWEEN_PRODUCTS_MS));
+        if (i + PRODUCT_CONCURRENCY < products.length) {
+            console.log(`Pausing for ${SLEEP_BETWEEN_PRODUCTS_MS}ms before next batch`);
+            await new Promise(r => setTimeout(r, SLEEP_BETWEEN_PRODUCTS_MS));
+        }
     }
 
     // If a high percentage of products have changed, something is probably wrong

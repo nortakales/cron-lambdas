@@ -95,7 +95,7 @@ async function zyteGet(url: string, attempts: number = 3, delay: number = 0): Pr
                     'Content-Type': 'application/json',
                     'Content-Length': Buffer.byteLength(requestBody)
                 },
-                timeout: 30000
+                timeout: 20000
             };
 
             const request = HTTPS.request('https://api.zyte.com/v1/extract', reqOptions, (response) => {
@@ -103,7 +103,7 @@ async function zyteGet(url: string, attempts: number = 3, delay: number = 0): Pr
                 response.on('data', chunk => data += chunk);
                 response.on('end', () => {
                     if (response.statusCode !== 200) {
-                        console.error(`Zyte API returned ${response.statusCode} for ${url}: ${data}`);
+                        console.warn(`Zyte API returned ${response.statusCode} for ${url}: ${data}`);
                         return reject({
                             statusCode: response.statusCode,
                             statusMessage: `Zyte API error for ${url}`,
@@ -120,11 +120,11 @@ async function zyteGet(url: string, attempts: number = 3, delay: number = 0): Pr
             });
 
             request.on('error', (error) => {
-                console.error(`Zyte request error for ${url}: ${error.message}`);
+                console.warn(`Zyte request error for ${url}: ${error.message}`);
                 reject(error);
             });
             request.on('timeout', () => {
-                console.error(`Zyte request timed out for ${url}`);
+                console.warn(`Zyte request timed out for ${url}`);
                 request.destroy();
                 reject(new Error(`Zyte request timed out for ${url}`));
             });
@@ -136,6 +136,7 @@ async function zyteGet(url: string, attempts: number = 3, delay: number = 0): Pr
             console.log(`Zyte request failed for ${url}, retrying (${attempts - 1} attempts left)`);
             return zyteGet(url, attempts - 1, delay + 1500);
         }
+        console.error(`Zyte request failed for ${url} after all retries`);
         throw error;
     }
 }
