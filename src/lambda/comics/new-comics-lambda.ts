@@ -51,9 +51,9 @@ function generateEmailBody(comics: Comic[]) {
             <a href="${comic.comicUrl}">
                 <img src="${comic.imageUrl}" style="height: 260px; width: 170px">
             </a>
-            <div style="padding: 10px; display: flex; flex-direction: column;">
-                <span style="font-size: 1.2rem;">${comic.title}</span>
-                <span style="font-size: 1rem;"><a href="https://www.amazon.com/s?k=${amazonSearchTitle}">Amazon Search</a></span>
+            <div style="padding: 10px;">
+                <div style="font-size: 1.2rem;">${comic.title}</div>
+                <div style="font-size: 1rem;"><a href="https://www.amazon.com/s?k=${amazonSearchTitle}">Amazon Search</a></div>
             </div>
         </div>
         `
