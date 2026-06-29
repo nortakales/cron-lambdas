@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as nodejslambda from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Schedule, Rule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
@@ -34,6 +35,9 @@ export class NewComicsCron extends Construct {
                 ENABLED: config.newComics.enabled,
                 REGION: config.base.region,
                 API_KEY_SECRET_ZYTE: config.base.apiKeyZyte,
+                SERIES_TABLE_NAME: config.newComics.comicSeriesExcludeTableName,
+                DYNAMO_ACCESS_ENDPOINT: config.base.dynamoAccessEndpoint,
+                API_KEY_SECRET_DYNAMO_ACCESS: config.base.dynamoAccessApiKey,
             },
             timeout: cdk.Duration.seconds(60),
             retryAttempts: 2,
@@ -64,6 +68,17 @@ export class NewComicsCron extends Construct {
             destination: new destinations.LambdaDestination(errorLogNotifierLambda),
             filterPattern: logs.FilterPattern.anyTerm('ERROR')
         });
+
+        const seriesExcludeTable = new dynamodb.Table(this, 'ComicSeriesExcludeTable', {
+            tableName: config.newComics.comicSeriesExcludeTableName,
+            partitionKey: {
+                name: 'seriesName',
+                type: dynamodb.AttributeType.STRING,
+            },
+            billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+            removalPolicy: cdk.RemovalPolicy.RETAIN,
+        });
+        seriesExcludeTable.grantReadData(this.lambda);
 
         const schedule = new Rule(this, 'NewComicsSchedule', {
             ruleName: 'NewComicsSchedule',

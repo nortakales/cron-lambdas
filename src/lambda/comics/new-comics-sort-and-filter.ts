@@ -54,158 +54,12 @@ const PUBLISHER_ALLOW_LIST = [
     "Vertigo Comics",
 ]
 
-// The full title with have a pound (#) and decimals removed from the end, and then matched against this in full
-const SERIES_TO_EXCLUDE = [
-    "The Batman & Scooby-Doo Mysteries",
-    "Harley Quinn: The Animated Series - The Eat, Bang, Kill Tour",
-    "BRZRKR",
-    "Getting Dizzy",
-    "We Have Demons",
-    "Batgirls",
-    "Black Manta",
-    "Teen Titans Academy",
-    "Titans United",
-    "Wonder Girl",
-    "Wonder Woman",
-    "Apex Legends: Overtime",
-    "Army of Darkness 1979",
-    "Army of Darkness",
-    "Elvira Meets Vincent Price",
-    "KISS: Phantom Obsession",
-    "Red Sonja: Black, White, Red",
-    "Sheena: Queen of the Jungle",
-    "G.I. Joe: A Real American Hero",
-    "Jupiter's Legacy: Requiem",
-    "King Spawn",
-    "Defenders",
-    "Excalibur",
-    "Hulk",
-    "Ka-Zar: Lord of the Savage Land",
-    "Miles Morales: Spider-Man",
-    "Savage Avengers",
-    "The Thing",
-    "X-Force",
-    "Rick And Morty: Corporate Assets",
-    "Mega",
-    "Catwoman",
-    "Nightwing",
-    "Scooby-Doo, Where Are You?",
-    "Barbarella",
-    "Black Panther",
-    "Venom",
-    "Exciting Comics",
-    "Gold Digger",
-    "Power Rangers",
-    "Power Rangers Universe",
-    "Action Comics",
-    "Justice League",
-    "The Flash",
-    "Magic: The Gathering",
-    "Crush & Lobo",
-    "Suicide Squad",
-    "Captain Marvel",
-    "Shang-Chi",
-    "Thor",
-    "Mighty Morphin",
-    "Vampiverse",
-    "Savage Dragon",
-    "Fantastic Four",
-    "Green Lantern",
-    "Looney Tunes",
-    "She-Hulk",
-    "Young Animal",
-    "Ant",
-    "Ant-Man",
-    "Gambit",
-    "Iron Fist",
-    "Marvel Previews",
-    "Mad",
-    "Ninja High School",
-    "Mighty Morphin Power Rangers",
-    "Cinebook",
-    "Ediciones La Cupula",
-    "Wolverine",
-    "Killadelphia",
-    "Jungle Comics",
-    "Planet Comics",
-    "House of Slaughter",
-    "Batman Incorporated",
-    "Gargoyles",
-    "Ghost Rider",
-    "X-Men: Red",
-    "My Little Pony",
-    "Immortal X-Men",
-    "Manga Z",
-    "Rick and Morty",
-    "Shazam!",
-    "Captain America",
-    "Daredevil",
-    "Doctor Strange",
-    "Fables",
-    "Thundercats",
-    "Absolute Green Lantern",
-    "Absolute Superman",
-    "Batgirl",
-    "Birds of Prey",
-    "ThunderCats",
-    "The Immortal Thor",
-    "Furrlough",
-    "Tomorrow Girl",
-    "Absolute Wonder Woman",
-    "DC Connect",
-    "Green Arrow",
-    "Justice League Unlimited",
-    "Superman",
-    "Gunslinger Spawn",
-    "Spider-Boy",
-    "The Incredible Hulk",
-    "Uncanny X-Men",
-    "Grim",
-    "JSA",
-    "All-New Venom",
-    "Hellverine",
-    "The Avengers",
-    "Ultimate Wolverine",
-    "X-Men",
-    "Adventure Time",
-    "Furrlough",
-    "Tomorrow Girl",
-    "Green Arrow",
-    "Harley Quinn",
-    "Justice League Unlimited",
-    "Superman",
-    "Aquaman",
-    "Green Lantern Corps",
-    "Supergirl",
-    "Absolute Flash",
-    "The New Gods",
-    "Titans",
-    "Zatanna",
-    "G.I. Joe",
-    "Ultimate Black Panther",
-    "MAD Magazine",
-    "Alice Forever After",
-    "Absolute Green Arrow",
-    "Archie x End of Life",
-    "Batman / Superman: World's Finest",
-    "Deathstroke: The Terminator",
-    "Lobo",
-    "New Titans",
-    "Superman Unlimited",
-    "Monster High: Boomuda Triangle",
-    "Zorro",
-    "The Darkness",
-    "Alias: Red Band",
-    "Sai: Dimensional Rivals",
-    "Sorcerer Supreme",
-    "Ultimate Impact: Reborn",
-]
-
-function removeNumber(title: string) {
-    return title.replace(/\s#\d+$/, '');
+// Strips trailing issue number (# N) or volume suffix (Volume N / Vol N / Vol. N) to get the base series name
+export function extractSeriesName(title: string): string {
+    return title.replace(/\s(#\d+|vol(?:ume|\.)?\s+\d+)$/i, '');
 }
 
-export async function getFilteredAndSortedComics() {
+export async function getFilteredAndSortedComics(excludedSeries: Set<string>) {
     const newComics = await getNewComics();
 
     // Apply filters
@@ -213,7 +67,7 @@ export async function getFilteredAndSortedComics() {
         .filter(comic => PUBLISHER_ALLOW_LIST.includes(comic.publisher))
         .filter(comic => comic.reprint !== true) // Remove reprints
         .filter(comic => comic.variant !== true) // Remove variants
-        .filter(comic => !SERIES_TO_EXCLUDE.includes(removeNumber(comic.title)))
+        .filter(comic => !excludedSeries.has(extractSeriesName(comic.title).toLowerCase()))
         .filter(comic => !KEYWORDS_TO_EXCLUDE.some(keyword => comic.title.toLowerCase().includes(keyword.toLowerCase())))
         // Remove xth printing
         .filter(comic => !/(2nd|3rd|\dth) [Pp]rinting/.test(comic.title));
@@ -255,7 +109,7 @@ export async function getFilteredAndSortedComics() {
 
 
 async function test() {
-    const comics = await getFilteredAndSortedComics();
+    const comics = await getFilteredAndSortedComics(new Set<string>());
     let publisher: string | null = null;
     for (let comic of comics) {
         if (comic.publisher !== publisher) {

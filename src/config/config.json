@@ -53,7 +53,8 @@
         "emailSubject": "New Comics",
         "emailList": [
             "nortakales@gmail.com"
-        ]
+        ],
+        "comicSeriesExcludeTableName": "comic_series_to_exclude"
     },
     "productTracker": {
         "enabled": "true",
