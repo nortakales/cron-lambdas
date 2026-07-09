@@ -67,7 +67,7 @@ function generateEmailBody(comics: Comic[], apiKey: string) {
             </a>
             <div style="padding: 10px;">
                 <div style="font-size: 1.2rem;">${comic.title}</div>
-                <div style="font-size: 1rem;"><a href="https://www.amazon.com/s?k=${amazonSearchTitle}">Amazon Search</a></div>
+                <div style="font-size: 1rem;"><a href="https://www.amazon.com/s?k=${encodeURIComponent(amazonSearchTitle)}">Amazon Search</a></div>
                 <div style="font-size: 1rem;"><a href="${excludeUrl}">Exclude &ldquo;${seriesName}&rdquo;</a></div>
             </div>
         </div>
