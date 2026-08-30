@@ -4,7 +4,7 @@ import { parse, HTMLElement } from 'node-html-parser';
 
 
 const baseUrl = 'https://www.serebii.net/';
-const generationNumber = 6;
+const generationNumber = 7;
 const generations: { [key: number]: Generation } = {
     1: {
         start: 1,
@@ -70,6 +70,17 @@ const generations: { [key: number]: Generation } = {
             'Y',
             'Omega Ruby',
             'Alpha Sapphire'
+        ]
+    },
+    7: {
+        start: 1,
+        end: 807,
+        generationString: 'pokedex-sm',
+        games: [
+            'Sun',
+            'Moon',
+            'Ultra Sun',
+            'Ultra Moon'
         ]
     }
 }
