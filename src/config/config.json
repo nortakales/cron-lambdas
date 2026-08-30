@@ -10,7 +10,7 @@
         "switchbotCredentials": "switchbot-credentials"
     },
     "autoxReminder": {
-        "enabled": "true",
+        "enabled": "false",
         "rate": "rate(30 minutes)",
         "dynamoTableName": "autox_reminder_urls",
         "fromEmail": "\"Autox Alert\" <automation@nortakales.com>",
