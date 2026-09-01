@@ -36,6 +36,12 @@ export interface AgentConfig {
          */
         enabled: boolean;
         helperPath: string;
+        /**
+         * Completed reminders whose completion is older than this are not
+         * mirrored. Open reminders are never aged out regardless of age. Set to 0
+         * to mirror everything.
+         */
+        completedRetentionDays: number;
     };
     /** Keychain generic-password service name holding the agent's access key. */
     keychainService: string;
@@ -43,6 +49,13 @@ export interface AgentConfig {
 
 /** Where swift-helper/build.sh puts the binary, relative to the compiled agent. */
 const DEFAULT_HELPER_PATH = join(__dirname, '..', 'swift-helper', 'out', 'reminders-helper');
+
+/**
+ * 18 months. Chosen to clear an annual recurring reminder by a wide margin: the
+ * most recent completed occurrence of a yearly reminder is at most ~12 months
+ * old, so this never truncates a live recurrence series.
+ */
+const DEFAULT_COMPLETED_RETENTION_DAYS = 548;
 
 const REQUIRED_KEYS: (keyof AgentConfig)[] = [
     'region',
@@ -82,6 +95,8 @@ export function loadConfig(path = process.env.ICLOUD_BRIDGE_CONFIG ?? DEFAULT_CO
         reminders: {
             helperPath: parsed.reminders?.helperPath ?? DEFAULT_HELPER_PATH,
             enabled: parsed.reminders?.enabled ?? false,
+            completedRetentionDays:
+                parsed.reminders?.completedRetentionDays ?? DEFAULT_COMPLETED_RETENTION_DAYS,
         },
         keychainService: parsed.keychainService ?? 'icloud-bridge-agent',
     };

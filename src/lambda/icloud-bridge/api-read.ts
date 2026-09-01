@@ -320,13 +320,22 @@ async function getReminderLists() {
         listId: item.reminderId as string,
         listName: item.listName as string,
         isDefault: item.isDefault as boolean | undefined,
+        sourceName: item.sourceName as string | undefined,
+        isLocal: item.isLocal as boolean | undefined,
         openCount: openCounts.get(item.reminderId as string) ?? 0,
     }));
 
     // A list the agent has not registered yet still shows up if it has reminders.
     for (const [listId, openCount] of openCounts) {
         if (!lists.some(list => list.listId === listId)) {
-            lists.push({ listId, listName: listId, isDefault: undefined, openCount });
+            lists.push({
+                listId,
+                listName: listId,
+                isDefault: undefined,
+                sourceName: undefined,
+                isLocal: undefined,
+                openCount,
+            });
         }
     }
 

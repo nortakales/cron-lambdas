@@ -29,6 +29,8 @@ export interface HelperList {
     listId: string;
     listName: string;
     isDefault: boolean;
+    sourceName: string;
+    isLocal: boolean;
 }
 
 export interface HelperSnapshot {

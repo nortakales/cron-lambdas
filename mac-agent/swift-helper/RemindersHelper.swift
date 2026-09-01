@@ -39,6 +39,10 @@ struct ListPayload: Codable {
     let listId: String
     let listName: String
     let isDefault: Bool
+    /// Owning account, e.g. "iCloud" or "On My Mac".
+    let sourceName: String
+    /// True for a local-only list, which never syncs to other devices.
+    let isLocal: Bool
 }
 
 struct Snapshot: Codable {
@@ -157,11 +161,16 @@ func fetchAllReminders(_ store: EKEventStore, completion: @escaping ([EKReminder
 func captureSnapshot(_ store: EKEventStore, completion: @escaping (Snapshot) -> Void) {
     let defaultListId = store.defaultCalendarForNewReminders()?.calendarIdentifier
 
-    let lists = store.calendars(for: .reminder).map { calendar in
-        ListPayload(
+    let lists = store.calendars(for: .reminder).map { calendar -> ListPayload in
+        let source = calendar.source
+        return ListPayload(
             listId: calendar.calendarIdentifier,
             listName: calendar.title,
-            isDefault: calendar.calendarIdentifier == defaultListId
+            isDefault: calendar.calendarIdentifier == defaultListId,
+            sourceName: source?.title ?? "Unknown",
+            // A local list exists only on this Mac; it is invisible on iPhone and
+            // is a common source of "why is there a duplicate list?" confusion.
+            isLocal: source?.sourceType == .local
         )
     }
 

@@ -94,6 +94,10 @@ export interface ReminderListRecord {
     reminderId: string;
     listName: string;
     isDefault?: boolean;
+    /** Owning account, e.g. "iCloud" or "On My Mac". */
+    sourceName?: string;
+    /** True for a local-only list, which never syncs to other devices. */
+    isLocal?: boolean;
     updatedAt: string;
 }
 
@@ -191,7 +195,13 @@ export interface ReminderDeletedDetail {
 }
 
 export interface ReminderListsSnapshotDetail {
-    lists: { listId: string; listName: string; isDefault?: boolean }[];
+    lists: {
+        listId: string;
+        listName: string;
+        isDefault?: boolean;
+        sourceName?: string;
+        isLocal?: boolean;
+    }[];
 }
 
 export function toMessageRecord(input: MessageInput, retentionDays: number): MessageRecord {

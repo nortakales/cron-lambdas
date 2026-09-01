@@ -54,6 +54,10 @@ export interface ReminderListInput {
     listId: string;
     listName: string;
     isDefault?: boolean;
+    /** Owning account, e.g. "iCloud" or "On My Mac". */
+    sourceName?: string;
+    /** True for a local-only list, which never syncs to other devices. */
+    isLocal?: boolean;
 }
 
 export type CommandType =

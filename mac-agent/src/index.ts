@@ -44,6 +44,7 @@ async function main() {
             new RemindersHelperClient(config.reminders.helperPath),
             publisher,
             syncState,
+            config.reminders.completedRetentionDays,
         ));
     } else {
         log.warn(`Reminders provider disabled: no helper at ${config.reminders.helperPath}`);

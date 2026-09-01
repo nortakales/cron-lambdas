@@ -133,6 +133,8 @@ async function syncListRegistry(detail: ReminderListsSnapshotDetail) {
         reminderId: list.listId,
         listName: list.listName,
         isDefault: list.isDefault,
+        sourceName: list.sourceName,
+        isLocal: list.isLocal,
         updatedAt,
     }));
     await batchPut(REMINDERS_TABLE, records);

@@ -59,6 +59,7 @@ export class RemindersProvider implements Provider {
         private readonly helper: RemindersHelperClient,
         private readonly publisher: Publisher,
         private readonly syncState: SyncState,
+        private readonly completedRetentionDays: number,
     ) { }
 
     async start(): Promise<void> {
@@ -132,7 +133,15 @@ export class RemindersProvider implements Provider {
         const upserts: ReminderInput[] = [];
         const deletions: { listId: string; reminderId: string }[] = [];
 
-        for (const reminder of snapshot.reminders) {
+        // Filtering before the diff (rather than expiring rows in DynamoDB) is
+        // what keeps the mirror consistent: a reminder that ages out simply stops
+        // appearing in `current`, so the loop below emits a deletion for it like
+        // any other removal. A TTL would delete the row while the fingerprint map
+        // still claimed it was published, and the mirror would never heal.
+        const retained = snapshot.reminders.filter(reminder => this.isRetained(reminder));
+        const aged = snapshot.reminders.length - retained.length;
+
+        for (const reminder of retained) {
             const hash = fingerprint(reminder);
             current[reminder.reminderId] = { h: hash, l: reminder.listId };
 
@@ -173,11 +182,31 @@ export class RemindersProvider implements Provider {
             capturedAt: snapshot.capturedAt,
         });
 
+        const agedNote = aged > 0 ? ` (${aged} completed reminder(s) past the retention window excluded)` : '';
         if (upserts.length || deletions.length) {
-            log.info(`Published ${upserts.length} change(s) and ${deletions.length} deletion(s) across ${snapshot.lists.length} list(s)`);
+            log.info(`Published ${upserts.length} change(s) and ${deletions.length} deletion(s) across ${snapshot.lists.length} list(s)${agedNote}`);
         } else {
-            log.info(`Snapshot at ${snapshot.capturedAt}: no reminder changes`);
+            log.info(`Snapshot at ${snapshot.capturedAt}: no reminder changes${agedNote}`);
         }
+    }
+
+    /**
+     * Whether a reminder belongs in the mirror.
+     *
+     * Only *completed* reminders age out — an open reminder is still actionable
+     * however old it is. A completed reminder with no completion date is kept,
+     * since its age is unknown and dropping it would be a guess.
+     */
+    private isRetained(reminder: HelperReminder): boolean {
+        if (this.completedRetentionDays <= 0) return true;
+        if (!reminder.completed) return true;
+        if (!reminder.completionDate) return true;
+
+        const completedAt = Date.parse(reminder.completionDate);
+        if (Number.isNaN(completedAt)) return true;
+
+        const ageDays = (Date.now() - completedAt) / 86_400_000;
+        return ageDays <= this.completedRetentionDays;
     }
 }
 

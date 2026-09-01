@@ -156,6 +156,40 @@ byte size to the message.
 agent now coalesces webhook activity over a 400ms window, keyed by message GUID,
 so a receipt burst becomes one event carrying the final state.
 
+## Reminder retention
+
+Completed reminders older than **548 days (18 months)** are not mirrored
+(`reminders.completedRetentionDays` in `~/.icloud-bridge/agent.json`; 0 disables).
+This cut a 6,695-reminder library to 874 and the local checkpoint from 674KB to
+88KB.
+
+- **Only completed reminders age out.** An open reminder is still actionable
+  however old it is, and is never dropped.
+- **18 months is deliberate margin for annual recurrences.** The most recent
+  completed occurrence of a yearly reminder is at most ~12 months old, so a
+  live recurrence series can never be truncated.
+- **A completed reminder with no completion date is kept**, since its age is
+  unknown and dropping it would be a guess.
+- Filtering happens in the agent, before the diff, so a reminder that ages out
+  appears as a normal deletion and the mirror stays consistent. Doing this with
+  a DynamoDB TTL instead would delete the row while the fingerprint map still
+  claimed it was published, and the mirror would never heal.
+- Changing the window takes effect on the next snapshot: widening it republishes
+  the newly-included reminders, narrowing it deletes the newly-excluded ones —
+  **provided the checkpoint is left in place.** Deleting
+  `~/.icloud-bridge/reminders-snapshot.json` first skips the deletions and
+  orphans those rows in DynamoDB.
+
+## Local vs iCloud lists
+
+`GET /reminders/lists` reports `sourceName` ("iCloud", "Local") and `isLocal`.
+
+A **local list** exists only on this Mac and is invisible on iPhone. One shows up
+here as a second list also called "Reminders": before iCloud finished its first
+sync, EventKit's default list for new reminders was that local one, so anything
+created in that window landed in a list no other device can see. Worth checking
+`isLocal` before wondering where a reminder went.
+
 ## Things worth knowing
 
 - **Ingest events carry arrays.** A cold-start backfill of hundreds of messages
