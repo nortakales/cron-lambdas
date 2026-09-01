@@ -1,0 +1,27 @@
+{
+  "name": "icloud-bridge-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mac-side agent for the iCloud bridge: pushes Messages/Reminders changes to AWS and executes queued commands locally",
+  "main": "out/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node out/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.840.0",
+    "@aws-sdk/client-dynamodb": "^3.840.0",
+    "@aws-sdk/client-eventbridge": "^3.840.0",
+    "@aws-sdk/client-secrets-manager": "^3.840.0",
+    "@aws-sdk/client-sqs": "^3.840.0",
+    "@aws-sdk/lib-dynamodb": "^3.840.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

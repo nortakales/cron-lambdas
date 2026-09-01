@@ -67,5 +67,20 @@
             "nortakales@gmail.com"
         ],
         "credentialsBrickset": "brickset-credentials"
+    },
+    "icloudBridge": {
+        "enabled": "true",
+        "messagesTableName": "icloud_bridge_messages",
+        "remindersTableName": "icloud_bridge_reminders",
+        "commandsTableName": "icloud_bridge_commands",
+        "syncStateTableName": "icloud_bridge_sync_state",
+        "eventBusName": "icloud-bridge-bus",
+        "commandQueueName": "icloud-bridge-command-queue",
+        "apiKeySecret": "icloud-bridge-api-key",
+        "blueBubblesPasswordSecret": "icloud-bridge-bluebubbles-password",
+        "agentCredentialsSecret": "icloud-bridge-agent-credentials",
+        "messageRetentionDays": "365",
+        "commandRetentionDays": "7",
+        "metricNamespace": "IcloudBridge"
     }
 }

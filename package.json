@@ -19,6 +19,7 @@
     "@aws-sdk/client-dynamodb": "^3.840.0",
     "@aws-sdk/client-secrets-manager": "^3.840.0",
     "@aws-sdk/client-sesv2": "^3.849.0",
+    "@aws-sdk/client-sqs": "^3.1121.0",
     "@aws-sdk/lib-dynamodb": "^3.840.0",
     "aws-cdk-lib": "2.203.1",
     "constructs": "^10.4.2",
@@ -28,7 +29,8 @@
     "node-html-parser": "^7.0.1",
     "pushover-notifications": "^1.2.3",
     "query-string": "^9.2.2",
-    "typed-duration": "^2.0.0"
+    "typed-duration": "^2.0.0",
+    "ulid": "^3.0.2"
   },
   "engines": {
     "node": ">=18.0.0",

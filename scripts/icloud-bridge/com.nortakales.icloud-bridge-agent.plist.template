@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.nortakales.icloud-bridge-agent</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__NODE_BIN__</string>
+        <string>__AGENT_DIR__/out/index.js</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__AGENT_DIR__</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart on any non-zero exit; the agent exits 1 when it cannot start. -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+
+    <!-- Don't hammer a persistent failure (e.g. BlueBubbles not yet running). -->
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <!-- Both streams go to one file, deliberately. Split logs hid a fatal
+         DynamoDB error in agent.error.log while agent.log looked healthy; one
+         chronological stream makes an error impossible to miss and keeps it in
+         context with the lines around it. -->
+    <key>StandardOutPath</key>
+    <string>__LOG_DIR__/agent.log</string>
+    <key>StandardErrorPath</key>
+    <string>__LOG_DIR__/agent.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin</string>
+    </dict>
+
+    <!-- A LaunchAgent in the GUI session, not a LaunchDaemon: sending iMessages
+         goes through AppleScript, which requires the logged-in user session. -->
+    <key>ProcessType</key>
+    <string>Interactive</string>
+</dict>
+</plist>

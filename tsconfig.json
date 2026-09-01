@@ -31,6 +31,8 @@
   "exclude": [
     "node_modules",
     "cdk.out",
-    "out"
+    "out",
+    "mac-agent",
+    "mcp-server"
   ]
 }
