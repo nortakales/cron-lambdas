@@ -225,6 +225,12 @@ function fingerprint(reminder: HelperReminder): string {
             reminder.completionDate ?? '',
             reminder.dueDate ?? '',
             reminder.priority,
+            // Included so an edited recurrence rule is detected as a change; a
+            // field the mirror stores but the fingerprint ignores would never
+            // propagate after its first publish.
+            reminder.recurrence ? JSON.stringify(reminder.recurrence) : '',
+            reminder.startDate ?? '',
+            reminder.url ?? '',
         ]))
         .digest('base64')
         // 12 base64 chars is ~72 bits: collision risk is irrelevant at this scale,
@@ -247,6 +253,21 @@ function toReminderInput(reminder: HelperReminder): ReminderInput {
         // EventKit uses 0 for "no priority"; keep it absent rather than storing 0.
         priority: reminder.priority || undefined,
         completionDate: reminder.completionDate ?? undefined,
+        startDate: reminder.startDate ?? undefined,
+        url: reminder.url ?? undefined,
+        creationDate: reminder.creationDate ?? undefined,
+        recurrence: reminder.recurrence?.map(rule => ({
+            frequency: rule.frequency,
+            interval: rule.interval,
+            daysOfTheWeek: rule.daysOfTheWeek ?? undefined,
+            daysOfTheMonth: rule.daysOfTheMonth ?? undefined,
+            monthsOfTheYear: rule.monthsOfTheYear ?? undefined,
+            weeksOfTheYear: rule.weeksOfTheYear ?? undefined,
+            daysOfTheYear: rule.daysOfTheYear ?? undefined,
+            setPositions: rule.setPositions ?? undefined,
+            endDate: rule.endDate ?? undefined,
+            occurrenceCount: rule.occurrenceCount ?? undefined,
+        })) ?? undefined,
         appleLastModified: reminder.appleLastModified ?? undefined,
     };
 }

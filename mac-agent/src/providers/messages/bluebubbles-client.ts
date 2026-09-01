@@ -26,7 +26,26 @@ export interface BlueBubblesMessage {
     dateCreated: number | null;
     dateRead?: number | null;
     dateDelivered?: number | null;
+    dateEdited?: number | null;
+    dateRetracted?: number | null;
+    datePlayed?: number | null;
     isFromMe: boolean;
+    /** Reaction kind, e.g. "like"; a "-" prefix means the reaction was removed. */
+    associatedMessageType?: string | null;
+    /** Target of a reaction, in `p:<part>/<guid>` form. */
+    associatedMessageGuid?: string | null;
+    /** Set when this message is an inline reply. */
+    replyToGuid?: string | null;
+    threadOriginatorGuid?: string | null;
+    expressiveSendStyleId?: string | null;
+    /** Identifies rich payloads: link previews, Apple Pay, app messages. */
+    balloonBundleId?: string | null;
+    isAudioMessage?: boolean;
+    isSpam?: boolean;
+    /** Non-zero for system events such as a group rename or a join/leave. */
+    itemType?: number;
+    groupActionType?: number;
+    groupTitle?: string | null;
 }
 
 export interface QueryOptions {

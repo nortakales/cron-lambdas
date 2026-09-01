@@ -35,6 +35,17 @@ export const LIST_REGISTRY_PARTITION = '__lists__';
 /** Sorts undated reminders last in the due-date GSI while keeping them present. */
 export const NO_DUE_DATE_SORT = '9999-12-31T23:59:59.999Z';
 
+export interface Reaction {
+    /** e.g. "like", "love", "laugh", "emphasize", "dislike", "question". */
+    type: string;
+    /** True when the reaction was taken back rather than added. */
+    removed: boolean;
+    /** GUID of the message being reacted to. */
+    targetGuid: string;
+    /** Which part of a multi-part message, when the target is subdivided. */
+    targetPart?: number;
+}
+
 export interface Attachment {
     guid: string;
     name?: string;
@@ -59,6 +70,24 @@ export interface MessageRecord {
     createdAt: string;
     updatedAt?: string;
     dateRead?: string;
+    dateDelivered?: string;
+    dateEdited?: string;
+    dateRetracted?: string;
+    datePlayed?: string;
+    /** Present when this message is a tapback rather than a chat message. */
+    reaction?: Reaction;
+    /** GUID of the message this one replies to inline. */
+    replyToGuid?: string;
+    threadOriginatorGuid?: string;
+    expressiveSendStyleId?: string;
+    /** Identifies rich payloads: link previews, Apple Pay, app messages. */
+    balloonBundleId?: string;
+    isAudioMessage?: boolean;
+    isSpam?: boolean;
+    /** Non-zero for system events such as a group rename or a join/leave. */
+    itemType?: number;
+    groupActionType?: number;
+    groupTitle?: string;
     /** GSI PK, always MESSAGE_TIMELINE_KEY. */
     timelineKey: string;
     /** GSI PK for the sender index; falls back to `me` for outgoing messages. */
@@ -84,6 +113,11 @@ export interface ReminderRecord {
     priority?: number;
     listName?: string;
     completionDate?: string;
+    startDate?: string;
+    url?: string;
+    creationDate?: string;
+    /** Recurrence rules, when the reminder repeats. */
+    recurrence?: RecurrenceRule[];
     updatedAt: string;
     appleLastModified?: string;
 }
@@ -152,6 +186,24 @@ export function epochSecondsFromNow(days: number) {
 // source of truth.
 // ---------------------------------------------------------------------------
 
+export interface RecurrenceRule {
+    /** daily | weekly | monthly | yearly */
+    frequency: string;
+    /** Every N periods; 1 means "every week" for a weekly rule. */
+    interval: number;
+    /** e.g. ["monday"], or ["+1monday"] / ["-1friday"] for ordinal patterns. */
+    daysOfTheWeek?: string[];
+    daysOfTheMonth?: number[];
+    monthsOfTheYear?: number[];
+    weeksOfTheYear?: number[];
+    daysOfTheYear?: number[];
+    setPositions?: number[];
+    /** Set when the series ends on a date. */
+    endDate?: string;
+    /** Set when the series ends after a number of occurrences. */
+    occurrenceCount?: number;
+}
+
 export interface MessageInput {
     /** BlueBubbles chat GUID; becomes the `chatId` partition key. */
     chatGuid: string;
@@ -166,6 +218,24 @@ export interface MessageInput {
     createdAt: string;
     updatedAt?: string;
     dateRead?: string;
+    dateDelivered?: string;
+    dateEdited?: string;
+    dateRetracted?: string;
+    datePlayed?: string;
+    /** Present when this message is a tapback rather than a chat message. */
+    reaction?: Reaction;
+    /** GUID of the message this one replies to inline. */
+    replyToGuid?: string;
+    threadOriginatorGuid?: string;
+    expressiveSendStyleId?: string;
+    /** Identifies rich payloads: link previews, Apple Pay, app messages. */
+    balloonBundleId?: string;
+    isAudioMessage?: boolean;
+    isSpam?: boolean;
+    /** Non-zero for system events such as a group rename or a join/leave. */
+    itemType?: number;
+    groupActionType?: number;
+    groupTitle?: string;
 }
 
 export interface ReminderInput {
@@ -178,6 +248,11 @@ export interface ReminderInput {
     dueDate?: string;
     priority?: number;
     completionDate?: string;
+    startDate?: string;
+    url?: string;
+    creationDate?: string;
+    /** Recurrence rules, when the reminder repeats. */
+    recurrence?: RecurrenceRule[];
     /** EventKit's lastModifiedDate; used to drop out-of-order updates. */
     appleLastModified?: string;
 }
@@ -219,6 +294,20 @@ export function toMessageRecord(input: MessageInput, retentionDays: number): Mes
         createdAt,
         updatedAt: input.updatedAt,
         dateRead: input.dateRead,
+        dateDelivered: input.dateDelivered,
+        dateEdited: input.dateEdited,
+        dateRetracted: input.dateRetracted,
+        datePlayed: input.datePlayed,
+        reaction: input.reaction,
+        replyToGuid: input.replyToGuid,
+        threadOriginatorGuid: input.threadOriginatorGuid,
+        expressiveSendStyleId: input.expressiveSendStyleId,
+        balloonBundleId: input.balloonBundleId,
+        isAudioMessage: input.isAudioMessage,
+        isSpam: input.isSpam,
+        itemType: input.itemType,
+        groupActionType: input.groupActionType,
+        groupTitle: input.groupTitle,
         timelineKey: MESSAGE_TIMELINE_KEY,
         senderKey: input.isFromMe ? 'me' : (input.sender ?? 'unknown'),
         ttl: epochSecondsFromNow(retentionDays),
@@ -238,6 +327,10 @@ export function toReminderRecord(input: ReminderInput): ReminderRecord {
         priority: input.priority,
         listName: input.listName,
         completionDate: input.completionDate,
+        startDate: input.startDate,
+        url: input.url,
+        creationDate: input.creationDate,
+        recurrence: input.recurrence,
         updatedAt: new Date().toISOString(),
         appleLastModified: input.appleLastModified,
     };

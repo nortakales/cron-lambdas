@@ -23,6 +23,17 @@ export interface Attachment {
     totalBytes?: number;
 }
 
+export interface Reaction {
+    /** e.g. "like", "love", "laugh", "emphasize", "dislike", "question". */
+    type: string;
+    /** True when the reaction was taken back rather than added. */
+    removed: boolean;
+    /** GUID of the message being reacted to. */
+    targetGuid: string;
+    /** Which part of a multi-part message, when the target is subdivided. */
+    targetPart?: number;
+}
+
 export interface MessageInput {
     chatGuid: string;
     messageGuid: string;
@@ -35,6 +46,42 @@ export interface MessageInput {
     createdAt: string;
     updatedAt?: string;
     dateRead?: string;
+    dateDelivered?: string;
+    dateEdited?: string;
+    dateRetracted?: string;
+    datePlayed?: string;
+    /** Present when this message is a tapback rather than a chat message. */
+    reaction?: Reaction;
+    /** GUID of the message this one replies to inline. */
+    replyToGuid?: string;
+    threadOriginatorGuid?: string;
+    expressiveSendStyleId?: string;
+    /** Identifies rich payloads: link previews, Apple Pay, app messages. */
+    balloonBundleId?: string;
+    isAudioMessage?: boolean;
+    isSpam?: boolean;
+    /** Non-zero for system events such as a group rename or a join/leave. */
+    itemType?: number;
+    groupActionType?: number;
+    groupTitle?: string;
+}
+
+export interface RecurrenceRule {
+    /** daily | weekly | monthly | yearly */
+    frequency: string;
+    /** Every N periods; 1 means "every week" for a weekly rule. */
+    interval: number;
+    /** e.g. ["monday"], or ["+1monday"] / ["-1friday"] for ordinal patterns. */
+    daysOfTheWeek?: string[];
+    daysOfTheMonth?: number[];
+    monthsOfTheYear?: number[];
+    weeksOfTheYear?: number[];
+    daysOfTheYear?: number[];
+    setPositions?: number[];
+    /** Set when the series ends on a date. */
+    endDate?: string;
+    /** Set when the series ends after a number of occurrences. */
+    occurrenceCount?: number;
 }
 
 export interface ReminderInput {
@@ -47,6 +94,11 @@ export interface ReminderInput {
     dueDate?: string;
     priority?: number;
     completionDate?: string;
+    startDate?: string;
+    url?: string;
+    creationDate?: string;
+    /** Recurrence rules, when the reminder repeats. */
+    recurrence?: RecurrenceRule[];
     appleLastModified?: string;
 }
 

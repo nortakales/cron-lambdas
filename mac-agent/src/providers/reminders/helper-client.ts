@@ -21,8 +21,25 @@ export interface HelperReminder {
     completed: boolean;
     completionDate?: string | null;
     dueDate?: string | null;
+    startDate?: string | null;
     priority: number;
+    url?: string | null;
+    creationDate?: string | null;
     appleLastModified?: string | null;
+    recurrence?: HelperRecurrence[] | null;
+}
+
+export interface HelperRecurrence {
+    frequency: string;
+    interval: number;
+    daysOfTheWeek?: string[] | null;
+    daysOfTheMonth?: number[] | null;
+    monthsOfTheYear?: number[] | null;
+    weeksOfTheYear?: number[] | null;
+    daysOfTheYear?: number[] | null;
+    setPositions?: number[] | null;
+    endDate?: string | null;
+    occurrenceCount?: number | null;
 }
 
 export interface HelperList {

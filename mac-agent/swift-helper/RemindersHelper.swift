@@ -31,8 +31,33 @@ struct ReminderPayload: Codable {
     let completed: Bool
     let completionDate: String?
     let dueDate: String?
+    let startDate: String?
     let priority: Int
+    let url: String?
+    let creationDate: String?
     let appleLastModified: String?
+    /// EventKit allows several rules per item, though Reminders.app sets at most one.
+    let recurrence: [RecurrencePayload]?
+}
+
+/// A recurrence rule flattened into JSON. Mirrors EKRecurrenceRule closely enough
+/// that a client can render "every 2 weeks on Monday" without EventKit.
+struct RecurrencePayload: Codable {
+    /// daily | weekly | monthly | yearly
+    let frequency: String
+    /// Every N periods; 1 for "every week".
+    let interval: Int
+    /// e.g. ["monday"], or ["+1monday"] / ["-1friday"] for "first"/"last" patterns.
+    let daysOfTheWeek: [String]?
+    let daysOfTheMonth: [Int]?
+    let monthsOfTheYear: [Int]?
+    let weeksOfTheYear: [Int]?
+    let daysOfTheYear: [Int]?
+    let setPositions: [Int]?
+    /// Set when the series ends on a date.
+    let endDate: String?
+    /// Set when the series ends after a number of occurrences.
+    let occurrenceCount: Int?
 }
 
 struct ListPayload: Codable {
@@ -130,9 +155,12 @@ func requestRemindersAccess(_ store: EKEventStore) -> Bool {
 // MARK: - Reading
 
 func serialize(_ reminder: EKReminder) -> ReminderPayload {
-    // Reminders store a due date as components, not an instant, so it has to be
+    // Reminders store dates as components, not instants, so they have to be
     // resolved through the calendar to get a real Date.
     let due = reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) }
+    let start = reminder.startDateComponents.flatMap { Calendar.current.date(from: $0) }
+
+    let rules = reminder.recurrenceRules?.map(serializeRecurrence)
 
     return ReminderPayload(
         reminderId: reminder.calendarItemIdentifier,
@@ -143,8 +171,47 @@ func serialize(_ reminder: EKReminder) -> ReminderPayload {
         completed: reminder.isCompleted,
         completionDate: iso(reminder.completionDate),
         dueDate: iso(due),
+        startDate: iso(start),
         priority: reminder.priority,
-        appleLastModified: iso(reminder.lastModifiedDate)
+        url: reminder.url?.absoluteString,
+        creationDate: iso(reminder.creationDate),
+        appleLastModified: iso(reminder.lastModifiedDate),
+        recurrence: (rules?.isEmpty ?? true) ? nil : rules
+    )
+}
+
+let weekdayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+
+func serializeRecurrence(_ rule: EKRecurrenceRule) -> RecurrencePayload {
+    let frequency: String
+    switch rule.frequency {
+    case .daily: frequency = "daily"
+    case .weekly: frequency = "weekly"
+    case .monthly: frequency = "monthly"
+    case .yearly: frequency = "yearly"
+    @unknown default: frequency = "unknown"
+    }
+
+    // EKWeekday is 1-based from Sunday. A non-zero weekNumber means an ordinal
+    // pattern such as "first Monday" (1) or "last Friday" (-1).
+    let days = rule.daysOfTheWeek?.map { day -> String in
+        let index = day.dayOfTheWeek.rawValue - 1
+        let name = weekdayNames.indices.contains(index) ? weekdayNames[index] : "unknown"
+        return day.weekNumber == 0 ? name : String(format: "%+d%@", day.weekNumber, name)
+    }
+
+    return RecurrencePayload(
+        frequency: frequency,
+        interval: rule.interval,
+        daysOfTheWeek: days,
+        daysOfTheMonth: rule.daysOfTheMonth?.map { $0.intValue },
+        monthsOfTheYear: rule.monthsOfTheYear?.map { $0.intValue },
+        weeksOfTheYear: rule.weeksOfTheYear?.map { $0.intValue },
+        daysOfTheYear: rule.daysOfTheYear?.map { $0.intValue },
+        setPositions: rule.setPositions?.map { $0.intValue },
+        endDate: iso(rule.recurrenceEnd?.endDate),
+        // EventKit reports 0 when the series ends on a date instead of a count.
+        occurrenceCount: (rule.recurrenceEnd?.occurrenceCount).flatMap { $0 == 0 ? nil : $0 }
     )
 }
 

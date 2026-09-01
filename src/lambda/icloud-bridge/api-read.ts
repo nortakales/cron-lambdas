@@ -39,6 +39,9 @@ const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
 /** Ceiling on the pages walked when aggregating open counts for /reminders/lists. */
 const MAX_AGGREGATE_PAGES = 20;
+/** Pages read per request when a FilterExpression is in play. */
+const FILTER_PAGE_SIZE = 200;
+const MAX_FILTER_PAGES = 10;
 /** Bounds a `q=` text search, which reads pages and filters them in the handler. */
 const MAX_SEARCH_PAGES = 10;
 const SEARCH_PAGE_SIZE = 200;
@@ -234,18 +237,35 @@ async function queryList(
         values[':dueBefore'] = opts.dueBefore;
     }
 
-    const result = await ddb.query({
-        TableName: REMINDERS_TABLE,
-        KeyConditionExpression: 'listId = :listId',
-        ExpressionAttributeValues: values,
-        ...(filters.length ? { FilterExpression: filters.join(' AND ') } : {}),
-        Limit: opts.limit,
-        ExclusiveStartKey: decodeCursor(opts.cursor),
-    });
+    const filterExpression = filters.length ? filters.join(' AND ') : undefined;
+    const items: Record<string, any>[] = [];
+    let startKey = decodeCursor(opts.cursor);
+    let pages = 0;
+
+    // DynamoDB applies a FilterExpression *after* Limit, so a single page can
+    // return far fewer rows than asked for -- a list with 38 open reminders was
+    // answering with 6. Pages are walked until the request is satisfied so that
+    // `limit` means "up to this many results", which is what a caller expects.
+    do {
+        const result = await ddb.query({
+            TableName: REMINDERS_TABLE,
+            KeyConditionExpression: 'listId = :listId',
+            ExpressionAttributeValues: values,
+            ...(filterExpression ? { FilterExpression: filterExpression } : {}),
+            Limit: filterExpression ? FILTER_PAGE_SIZE : opts.limit,
+            ExclusiveStartKey: startKey,
+        });
+        items.push(...(result.Items ?? []));
+        startKey = result.LastEvaluatedKey;
+    } while (filterExpression && startKey && items.length < opts.limit && ++pages < MAX_FILTER_PAGES);
 
     return json(200, {
-        items: (result.Items ?? []).map(toPublicReminder),
-        nextCursor: encodeCursor(result.LastEvaluatedKey),
+        items: items.slice(0, opts.limit).map(toPublicReminder),
+        // Truncating to `limit` would strand the remainder, so the cursor is only
+        // returned when nothing was dropped; otherwise the caller re-reads the
+        // page boundary rather than skipping rows.
+        nextCursor: items.length <= opts.limit ? encodeCursor(startKey) : undefined,
+        ...(items.length > opts.limit ? { truncated: true } : {}),
     });
 }
 

@@ -152,6 +152,37 @@ dashboard that re-polls after `done` will see it without special-casing.
 | `service` | `iMessage`, `SMS`, or **`RCS`** — don't assume two values |
 | `dateRead` | Absent if unread |
 | `attachments` | Metadata only; **the API serves no file bytes** |
+| `reaction` | Present when the message is a **tapback**, not a chat message. See below |
+| `replyToGuid` | Set when the message is an inline reply. Common — 57 in a 600-message sample |
+| `threadOriginatorGuid` | Head of a longer reply thread |
+| `dateDelivered` | Delivery receipt, distinct from `dateRead` |
+| `dateEdited` / `dateRetracted` | iOS 16+ edit / "Undo Send" |
+| `datePlayed` | Audio message playback |
+| `balloonBundleId` | Rich payload: link preview, Apple Pay, app message |
+| `expressiveSendStyleId` | Screen/bubble effect |
+| `isAudioMessage`, `isSpam` | Present only when true |
+| `itemType`, `groupActionType`, `groupTitle` | Present only when non-zero: system events such as a group rename |
+
+### Reactions (tapbacks)
+
+Reactions arrive as **their own messages**, whose `text` is prose like
+`Liked "see you then"`. Rendering them as chat lines is almost never what you
+want — check `reaction` first and attach it to its target instead:
+
+```json
+{
+  "messageGuid": "9F2C...",
+  "text": "Liked \u201csee you then\u201d",
+  "reaction": { "type": "like", "removed": false,
+                "targetGuid": "FACA91C9-B157-4C2A-9D04-168CECA2D79D", "targetPart": 0 }
+}
+```
+
+`type` is `like`, `love`, `laugh`, `emphasize`, `dislike` or `question`.
+`removed: true` means the reaction was taken back — apply it as a removal rather
+than a second badge. `targetGuid` matches the `messageGuid` of the message being
+reacted to; Apple's `p:0/` part prefix is already stripped for you, with the part
+index in `targetPart`.
 
 **Retention: 1 year.** Older messages are removed by DynamoDB TTL. Apple remains
 the source of truth; this is a queryable cache.
@@ -242,6 +273,50 @@ Only fields you send are touched. **`null` clears** `notes`, `dueDate` or
 | `priority` | Absent when unset (EventKit's 0 is normalised away) |
 | `completionDate` | Present only when completed |
 | `notes` | Absent when empty |
+| `recurrence` | Array of rules when the reminder repeats. See below |
+| `creationDate` | When the reminder was created |
+| `startDate` | Start date, distinct from `dueDate` |
+| `url` | Attached URL |
+
+### Recurring reminders
+
+**Each occurrence is a separate reminder with its own `reminderId`.** Reminders
+does not model a series as one row that moves: completing an occurrence leaves it
+completed forever and the next occurrence exists as a distinct reminder. In this
+data `'Garbage, Recycling'` is **80 rows** — 79 completed, weekly since March
+2025, and exactly one open.
+
+Two consequences for a dashboard:
+
+- **Grouping by title will collapse a series into one entry** and hide the real
+  count. Group by `title` only if that is what you actually want.
+- **A "completed today" feed will show recurring chores repeatedly** over time,
+  because each completion is a different reminder.
+
+`recurrence` describes the rule on whichever occurrence carries it:
+
+```json
+"recurrence": [
+  { "frequency": "weekly", "interval": 2, "daysOfTheWeek": ["monday"] }
+]
+```
+
+| Field | Notes |
+| --- | --- |
+| `frequency` | `daily`, `weekly`, `monthly`, `yearly` |
+| `interval` | Every N periods; `2` + `weekly` is fortnightly |
+| `daysOfTheWeek` | `["monday"]`, or `["+1monday"]` / `["-1friday"]` for "first"/"last" |
+| `daysOfTheMonth`, `monthsOfTheYear`, `weeksOfTheYear`, `daysOfTheYear`, `setPositions` | Present for the pattern that uses them |
+| `endDate` / `occurrenceCount` | Only one is set, and only when the series ends |
+
+Across this library: 19 yearly, 7 quarterly, 5 monthly, 3 semi-annual, 2 weekly,
+2 fortnightly. **19 annual series is why the completed-reminder retention window
+is 18 months rather than 12** — a 12-month cutoff would sit right on top of them.
+
+### Not available at all
+
+Confirmed absent from the public EventKit API, so no amount of work exposes them:
+**subtasks, tags, flagged status, and images attached to reminders.**
 
 **Retention: completed reminders older than 18 months are not mirrored.** Open
 reminders are never dropped regardless of age. If a dashboard shows "completed
@@ -290,6 +365,12 @@ back unchanged as `?cursor=`. Absent `nextCursor` means the end.
 A page can come back empty while still returning a cursor (search filters and the
 open/completed boundary can both do this). **Stop when `nextCursor` is absent,
 not when `items` is empty.**
+
+Filtered list queries (`listId` plus `completed` or `dueBefore`) read ahead
+internally so `limit` means "up to this many results". Without that, DynamoDB
+applies its filter *after* the limit and a list with 38 open reminders answers
+with 6. If a request needs more than 10 internal pages it returns `truncated:
+true` and omits the cursor; narrow the filter in that case.
 
 ---
 
