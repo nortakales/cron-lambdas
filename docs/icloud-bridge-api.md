@@ -218,6 +218,7 @@ never reaches their phone.
 | `listId` | Restrict to one list |
 | `completed` | `true` or `false`. Omit for both |
 | `dueBefore` | ISO8601; only reminders due before it |
+| `dueAfter` | ISO8601; only reminders due after it. Combine with `dueBefore` for a window such as "due today". Undated reminders are excluded from any date window, since they sort after every real date by design |
 | `limit` | 1–200, default 50 |
 | `cursor` | From `nextCursor` |
 

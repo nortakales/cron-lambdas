@@ -16,6 +16,13 @@ import {
     ReminderRecord,
 } from './shared/model';
 
+/**
+ * One tick below the undated sentinel. Used as the upper bound of an open-ended
+ * `dueAfter` query so undated reminders -- which sort at the sentinel by design
+ * -- are not swept in as "due after" every date.
+ */
+const LATEST_DATED_SORT = '9999-12-31T23:59:59.998Z';
+
 /** Index chosen per request, depending on whether a sender filter was given. */
 interface MessageQueryPlan {
     indexName: string;
@@ -211,16 +218,21 @@ async function getReminders(event: APIGatewayProxyEventV2) {
     const limit = parseLimit(params.limit, DEFAULT_LIMIT, MAX_LIMIT);
     const completed = parseCompleted(params.completed);
     const dueBefore = params.dueBefore ? isoOrReject(params.dueBefore, 'dueBefore') : undefined;
+    const dueAfter = params.dueAfter ? isoOrReject(params.dueAfter, 'dueAfter') : undefined;
+
+    if (dueBefore && dueAfter && dueAfter > dueBefore) {
+        throw badRequest('dueAfter must be earlier than dueBefore');
+    }
 
     if (params.listId) {
-        return await queryList(params.listId, { completed, dueBefore, limit, cursor: params.cursor });
+        return await queryList(params.listId, { completed, dueBefore, dueAfter, limit, cursor: params.cursor });
     }
-    return await queryByCompletion({ completed, dueBefore, limit, cursor: params.cursor });
+    return await queryByCompletion({ completed, dueBefore, dueAfter, limit, cursor: params.cursor });
 }
 
 async function queryList(
     listId: string,
-    opts: { completed?: boolean; dueBefore?: string; limit: number; cursor?: string },
+    opts: { completed?: boolean; dueBefore?: string; dueAfter?: string; limit: number; cursor?: string },
 ) {
     if (listId === LIST_REGISTRY_PARTITION) {
         throw badRequest(`${LIST_REGISTRY_PARTITION} is a reserved listId; use GET /reminders/lists`);
@@ -235,6 +247,12 @@ async function queryList(
     if (opts.dueBefore !== undefined) {
         filters.push('dueSort < :dueBefore');
         values[':dueBefore'] = opts.dueBefore;
+    }
+    if (opts.dueAfter !== undefined) {
+        // The upper bound keeps undated reminders out; they sort at the sentinel.
+        filters.push('dueSort BETWEEN :dueAfter AND :latestDated');
+        values[':dueAfter'] = opts.dueAfter;
+        values[':latestDated'] = LATEST_DATED_SORT;
     }
 
     const filterExpression = filters.length ? filters.join(' AND ') : undefined;
@@ -278,6 +296,7 @@ async function queryList(
 async function queryByCompletion(opts: {
     completed?: boolean;
     dueBefore?: string;
+    dueAfter?: string;
     limit: number;
     cursor?: string;
 }) {
@@ -293,11 +312,13 @@ async function queryByCompletion(opts: {
         const result = await ddb.query({
             TableName: REMINDERS_TABLE,
             IndexName: REMINDER_DUE_INDEX,
-            KeyConditionExpression: opts.dueBefore
-                ? 'completedKey = :phase AND dueSort < :dueBefore'
-                : 'completedKey = :phase',
+            KeyConditionExpression: dueRangeCondition(opts.dueAfter, opts.dueBefore),
+            // DynamoDB rejects any value that the expression does not reference,
+            // so :latestDated is only supplied for the open-ended dueAfter case.
             ExpressionAttributeValues: {
                 ':phase': phase,
+                ...(opts.dueAfter ? { ':dueAfter': opts.dueAfter } : {}),
+                ...(opts.dueAfter && !opts.dueBefore ? { ':latestDated': LATEST_DATED_SORT } : {}),
                 ...(opts.dueBefore ? { ':dueBefore': opts.dueBefore } : {}),
             },
             // Soonest due first; undated reminders sort last by construction.
@@ -325,6 +346,20 @@ async function queryByCompletion(opts: {
     }
 
     return json(200, { items: items.map(toPublicReminder) });
+}
+
+/**
+ * Builds the sort-key condition for a due-date window on the GSI.
+ *
+ * `dueAfter` alone still needs an upper bound, otherwise undated reminders --
+ * which sort at NO_DUE_DATE_SORT so they come last -- would match every
+ * "due after" query.
+ */
+function dueRangeCondition(dueAfter?: string, dueBefore?: string): string {
+    if (dueAfter && dueBefore) return 'completedKey = :phase AND dueSort BETWEEN :dueAfter AND :dueBefore';
+    if (dueAfter) return 'completedKey = :phase AND dueSort BETWEEN :dueAfter AND :latestDated';
+    if (dueBefore) return 'completedKey = :phase AND dueSort < :dueBefore';
+    return 'completedKey = :phase';
 }
 
 async function getReminderLists() {
