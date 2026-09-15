@@ -60,9 +60,9 @@ launchctl bootout   gui/$(id -u)/com.nortakales.icloud-bridge-agent
 # Rebuild and reinstall after a code change
 scripts/icloud-bridge/install-launch-agent.sh
 
-# Messages stalled in BOTH the mirror and Beeper? Known unexplained fault in
-# BlueBubbles' message detection. Manual release (not automated - see runbook):
-scripts/bluebubbles/chat-db-poke.sh
+# Messages stalled in BOTH the mirror and Beeper? Ask BlueBubbles what it saw.
+# Detection lag should be ~1s; more means App Nap is throttling it (see runbook).
+defaults read com.BlueBubbles.BlueBubbles-Server NSAppSleepDisabled   # want 1
 
 # Credentials and URLs
 scripts/icloud-bridge/show-api-details.sh
@@ -81,9 +81,10 @@ reminders never expire.
 1. **Is the agent running?** Most "stale data" is a stopped agent, not an API fault.
 2. **Is Reminders.app running?** If not, iCloud stops syncing to the Mac and
    reminders silently stop updating.
-3. **Messages stale but agent healthy?** Compare `chat.db` and `chat.db-wal`
-   mtimes in `~/Library/Messages`. A WAL well ahead of the DB file means
-   BlueBubbles has stopped reporting new messages — a known, still-unexplained
-   fault that stalls Beeper identically. See the runbook gotchas.
+3. **Messages stale but agent healthy?** BlueBubbles has stopped reporting new
+   messages — it stalls Beeper identically. Usually App Nap throttling its poll:
+   `defaults read com.BlueBubbles.BlueBubbles-Server NSAppSleepDisabled` (want
+   1). Confirm with `GET /api/v1/server/logs`. See the runbook gotchas.
+   Also check BlueBubbles is even running — it does not start at login.
 4. **Grep the agent log for `ERROR`.** Both streams land in one file.
 5. **New API key not working?** The authorizer caches for 5 minutes. Wait.

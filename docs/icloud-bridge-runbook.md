@@ -156,33 +156,40 @@ byte size to the message.
 agent now coalesces webhook activity over a 400ms window, keyed by message GUID,
 so a receipt burst becomes one event carrying the final state.
 
-**Messages can stall in the mirror for up to an hour — and the Beeper bridge
-stalls at the same instant.** BlueBubbles' new-message detection goes deaf while
-its websocket, its HTTP API and Messages.app all stay healthy; messages pile up
-unseen in `chat.db`'s write-ahead log and then drain in one burst.
+**Messages could stall in the mirror for up to an hour — macOS App Nap, fixed
+2026-09-15.** BlueBubbles polls `chat.db` every second
+(`db_poll_interval = 1000`). App Nap throttled that timer on this idle headless
+Mac, so its detection simply stopped — for as long as 57 minutes — and then swept
+the whole backlog the moment anything woke the app. **Both** consumers went
+silent together, since the Beeper bridge feeds from the same poll.
 
-Measured 2026-09-15: an inbound message from another person, timestamped
-11:53:50, reached neither consumer until 12:50:37 — **57 minutes**. Nothing was
-lost; it was readable in `chat.db-wal` the whole time.
+`auto_caffeinate = 1` masked it: that prevents *system sleep*, not App Nap
+throttling a timer inside a running app.
 
-**Two published root causes for this have already been wrong** (APNs wake-ups;
-SQLite checkpoints). There is currently **no working automated fix**. The
-confirmed-facts table, the refuted list and the open question are in
-`beeper-imessage-bridge.md` under *Gotchas* — go there rather than trusting a
-one-line summary. What still holds:
+```bash
+defaults write com.BlueBubbles.BlueBubbles-Server NSAppSleepDisabled -bool YES
+osascript -e 'quit app "BlueBubbles"'; sleep 4; open -a BlueBubbles
+```
 
-- **The fault is upstream of the agent.** If the mirror and Beeper both missed a
-  message, do not look for an agent bug. Confirm with BlueBubbles
-  `POST /api/v1/message/query`, which is ground truth for what the Mac holds.
-- **Detect it** by comparing `chat.db` and `chat.db-wal` mtimes in
-  `~/Library/Messages`. A WAL well ahead of the DB file means messages are
-  stranded. This is a reliable *symptom* — it is not the mechanism.
-- **Release it by hand** with `scripts/bluebubbles/chat-db-poke.sh`. It has
-  worked once and is non-destructive, but it is not confirmed to be what
-  actually unsticks BlueBubbles. Use it alone and record the result.
-- **`createdAt` is the send time, not the ingest time.** A message can appear in
-  the mirror well after its timestamp, so a dashboard polling `?since=` may see
-  rows appear "in the past". Do not assume arrival order matches `createdAt`.
+Measured: 10 stalls in 31 messages (worst 3406s) before, 0 in 12 (worst 3.3s)
+after, including a 24-minute idle gap. Full analysis, the three wrong root causes
+it took to get there, and the list of ruled-out levers are in
+`beeper-imessage-bridge.md` under *Gotchas*. What still holds:
+
+- **The fault was upstream of the agent.** If the mirror and Beeper both miss a
+  message, it is not an agent bug. Ask BlueBubbles what *it* saw:
+  `GET /api/v1/server/logs` timestamps its own detections, and the gap to the
+  message's send time is the detection lag. ~1s is healthy.
+- **`createdAt` is the send time, not the ingest time.** Even healthy, ingest
+  trails by a second or two, and any future stall reopens the gap — so a
+  dashboard polling `?since=` should not assume arrival order matches
+  `createdAt`.
+- **Check the fix is still on** with
+  `defaults read com.BlueBubbles.BlueBubbles-Server NSAppSleepDisabled` (want 1).
+  It only applies at app launch.
+
+**BlueBubbles does not start at login** (`auto_start = 0`). After a reboot,
+nothing reaches the mirror or Beeper until someone opens the app.
 
 ## Reminder retention
 

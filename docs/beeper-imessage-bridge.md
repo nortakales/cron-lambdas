@@ -20,8 +20,8 @@ Status: **partially set up — blocked on `bbctl login`.** See *Progress* at the
   Messages.app
        │ writes
        v
-  chat.db + chat.db-wal
-       │ polled/watched                ┌─ webhook :4000 ─→ mac-agent ─→ EventBridge ─→ AWS
+  chat.db
+       │ polled every 1s               ┌─ webhook :4000 ─→ mac-agent ─→ EventBridge ─→ AWS
        v                               │                                        (unchanged)
   BlueBubbles :1234 ───────────────────┤
      (Mac mini)                        └─ socket.io ws ──→ mautrix-imessage ─→ Beeper Matrix
@@ -34,9 +34,10 @@ Status: **partially set up — blocked on `bbctl login`.** See *Progress* at the
 Only the lower branch is new.
 
 **Both consumers depend on BlueBubbles noticing a new message in the first
-place**, and that step is known to fail for up to an hour at a time. When Beeper
-looks stuck, check the AWS mirror before suspecting the bridge — if both are
-stuck, the problem is above the fork. See *Gotchas*.
+place.** That poll is the single point of failure for both, and macOS App Nap
+throttled it into hour-long stalls until 2026-09-15 — see *Gotchas*. When Beeper
+looks stuck, check the AWS mirror before suspecting the bridge: if both are
+stuck, the problem is above the fork.
 
 **The two consumers cannot collide.** The mac-agent is *pushed to* over an HTTP
 webhook at `127.0.0.1:4000/bb-webhook`. The Beeper bridge *pulls* over a
@@ -312,59 +313,30 @@ sed 's/\x1b\[[0-9;]*m//g' "$BLOG" | tr '\r' '\n' | grep -i "reconnect\|websocket
   | grep -i bluebubbles     # only BlueBubbles-side trouble
 ```
 
-**5. Is the WAL ahead of `chat.db`?** The most reliable *detector* of the known
-stall — though not, it turns out, an explanation of it.
+**5. Did BlueBubbles itself ever see the message?** This is the fork in the road
+and should be step 1 in practice — it separates "BlueBubbles never detected it"
+from "BlueBubbles detected it and a consumer dropped it".
 
 ```bash
-stat -f "chat.db:     %Sm" -t "%H:%M:%S" ~/Library/Messages/chat.db
-stat -f "chat.db-wal: %Sm" -t "%H:%M:%S" ~/Library/Messages/chat.db-wal
+BB_PW=$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password --query SecretString --output text)
+curl -s "http://127.0.0.1:1234/api/v1/server/logs?password=${BB_PW}&count=200" | python3 -c "import json,sys; [print(l) for l in json.load(sys.stdin)['data'].split(chr(10)) if 'New Message' in l]"
 ```
 
-Compare what has been checkpointed into `chat.db` against everything that has
-actually arrived. These disagree only when messages are stranded:
+Each line carries BlueBubbles' **detection** time and the message's **send** time,
+so the gap between them is the detection lag. Healthy is ~1s.
+
+- **Lag over ~5s, or the message absent entirely** → BlueBubbles is the problem,
+  not the bridge. Check App Nap is still disabled (see *Gotchas*).
+- **Logged promptly but a consumer lacks it** → now it is that consumer's bug.
 
 ```bash
-sqlite3 "file:$HOME/Library/Messages/chat.db?immutable=1" \
-  "SELECT datetime(date/1000000000 + 978307200,'unixepoch','localtime'), substr(text,1,30) \
-   FROM message ORDER BY date DESC LIMIT 1;"   # checkpointed into chat.db
-
-sqlite3 "file:$HOME/Library/Messages/chat.db?mode=ro" \
-  "SELECT datetime(date/1000000000 + 978307200,'unixepoch','localtime'), substr(text,1,30) \
-   FROM message ORDER BY date DESC LIMIT 1;"   # everything, WAL included
+defaults read com.BlueBubbles.BlueBubbles-Server NSAppSleepDisabled   # want 1
+ps -o pid,%cpu,time,etime -p "$(pgrep -f 'MacOS/BlueBubbles$')"       # want ~1%, not ~0.1%
 ```
 
-**This is not "what BlueBubbles can read."** Its query API reads the WAL too and
-will happily hand you the message it never told anyone about — which is the whole
-point: the data was always reachable, the notification never came.
-
-To release a stall, reach for **one** lever and record which one, because the
-last attempt had three candidates inside 80 seconds:
-
-Cheapest candidate first. Deliberately **one unbroken line** — a version of this
-wrapped over two lines with backslashes lost them on copy-paste, which ran
-`get-secret-value` without `--query` and dumped the whole secret JSON, password
-included, into a terminal and a chat log. Keep it on one line.
-
-```bash
-BB_PW=$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password --query SecretString --output text) && curl -s -o /dev/null -w "HTTP %{http_code}\n" "http://127.0.0.1:1234/api/v1/server/info?password=${BB_PW}"
-```
-
-Want `HTTP 200`. A `401` means the password never got substituted — and note that
-without `-w` a 401 and a 200 print identically (nothing at all), so always keep
-the status code.
-
-Second candidate. Needs a terminal that has Full Disk Access; fails under launchd:
-
-```bash
-bash scripts/bluebubbles/chat-db-poke.sh
-```
-
-**Only meaningful while a stall is actually in progress.** Running either against
-a healthy bridge proves nothing — confirm with the mtime check above first, then
-pull one lever and record whether the backlog drains.
-
-Mac idle time and Messages.app's process state are *not* diagnostic — a host idle
-for weeks with Messages at `STAT S` is normal here and bridges fine.
+Mac idle time, Messages.app's process state, and `chat.db`/`chat.db-wal` mtimes
+are **not** diagnostic — all three were chased at length and none of them
+determine anything.
 
 **6. Error triage.** Counts first, then read only what matters.
 
@@ -392,95 +364,109 @@ Then redo step 4.
 
 ## Gotchas
 
-**Messages can stall for up to an hour in both consumers at once. Not a bridge
-bug — it hits the iCloud Bridge identically.**
-*(two sessions, two wrong root causes; read the status line before acting)*
+**Messages stalling for minutes to an hour — SOLVED 2026-09-15. It was App Nap
+throttling BlueBubbles.** *(cost two sessions and three wrong root causes)*
 
-**Status: reliably detectable, not yet explained, no working automated fix.**
-Read the confirmed facts and form your own view — do not inherit a conclusion
-from this file, because the last two written here were both wrong.
+BlueBubbles is configured to poll `chat.db` every second
+(`db_poll_interval = 1000` in its `config.db`). macOS **App Nap** was throttling
+that timer to a near standstill, because BlueBubbles is a background GUI app that
+sits idle and untouched on a headless Mac. Its own log showed **12 minutes of
+total silence** between detections. Any activity woke the app, one poll then ran
+and swept the entire backlog at once — which is the burst delivery that made this
+look like a sync or wake problem for two sessions.
 
-### What is confirmed
+`auto_caffeinate = 1` hides this, and is why it was missed: that prevents
+**system sleep**, which has nothing to do with App Nap throttling a timer inside
+a running app.
 
-Measured 2026-09-15, all timestamps local:
+### The fix
 
-| Time | Observation |
+```bash
+defaults write com.BlueBubbles.BlueBubbles-Server NSAppSleepDisabled -bool YES
+# then fully quit and relaunch BlueBubbles -- it is read at launch
+osascript -e 'quit app "BlueBubbles"'; sleep 4; open -a BlueBubbles
+```
+
+Persisted in `~/Library/Preferences/com.BlueBubbles.BlueBubbles-Server.plist`, so
+it survives relaunches and reboots. Verify with:
+
+```bash
+defaults read com.BlueBubbles.BlueBubbles-Server NSAppSleepDisabled   # want 1
+```
+
+**Note the bundle ID.** An earlier attempt set `NSAppSleepDisabled` on
+`com.apple.iChat` — Messages.app was never the problem, BlueBubbles is the
+process running the timer. That setting is harmless and was left in place.
+
+### Measured result
+
+| | Before | After |
+| --- | --- | --- |
+| Messages sampled | 31 | 12 |
+| Stalled >90s | **10 (32%)** | **0** |
+| Worst lag | **3406s** (57 min) | **3.3s** |
+| Mean lag | — | 1.2s |
+| BlueBubbles CPU | 0.14% avg over 15 days | ~1.4% |
+
+The "after" window includes a 24-minute idle gap, which is exactly the condition
+that previously triggered a nap. The 10x CPU rise is the poll loop actually
+running.
+
+**This also explains the self-message quirk** that was documented separately as
+cosmetic and unexplained: the inbound copy of a message you send to yourself was
+simply landing in a nap. Post-fix both copies arrive ~2s apart.
+
+### What this cost, and why
+
+Three root causes were published here before this one, each stated with more
+confidence than the evidence supported:
+
+| Wrong answer | Why it survived as long as it did |
 | --- | --- |
-| 11:07:38 | `chat.db` mtime freezes. Last message either consumer sees. |
-| 11:53:50 | Inbound message from another person lands in `chat.db-wal`. |
-| 11:53–12:50 | **Both** consumers silent for 57 min. BlueBubbles socket pings normally throughout; 0 fatals. Its query API returns the message on demand the whole time. |
-| 12:49:30 | A debugging `curl` hits `POST /api/v1/message/query`. |
-| 12:50:19 | Debugging `sqlite3` opens `chat.db` read-only, twice. |
-| 12:50:36 | `touch chat.db` (mtime only). |
-| 12:50:37 | **Both** consumers receive the stuck message, 1s later. |
-| 12:59:44 | A new message is bridged in ~2s — with `chat.db` mtime still 12:50:36. |
+| APNs push wakes Messages.app | Fit the burst pattern. Never tested against an inbound message from someone else — when one finally stalled, it died. |
+| Messages from other people are unaffected | **Inferred from pre-bridge history and never tested.** Flagged as inferred, then quoted as fact. |
+| BlueBubbles needs a `chat.db` checkpoint | Built on one 1-second correlation after a `touch`. Coincidence: a later message was detected with `chat.db` mtime frozen. |
 
-Two things follow, and only two:
+A `chat-db-poke.sh` LaunchAgent was built and shipped on that third theory. It
+never worked even once — launchd-spawned `/bin/bash` has no Full Disk Access — and
+the lever itself was later disproven outright. Deleted.
 
-- **The fault is upstream of both consumers.** A Beeper-side bug cannot silence
-  the AWS agent too. Stop debugging the bridge the moment you see both stalled.
-- **Nothing is ever lost.** The messages are in `chat.db-wal` and readable the
-  entire time. This is a notification failure, not a delivery failure.
+**What actually cracked it** was reading BlueBubbles' own configuration instead of
+theorising about its behaviour. `db_poll_interval = 1000` against 12 minutes of
+log silence is a one-line contradiction that points straight at OS throttling.
+`GET /api/v1/server/logs` is the oracle that should have been consulted first —
+it timestamps BlueBubbles' *own* detection, which separates "BlueBubbles never
+saw it" from "BlueBubbles saw it and the consumer dropped it".
 
-### What is refuted
+### If it comes back
 
-| Claim | Killed by |
-| --- | --- |
-| APNs push wakes Messages.app; that is the trigger | Messages.app writes to the WAL throughout the stall. |
-| Only messages *you send from your iPhone* stall | The stuck 11:53:50 message was **inbound from someone else**. |
-| "Messages from other people arrive in real time" | Same. This was inferred from pre-bridge history and never tested. |
-| It is group-vs-1:1 | Coincidence of which messages got tested. |
-| App Nap on Messages.app | `NSAppSleepDisabled` + restart changed nothing. Setting left in place, harmless. |
-| **BlueBubbles needs a `chat.db` checkpoint (mtime change) to detect messages** | **The 12:59:44 message was bridged with mtime frozen.** Detection plainly works without it. |
+```bash
+# 1. Did BlueBubbles itself detect the message? This is the fork in the road.
+BB_PW=$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password --query SecretString --output text)
+curl -s "http://127.0.0.1:1234/api/v1/server/logs?password=${BB_PW}&count=200" | python3 -c "import json,sys; [print(l) for l in json.load(sys.stdin)['data'].split(chr(10)) if 'New Message' in l]"
 
-That last row was written as settled fact in this file for about an hour. It was
-wrong. The WAL divergence is a real and useful **symptom**; it is not the
-mechanism.
+# 2. Is App Nap still off, and is the app actually burning CPU?
+defaults read com.BlueBubbles.BlueBubbles-Server NSAppSleepDisabled
+ps -o pid,%cpu,time,etime -p "$(pgrep -f 'MacOS/BlueBubbles$')"
+```
 
-### What is still open
+Detection lag in step 1 above ~5s means the throttling is back — recheck the
+`defaults` value and that the app was relaunched after it was set. If BlueBubbles
+logs the message promptly but a consumer lacks it, the fault is in that consumer,
+and only then is it a bridge problem.
 
-Something leaves BlueBubbles' new-message detection deaf while its socket, its
-HTTP API and Messages.app all stay healthy. Recovery at 12:50:37 is strongly
-time-correlated with the `touch` — but a `curl` to its API and two `sqlite3`
-opens happened 66s and 17s earlier, so **three candidate triggers sit inside an
-80-second window and this data cannot separate them.** Do not assume it was the
-touch.
+**Ruled out, do not re-test:** `sqlite3` reads of `chat.db`, `curl` to
+`/server/info`, `touch` on `chat.db`, and `POST /server/restart/soft` — each was
+tried alone against a live stall and none released it. App Nap on `com.apple.iChat`.
+Group-vs-1:1. Message direction (stalls hit 3 outgoing and 7 incoming; instant
+delivery hit 7 outgoing and 14 incoming).
 
-Next experiment when it recurs: reach for exactly **one** lever, and record which
-one. An API `curl` is the cheapest and needs no special privileges.
+**`Ignoring duplicate message` in the bridge log is a red herring** — correct
+dedupe of old messages BlueBubbles re-sends as status updates.
 
-### Red herrings, and the tooling that does not work
-
-**`scripts/bluebubbles/chat-db-poke.sh` does NOT work under launchd.** It is kept
-because it is the fastest way to release a stall *by hand*, but the LaunchAgent
-was withdrawn after one run: launchd-spawned `/bin/bash` has no Full Disk Access,
-so `touch ~/Library/Messages/chat.db` fails with `Operation not permitted` every
-30s. An interactive shell inherits the terminal's FDA grant and succeeds, which
-is exactly why manual testing looked fine. **Do not fix this by granting
-`/bin/bash` Full Disk Access** — that hands it to every script on the machine, to
-chase a lever that is not even confirmed to be the right one.
-
-**`Ignoring duplicate message` in the log is a red herring** — correct dedupe of
-old messages BlueBubbles re-sends as status updates. Check the `message` table in
-the bridge DB before theorising.
-
-**Diagnose with three sources, not one:** BlueBubbles `POST /api/v1/message/query`
-is ground truth for what the Mac has; the bridge log and
-`~/Library/Logs/icloud-bridge/agent.log` show what each consumer received. **If
-both consumers missed it, the fault is upstream of both and is not a Beeper
-problem** — that single check would have saved most of the first session.
-
-**Related quirk — the inbound copy of a message you send to yourself often never
-arrives.** Messaging yourself creates two rows in BlueBubbles, `isFromMe` true
-and false. Across three tests one delivered both copies 34s apart; the other two
-delivered only the `true` copy while the `false` copy sat plainly in BlueBubbles.
-Cosmetic — it duplicates a message you just sent — but do not read "I only see
-one copy of my self-test" as evidence the bridge is broken.
-
-**The one upstream fix that would end this properly** is BlueBubbles' **Private
-API**, and it is still not recommended: it requires SIP disabled, and
-[#843](https://github.com/BlueBubblesApp/bluebubbles-server/issues/843) reports
-it can kill the `chat.db` watcher outright.
+**Diagnose with three sources:** BlueBubbles' `server/logs` for what *it* saw, the
+bridge log, and `~/Library/Logs/icloud-bridge/agent.log`. **If both consumers
+missed it, the fault is upstream of both and is not a Beeper problem.**
 
 Related upstream: [#750 — inbound messages delayed after Mac inactivity](https://github.com/BlueBubblesApp/bluebubbles-server/issues/750).
 
@@ -580,7 +566,7 @@ is load-bearing, not just config safety.
 | 5. Verify config | ✅ all three params present in `config.yaml` |
 | 6. launchd | ✅ installed and `state = running` |
 | 7. Cut over | ✅ two-way verified — see below |
-| 8. `chat-db-poke` agent | ⚠️ **withdrawn** — fails under launchd (no Full Disk Access). Manual use only. |
+| 8. App Nap disabled for BlueBubbles | ✅ 2026-09-15 — fixed hour-long stalls affecting **both** consumers |
 
 **Two-way traffic verified end to end:**
 
@@ -590,11 +576,10 @@ is load-bearing, not just config safety.
   interference.
 - **Outbound** — a message sent from Beeper Desktop appeared on the iPhone
   instantly (`Sent message checkpoint` in the log).
-- **Known latency — detectable, still unexplained, no automated fix.** *Any*
-  message, in either direction, can stall in **both** consumers at once; measured
-  at 57 minutes on an inbound message from another person. Not a bridge fault.
-  See *Gotchas* — and note two published root causes for this have already been
-  wrong, so check the confirmed-facts table rather than trusting a conclusion.
+- **Known latency — root-caused and fixed 2026-09-15.** macOS App Nap was
+  throttling BlueBubbles' 1s `chat.db` poll, stalling **both** consumers for up
+  to 57 minutes. One `defaults write` plus a relaunch; 32% stall rate → 0 across
+  the following sample. Never a bridge fault. See *Gotchas*.
 
 At cut-over: 1220 messages bridged, 38 portals, 0 fatals, both services up.
 
