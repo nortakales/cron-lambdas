@@ -1,26 +1,35 @@
 #!/bin/bash
 #
-# Work around BlueBubbles missing new messages on an idle Mac.
+# MANUAL TOOL. Run it by hand when messages have stalled. It is deliberately
+# NOT a LaunchAgent -- that was tried on 2026-09-15 and withdrawn within the
+# hour, because launchd-spawned /bin/bash has no Full Disk Access and every run
+# failed with "Operation not permitted" on ~/Library/Messages/chat.db. An
+# interactive shell inherits the terminal's FDA grant, which is why testing it
+# by hand looked fine. Do NOT "fix" that by granting /bin/bash Full Disk Access:
+# that hands FDA to every script on the machine, and it would be chasing a lever
+# that is not even confirmed to be the right one (see below).
 #
-# Messages.app keeps chat.db in SQLite WAL mode: new messages are appended to
-# chat.db-wal and only folded into chat.db at a checkpoint. BlueBubbles watches
-# chat.db itself, so until a checkpoint fires it sees no change and emits no
-# new-message event -- to its two consumers (the icloud-bridge mac-agent and the
-# Beeper bridge) the conversation simply stops.
+# What it is for. BlueBubbles' new-message detection sometimes goes deaf while
+# its websocket, its HTTP API and Messages.app all stay healthy -- both the
+# icloud-bridge mac-agent and the Beeper bridge then receive nothing, for up to
+# an hour, while messages accumulate in chat.db's write-ahead log. Touching
+# chat.db has once been followed 1 second later by both consumers draining the
+# backlog.
 #
-# On a busy Mac checkpoints are frequent and nobody notices. On this idle
-# headless mini they can be an hour apart. Measured 2026-09-15: chat.db frozen
-# at 11:07:38 while chat.db-wal was still being written at 12:47:18, with an
-# inbound message from 11:53:50 sitting unread in the WAL by both consumers.
+# Read that carefully: *once*, and *followed by*. On that occasion a curl to the
+# BlueBubbles API and two sqlite3 opens had also happened 66s and 17s earlier, so
+# three candidate triggers sat inside 80 seconds and the data could not separate
+# them. Worse, a later message was detected normally while chat.db's mtime stayed
+# frozen -- which rules out "BlueBubbles needs an mtime change" as the mechanism.
 #
-# The fix is only a metadata update -- utimensat on chat.db, no content written,
-# no SQLite connection opened. That is deliberate: forcing a real checkpoint
-# would need a writable handle on Messages' own database, which is not a risk
-# worth taking to solve a visibility problem. Bumping mtime is enough, because
-# BlueBubbles is watching the file, not the data. In testing the stuck message
-# reached both Beeper and AWS 1 second after the touch.
+# So: this may simply not be what unsticks it. It is cheap and non-destructive,
+# so it is a reasonable first thing to try, but if you use it, use it ALONE and
+# record whether it worked. Full analysis, including two already-refuted root
+# causes, is in docs/beeper-imessage-bridge.md under Gotchas.
 #
-# Touch only when the WAL is actually ahead, so an idle Mac stays idle.
+# It only ever updates mtime -- no content written, no SQLite connection opened.
+# Forcing a real checkpoint would need a writable handle on Messages' own
+# database, which is not worth the risk.
 
 set -uo pipefail
 

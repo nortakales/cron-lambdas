@@ -39,7 +39,7 @@ bug that took real time to find.
 | Bus / queue | `icloud-bridge-bus` / `icloud-bridge-command-queue` |
 | Secrets | `icloud-bridge-api-key`, `-bluebubbles-password`, `-agent-credentials` |
 | Agent identity | IAM user `icloud-bridge-agent`; key in Keychain `icloud-bridge-agent` / `aws` |
-| launchd | `gui/501/com.nortakales.icloud-bridge-agent`, `gui/501/com.nortakales.chat-db-poke` |
+| launchd | `gui/501/com.nortakales.icloud-bridge-agent` |
 | Agent log | `~/Library/Logs/icloud-bridge/agent.log` (stdout **and** stderr) |
 | Agent config | `~/.icloud-bridge/agent.json` |
 | Reminders checkpoint | `~/.icloud-bridge/reminders-snapshot.json` |
@@ -60,10 +60,9 @@ launchctl bootout   gui/$(id -u)/com.nortakales.icloud-bridge-agent
 # Rebuild and reinstall after a code change
 scripts/icloud-bridge/install-launch-agent.sh
 
-# Messages arriving late? BlueBubbles cannot see chat.db's WAL until a
-# checkpoint. This poke agent forces the issue every 30s. See runbook gotchas.
-scripts/bluebubbles/install-chat-db-poke.sh
-tail -f ~/Library/Logs/bluebubbles/chat-db-poke.log
+# Messages stalled in BOTH the mirror and Beeper? Known unexplained fault in
+# BlueBubbles' message detection. Manual release (not automated - see runbook):
+scripts/bluebubbles/chat-db-poke.sh
 
 # Credentials and URLs
 scripts/icloud-bridge/show-api-details.sh
@@ -83,7 +82,8 @@ reminders never expire.
 2. **Is Reminders.app running?** If not, iCloud stops syncing to the Mac and
    reminders silently stop updating.
 3. **Messages stale but agent healthy?** Compare `chat.db` and `chat.db-wal`
-   mtimes in `~/Library/Messages`. If the WAL is newer, BlueBubbles cannot see
-   the new messages — check `com.nortakales.chat-db-poke` is running.
+   mtimes in `~/Library/Messages`. A WAL well ahead of the DB file means
+   BlueBubbles has stopped reporting new messages — a known, still-unexplained
+   fault that stalls Beeper identically. See the runbook gotchas.
 4. **Grep the agent log for `ERROR`.** Both streams land in one file.
 5. **New API key not working?** The authorizer caches for 5 minutes. Wait.

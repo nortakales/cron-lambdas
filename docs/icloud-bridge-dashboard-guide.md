@@ -60,9 +60,9 @@ SQS redelivers up to 5 times, so check `attempts` before showing a hard error.
 
 > **`createdAt` is the send time, not the ingest time.** Any message — sent by
 > the user *or* received from someone else — can reach the mirror after its
-> timestamp, arriving in a burst when the Mac's `chat.db` is next checkpointed.
-> A 30s poke agent now caps this at about a minute, but do not design as though
-> ingest order matches `createdAt`.
+> timestamp, arriving in a burst when BlueBubbles resumes reporting. Stalls of
+> up to an hour have been measured and there is no automated fix yet, so do not
+> design as though ingest order matches `createdAt`.
 >
 > So a message can appear "in the past": polling `?since=<last seen createdAt>`
 > **can miss it**, because it was written with a timestamp earlier than one you

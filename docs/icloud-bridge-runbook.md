@@ -156,37 +156,33 @@ byte size to the message.
 agent now coalesces webhook activity over a 400ms window, keyed by message GUID,
 so a receipt burst becomes one event carrying the final state.
 
-**Messages can reach the mirror minutes to hours late.** Messages.app keeps
-`chat.db` in SQLite **WAL mode**: new rows land in `chat.db-wal` and are only
-folded into `chat.db` at a **checkpoint**. BlueBubbles watches `chat.db` itself,
-so between checkpoints it sees an unchanging file and fires no webhook. On this
-idle headless Mac checkpoints can be over an hour apart.
+**Messages can stall in the mirror for up to an hour — and the Beeper bridge
+stalls at the same instant.** BlueBubbles' new-message detection goes deaf while
+its websocket, its HTTP API and Messages.app all stay healthy; messages pile up
+unseen in `chat.db`'s write-ahead log and then drain in one burst.
 
-Measured 2026-09-15: `chat.db` frozen at mtime 11:07:38 while `chat.db-wal` was
-still being written at 12:47:18, with an **inbound message from someone else**
-timestamped 11:53:50 unseen by the agent for 57 minutes. It was never lost —
-reading the file *with* the WAL showed it the whole time.
+Measured 2026-09-15: an inbound message from another person, timestamped
+11:53:50, reached neither consumer until 12:50:37 — **57 minutes**. Nothing was
+lost; it was readable in `chat.db-wal` the whole time.
 
-**Mitigated, not eliminated.** `scripts/bluebubbles/install-chat-db-poke.sh`
-installs `com.nortakales.chat-db-poke`, which every 30s bumps `chat.db`'s mtime
-whenever the WAL is ahead — metadata only, no writes to Messages' database. The
-stuck message reached the mirror 1 second after the first poke. Worst case is now
-~30s rather than unbounded.
+**Two published root causes for this have already been wrong** (APNs wake-ups;
+SQLite checkpoints). There is currently **no working automated fix**. The
+confirmed-facts table, the refuted list and the open question are in
+`beeper-imessage-bridge.md` under *Gotchas* — go there rather than trusting a
+one-line summary. What still holds:
 
-An earlier version of this note blamed APNs wake-ups and claimed messages from
-other people were unaffected. **Both were wrong**; the correction table is in
-`beeper-imessage-bridge.md` under *Gotchas*. Consequences that still hold:
-
+- **The fault is upstream of the agent.** If the mirror and Beeper both missed a
+  message, do not look for an agent bug. Confirm with BlueBubbles
+  `POST /api/v1/message/query`, which is ground truth for what the Mac holds.
+- **Detect it** by comparing `chat.db` and `chat.db-wal` mtimes in
+  `~/Library/Messages`. A WAL well ahead of the DB file means messages are
+  stranded. This is a reliable *symptom* — it is not the mechanism.
+- **Release it by hand** with `scripts/bluebubbles/chat-db-poke.sh`. It has
+  worked once and is non-destructive, but it is not confirmed to be what
+  actually unsticks BlueBubbles. Use it alone and record the result.
 - **`createdAt` is the send time, not the ingest time.** A message can appear in
-  the mirror after its timestamp, so a dashboard polling `?since=` may see rows
-  appear "in the past". Do not assume arrival order matches `createdAt`.
-- **Not fixable in the agent.** It is upstream of the webhook, in BlueBubbles'
-  message detection — which is why the fix is a separate LaunchAgent.
-- **Diagnosing it:** BlueBubbles `POST /api/v1/message/query` is ground truth for
-  what the Mac holds. If it has a message the mirror lacks, the event never
-  fired — do not look for a bug in the agent. Then compare `chat.db` and
-  `chat.db-wal` mtimes; if the WAL is ahead, this is the bug, and check that the
-  poke agent is running.
+  the mirror well after its timestamp, so a dashboard polling `?since=` may see
+  rows appear "in the past". Do not assume arrival order matches `createdAt`.
 
 ## Reminder retention
 
