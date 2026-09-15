@@ -156,6 +156,30 @@ byte size to the message.
 agent now coalesces webhook activity over a 400ms window, keyed by message GUID,
 so a receipt burst becomes one event carrying the final state.
 
+**Messages you send from your iPhone can reach the mirror minutes late.**
+This host is an idle, headless Mac, and BlueBubbles only notices `chat.db`
+changes when something wakes Messages.app — which happens on an **APNs push, and
+a push only arrives when the Mac is a *recipient***. Messages *you* send from
+another device produce only an iCloud sync write, so nothing wakes the Mac and
+they sit unnoticed. The next inbound message flushes the whole backlog at once.
+
+Measured: outgoing messages stalled **12m16s** and **3m17s**, both released the
+instant an unrelated inbound message arrived. Messages *from other people* are
+unaffected and arrive in real time, as does anything sent through this Mac.
+
+It stays invisible in normal use because replies keep flushing the backlog — it
+only shows on an isolated message to a quiet chat. Consequences:
+
+- **`createdAt` is the send time, not the ingest time.** A message can appear in
+  the mirror minutes after its timestamp, so a dashboard polling `?since=` may
+  see rows appear "in the past". Do not assume arrival order matches `createdAt`.
+- **Not fixable in the agent.** It is upstream of the webhook, in BlueBubbles'
+  message detection. The full analysis, ruled-out causes and mitigations are in
+  `beeper-imessage-bridge.md` under *Gotchas*.
+- **Diagnosing it:** BlueBubbles `POST /api/v1/message/query` is ground truth for
+  what the Mac holds. If it has a message the mirror lacks, the event never
+  fired — do not look for a bug in the agent.
+
 ## Reminder retention
 
 Completed reminders older than **548 days (18 months)** are not mirrored
@@ -198,6 +222,12 @@ created in that window landed in a list no other device can see. Worth checking
   `GET /commands/{commandId}`. A failed command stays on SQS for redrive unless it
   is a `PermanentCommandError`, which is deleted immediately rather than burning
   five deliveries en route to the DLQ.
+- **BlueBubbles may have a second consumer on this host.** A Beeper bridge can be
+  installed alongside the agent to put iMessage into Beeper on Windows — see
+  `beeper-imessage-bridge.md`. It opens its own **socket.io websocket** to
+  BlueBubbles and never touches the agent's `:4000` webhook, so the two do not
+  interfere. Worth knowing before debugging BlueBubbles load, duplicate read
+  receipts, or an unexpected second client in the server UI.
 - **Everything is idempotent.** Reads key on the Apple identifier (message GUID,
   EventKit item id); writes key on `commandId`. Replaying either is safe.
 - **The Reminders TCC grant attaches to `node`**, not to the helper binary, since

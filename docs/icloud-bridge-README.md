@@ -20,6 +20,7 @@ Status: **Messages and Reminders live in both directions.**
 | Know what's missing or next | `icloud-bridge-backlog.md` |
 | Add image support | `icloud-bridge-attachments-plan.md` |
 | The original design | `icloud-bridge-spec.md` |
+| Get iMessage into Beeper on Windows | `beeper-imessage-bridge.md` — **separate project**, shares only the BlueBubbles server |
 
 **Changing agent or Lambda code? Read Part 2 of the decisions doc first.** It
 lists behaviour that looks redundant but is load-bearing — every entry was a real

@@ -58,6 +58,17 @@ SQS redelivers up to 5 times, so check `attempts` before showing a hard error.
 
 ## Messages
 
+> **`createdAt` is the send time, not the ingest time.** Messages the user sends
+> from their *iPhone* can reach the mirror minutes after their timestamp — they
+> arrive in a burst when the Mac is next woken by an inbound message. Messages
+> from other people are unaffected and arrive in real time.
+>
+> So a message can appear "in the past": polling `?since=<last seen createdAt>`
+> **can miss it**, because it was written with a timestamp earlier than one you
+> already processed. If you poll incrementally, re-query a trailing window
+> (~15 min) rather than advancing `since` to the newest `createdAt` you saw.
+> Cause and analysis: `icloud-bridge-runbook.md`, gotchas.
+
 ### View all messages
 
 ```

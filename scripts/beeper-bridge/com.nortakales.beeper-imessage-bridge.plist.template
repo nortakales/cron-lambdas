@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.nortakales.beeper-imessage-bridge</string>
+
+    <!-- bbctl has no service mode of its own (upstream README: "Currently runs
+         in the foreground"), so launchd supervises it exactly like the agent.
+         --no-override-config is deliberate: the generated config.yaml holds the
+         BlueBubbles URL and password, and upstream warns that `bbctl run` does
+         not always copy --param values through. Once the config is verified by
+         hand, never let a restart regenerate it. -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/bbctl</string>
+        <string>run</string>
+        <string>--type</string>
+        <string>imessage</string>
+        <string>--no-override-config</string>
+        <string>sh-imessage</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__BBCTL_DIR__</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart on any non-zero exit, same policy as the agent. -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+
+    <!-- Don't hammer a persistent failure (e.g. BlueBubbles not yet up after a
+         reboot, or an expired Beeper token that needs `bbctl login`). -->
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <!-- One chronological stream, for the same reason as the agent: a split
+         error log hid a fatal error once already. -->
+    <key>StandardOutPath</key>
+    <string>__LOG_DIR__/beeper-bridge.log</string>
+    <key>StandardErrorPath</key>
+    <string>__LOG_DIR__/beeper-bridge.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin</string>
+    </dict>
+
+    <!-- LaunchAgent in the GUI session. The bridge itself needs no AppleScript,
+         but it reads the Beeper token from ~/.config/bbctl.json in this user's
+         home, and BlueBubbles only runs in the logged-in session anyway. -->
+    <key>ProcessType</key>
+    <string>Interactive</string>
+</dict>
+</plist>
