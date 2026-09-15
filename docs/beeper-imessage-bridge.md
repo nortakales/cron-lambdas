@@ -339,9 +339,21 @@ To release a stall, reach for **one** lever and record which one, because the
 last attempt had three candidates inside 80 seconds:
 
 ```bash
-curl -s "http://127.0.0.1:1234/api/v1/server/info?password=$BB_PW" >/dev/null  # cheapest
-bash scripts/bluebubbles/chat-db-poke.sh    # metadata-only touch; needs a terminal with FDA
+# Cheapest candidate. Self-contained -- do NOT assume $BB_PW is already set, and
+# do not send the body to /dev/null without -w, or a 401 looks identical to
+# success: both print nothing.
+BB_PW=$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password \
+          --query SecretString --output text)
+curl -s -o /dev/null -w "HTTP %{http_code}\n" \
+  "http://127.0.0.1:1234/api/v1/server/info?password=${BB_PW}"    # want 200, not 401
+
+# Second candidate. Needs a terminal that has Full Disk Access; fails under launchd.
+bash scripts/bluebubbles/chat-db-poke.sh
 ```
+
+**Only meaningful while a stall is actually in progress.** Running either against
+a healthy bridge proves nothing — confirm with the mtime check above first, then
+pull one lever and record whether the backlog drains.
 
 Mac idle time and Messages.app's process state are *not* diagnostic — a host idle
 for weeks with Messages at `STAT S` is normal here and bridges fine.
