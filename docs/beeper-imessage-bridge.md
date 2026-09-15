@@ -207,6 +207,117 @@ launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.nortakales.beeper-im
 share one SQLite database and one appservice registration. Always `bootout`
 before running by hand.
 
+## Debugging a missing message
+
+The question is always **which of the three views has it**. Answer that first;
+it tells you whether the fault is upstream of both consumers (almost always) or
+actually in the bridge (rare).
+
+```bash
+BB_PW="$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password \
+  --region us-west-2 --query SecretString --output text)"
+DB="$HOME/Library/Application Support/bbctl/prod/sh-imessage/mautrix-imessage.db"
+BLOG=~/Library/Logs/beeper-bridge/beeper-bridge.log
+```
+
+**1. Ground truth — what does the Mac actually have?**
+
+```bash
+curl -s -X POST "http://127.0.0.1:1234/api/v1/message/query?password=${BB_PW}" \
+  -H 'Content-Type: application/json' \
+  -d '{"limit":8,"offset":0,"sort":"DESC","with":["chats"]}' -o /tmp/bb.json
+
+python3 - <<'PY'
+import json, datetime
+for m in json.load(open("/tmp/bb.json"))["data"]:
+    ts = m.get("dateCreated")
+    t = datetime.datetime.fromtimestamp(ts/1000).strftime("%H:%M:%S") if ts else "?"
+    ch = m.get("chats") or []
+    g = ch[0].get("guid", "?") if ch else "?"
+    kind = "GROUP" if ";+;" in g else "1:1  "
+    print(f'{t} | {kind} | fromMe={str(m.get("isFromMe")):5} | {m["guid"][:8]} | {(m.get("text") or "")[:30]}')
+PY
+```
+
+*(Write to a file and read it in a quoted heredoc. Piping into `python3 -c '…'`
+looks tidier but cannot work here — the f-string needs both quote styles, and
+escaping them inside the shell's single quotes is a syntax error.)*
+
+If the message is **not** here, it never reached the Mac — nothing downstream can
+help. If it **is** here but missing downstream, BlueBubbles never emitted an
+event; see the latency gotcha below before assuming a bug.
+
+**2. Did the bridge get it?** Grep by the GUID's first 8 characters.
+
+```bash
+# NOTE: the log carries ANSI colour codes AND carriage returns. A plain grep
+# finds nothing. Always strip both first — this trips people up every time.
+sed 's/\x1b\[[0-9;]*m//g' "$BLOG" | tr '\r' '\n' | grep 1ED96D0F
+
+# Did it actually reach Matrix? A row here means yes (mxid is NOT NULL).
+sqlite3 "$DB" "select count(*) from message where guid like '1ED96D0F%';"
+
+# Newest messages the bridge has bridged, as local time
+sqlite3 -separator ' | ' "$DB" \
+  "select datetime(timestamp/1000,'unixepoch','localtime'), substr(portal_guid,1,30)
+   from message order by timestamp desc limit 10;"
+```
+
+**3. Did the iCloud Bridge agent get it?** The independent oracle — it consumes
+the same events over a different transport.
+
+```bash
+tail -20 ~/Library/Logs/icloud-bridge/agent.log
+```
+
+**If both the bridge and the agent missed it, it is not a Beeper problem.**
+
+**4. Is the socket actually alive?** Pings arrive every 60s.
+
+```bash
+# BlueBubbles socket — this is the one that carries messages
+sed 's/\x1b\[[0-9;]*m//g' "$BLOG" | tr '\r' '\n' | grep "ping from BlueBubbles" | tail -3
+```
+
+**There are two different websockets and they fail for different reasons.**
+Do not conflate them:
+
+| Socket | Carries | Failure looks like |
+| --- | --- | --- |
+| **BlueBubbles** (`component=bluebubbles`) | iMessage events | pings stop arriving |
+| **Appservice** (to Beeper's Matrix server) | Matrix traffic | `websocket: close 1006` |
+
+A generic `grep -c reconnect` matches both and will make a healthy BlueBubbles
+socket look broken. `close 1006` on the *appservice* socket is a routine
+reconnect to Beeper and is not a local fault — the bridge recovers on its own.
+Filter explicitly:
+
+```bash
+sed 's/\x1b\[[0-9;]*m//g' "$BLOG" | tr '\r' '\n' | grep -i "reconnect\|websocket clos" \
+  | grep -i bluebubbles     # only BlueBubbles-side trouble
+```
+
+**5. Is the Mac asleep at the wheel?** Explains nearly all latency.
+
+```bash
+ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print "idle seconds: " int($NF/1000000000); exit}'
+ps -o pid,%cpu,etime,stat -p "$(pgrep -x Messages)"
+```
+
+A huge idle time with Messages.app at `STAT S` is the normal state of this host,
+and is the precondition for the latency gotcha.
+
+**6. Error triage.** Counts first, then read only what matters.
+
+```bash
+C=$(sed 's/\x1b\[[0-9;]*m//g' "$BLOG" | tr '\r' '\n')
+echo "$C" | grep -c " ERR "; echo "$C" | grep -c " WRN "; echo "$C" | grep -c " FTL "
+echo "$C" | grep " ERR " | sed 's/.*ERR //; s/identifier=.*//; s/module=.*//' | sort | uniq -c | sort -rn
+```
+
+Expect a steady trickle of `No contacts matched address` — benign, see step 4 of
+*Setup*. `FTL` should be zero.
+
 ## Reset
 
 If the bridge misbehaves, start clean rather than debugging a half-state:
@@ -244,6 +355,20 @@ on the *next* wake — a self-sent test produced its two copies 34 seconds apart
 **Why it was never noticed in the iCloud Bridge:** in a live conversation,
 replies arrive constantly and each one flushes your own messages behind it. Only
 an isolated message to a quiet chat exposes the lag.
+
+**Related quirk — the inbound copy of a message you send to yourself often never
+arrives.** Messaging yourself creates two rows in BlueBubbles, `isFromMe` true
+and false. Observed across three tests: one delivered both copies 34 seconds
+apart; the other two delivered only the `true` copy, with the `false` copy still
+absent from *both* consumers 50+ minutes later while plainly present in
+BlueBubbles. Cosmetic — it is a duplicate of a message you just sent — but do not
+use "I only see one copy of my self-test" as evidence the bridge is broken.
+
+**Caveat on the real-time claim for inbound:** every message exercised during
+setup was self-sent. That inbound from *other people* is real time is inferred
+from mirror history predating the bridge, not directly re-verified afterwards.
+It has never been observed failing, but if inbound from others ever looks
+delayed, treat that assumption as unproven rather than trusting this table.
 
 Debugging notes, so the next person skips the wrong turns:
 
