@@ -39,7 +39,7 @@ bug that took real time to find.
 | Bus / queue | `icloud-bridge-bus` / `icloud-bridge-command-queue` |
 | Secrets | `icloud-bridge-api-key`, `-bluebubbles-password`, `-agent-credentials` |
 | Agent identity | IAM user `icloud-bridge-agent`; key in Keychain `icloud-bridge-agent` / `aws` |
-| launchd | `gui/501/com.nortakales.icloud-bridge-agent` |
+| launchd | `gui/501/com.nortakales.icloud-bridge-agent`, `gui/501/com.nortakales.chat-db-poke` |
 | Agent log | `~/Library/Logs/icloud-bridge/agent.log` (stdout **and** stderr) |
 | Agent config | `~/.icloud-bridge/agent.json` |
 | Reminders checkpoint | `~/.icloud-bridge/reminders-snapshot.json` |
@@ -60,6 +60,11 @@ launchctl bootout   gui/$(id -u)/com.nortakales.icloud-bridge-agent
 # Rebuild and reinstall after a code change
 scripts/icloud-bridge/install-launch-agent.sh
 
+# Messages arriving late? BlueBubbles cannot see chat.db's WAL until a
+# checkpoint. This poke agent forces the issue every 30s. See runbook gotchas.
+scripts/bluebubbles/install-chat-db-poke.sh
+tail -f ~/Library/Logs/bluebubbles/chat-db-poke.log
+
 # Credentials and URLs
 scripts/icloud-bridge/show-api-details.sh
 
@@ -77,5 +82,8 @@ reminders never expire.
 1. **Is the agent running?** Most "stale data" is a stopped agent, not an API fault.
 2. **Is Reminders.app running?** If not, iCloud stops syncing to the Mac and
    reminders silently stop updating.
-3. **Grep the agent log for `ERROR`.** Both streams land in one file.
-4. **New API key not working?** The authorizer caches for 5 minutes. Wait.
+3. **Messages stale but agent healthy?** Compare `chat.db` and `chat.db-wal`
+   mtimes in `~/Library/Messages`. If the WAL is newer, BlueBubbles cannot see
+   the new messages — check `com.nortakales.chat-db-poke` is running.
+4. **Grep the agent log for `ERROR`.** Both streams land in one file.
+5. **New API key not working?** The authorizer caches for 5 minutes. Wait.
