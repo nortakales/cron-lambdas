@@ -106,8 +106,9 @@ the alternative is worse.
 ### 1. Verify BlueBubbles before touching anything
 
 ```bash
-BB_PW="$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password \
-  --region us-west-2 --query SecretString --output text)"
+# One line on purpose: if the line break and backslash are lost on copy-paste,
+# --query never applies and this prints the entire secret to your terminal.
+BB_PW="$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password --region us-west-2 --query SecretString --output text)"
 
 # Server reachable, and what features it has
 curl -s "http://127.0.0.1:1234/api/v1/server/info?password=${BB_PW}" | python3 -m json.tool
@@ -227,8 +228,9 @@ it tells you whether the fault is upstream of both consumers (almost always) or
 actually in the bridge (rare).
 
 ```bash
-BB_PW="$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password \
-  --region us-west-2 --query SecretString --output text)"
+# One line on purpose: if the line break and backslash are lost on copy-paste,
+# --query never applies and this prints the entire secret to your terminal.
+BB_PW="$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password --region us-west-2 --query SecretString --output text)"
 DB="$HOME/Library/Application Support/bbctl/prod/sh-imessage/mautrix-imessage.db"
 BLOG=~/Library/Logs/beeper-bridge/beeper-bridge.log
 ```
@@ -338,16 +340,22 @@ point: the data was always reachable, the notification never came.
 To release a stall, reach for **one** lever and record which one, because the
 last attempt had three candidates inside 80 seconds:
 
-```bash
-# Cheapest candidate. Self-contained -- do NOT assume $BB_PW is already set, and
-# do not send the body to /dev/null without -w, or a 401 looks identical to
-# success: both print nothing.
-BB_PW=$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password \
-          --query SecretString --output text)
-curl -s -o /dev/null -w "HTTP %{http_code}\n" \
-  "http://127.0.0.1:1234/api/v1/server/info?password=${BB_PW}"    # want 200, not 401
+Cheapest candidate first. Deliberately **one unbroken line** — a version of this
+wrapped over two lines with backslashes lost them on copy-paste, which ran
+`get-secret-value` without `--query` and dumped the whole secret JSON, password
+included, into a terminal and a chat log. Keep it on one line.
 
-# Second candidate. Needs a terminal that has Full Disk Access; fails under launchd.
+```bash
+BB_PW=$(aws secretsmanager get-secret-value --secret-id icloud-bridge-bluebubbles-password --query SecretString --output text) && curl -s -o /dev/null -w "HTTP %{http_code}\n" "http://127.0.0.1:1234/api/v1/server/info?password=${BB_PW}"
+```
+
+Want `HTTP 200`. A `401` means the password never got substituted — and note that
+without `-w` a 401 and a 200 print identically (nothing at all), so always keep
+the status code.
+
+Second candidate. Needs a terminal that has Full Disk Access; fails under launchd:
+
+```bash
 bash scripts/bluebubbles/chat-db-poke.sh
 ```
 
