@@ -40,7 +40,7 @@ export class ProductTrackerCron extends Construct {
                 API_KEY_SECRET_ZYTE: config.base.apiKeyZyte,
                 CREDENTIALS_BRICKSET: config.productTracker.credentialsBrickset,
                 HTTP_CACHE_BUCKET_NAME: httpCacheBucket.bucketName,
-                HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
+                HTTP_CACHE_TTL_MINUTES: String(config.productTracker.httpCacheTtlMinutes),
             },
             timeout: cdk.Duration.minutes(15),
             memorySize: 512,

@@ -70,7 +70,8 @@
         "emailList": [
             "nortakales@gmail.com"
         ],
-        "credentialsBrickset": "brickset-credentials"
+        "credentialsBrickset": "brickset-credentials",
+        "httpCacheTtlMinutes": 180
     },
     "icloudBridge": {
         "enabled": "true",
