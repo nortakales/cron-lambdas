@@ -13,7 +13,7 @@ import { Construct } from 'constructs';
 
 export class AutoxReminderCron extends Construct {
 
-    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function) {
+    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheTable: dynamodb.Table) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'AutoxReminderLambdaFunction', {
@@ -36,6 +36,8 @@ export class AutoxReminderCron extends Construct {
                 API_KEY_SECRET_ZYTE: config.base.apiKeyZyte,
                 PUSH_NOTIFICATION_LAMBDA_ARN: config.autoxReminder.pushNotificationLambdaArn,
                 PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey,
+                HTTP_CACHE_TABLE_NAME: config.httpCache.dynamoTableName,
+                HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
             },
             timeout: cdk.Duration.seconds(60),
             retryAttempts: 2,
@@ -87,6 +89,8 @@ export class AutoxReminderCron extends Construct {
             }
         });
         dynamoTable.grantReadWriteData(lambdaFunction);
+
+        httpCacheTable.grantReadWriteData(lambdaFunction);
 
         const schedule = new Rule(this, 'AutoxReminderSchedule', {
             ruleName: 'AutoxReminderSchedule',

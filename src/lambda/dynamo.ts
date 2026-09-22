@@ -19,6 +19,16 @@ const translateConfig: TranslateConfig = { marshallOptions, unmarshallOptions };
 
 const DDB = DynamoDBDocument.from(dynamoClient, translateConfig);
 
+// Some tables (e.g. the generic HTTP cache) can store large items (cached HTML/JSON bodies), so avoid
+// dumping the full item into CloudWatch logs every time one is read or written.
+const MAX_LOGGED_CHARS = 2000;
+function truncateForLog(value: string): string {
+    if (value.length <= MAX_LOGGED_CHARS) {
+        return value;
+    }
+    return value.slice(0, MAX_LOGGED_CHARS) + `... (truncated, ${value.length} total chars)`;
+}
+
 export async function get(table: string, key: { [key: string]: any }) {
 
     const item = await DDB.get({
@@ -27,7 +37,7 @@ export async function get(table: string, key: { [key: string]: any }) {
     });
 
     if (item.Item !== undefined) {
-        console.log("Found in DDB: " + JSON.stringify(item.Item));
+        console.log("Found in DDB: " + truncateForLog(JSON.stringify(item.Item)));
     } else {
         console.log("Did not find DDB item with key " + JSON.stringify(key));
     }
@@ -58,7 +68,7 @@ export async function query(table: string, indexName: string, hashKeyName: strin
     const item = await DDB.query(query);
 
     if (item.Items !== undefined) {
-        console.log("Found in DDB: " + JSON.stringify(item.Items));
+        console.log("Found in DDB: " + truncateForLog(JSON.stringify(item.Items)));
     } else {
         console.log("Did not find DDB item(s) for query " + JSON.stringify(query));
     }
@@ -68,7 +78,7 @@ export async function query(table: string, indexName: string, hashKeyName: strin
 
 export async function put(table: string, item: { [key: string]: any }) {
 
-    console.log(`Writing to DDB: ${table}: ${JSON.stringify(item)}`);
+    console.log(`Writing to DDB: ${table}: ${truncateForLog(JSON.stringify(item))}`);
 
     await DDB.put({
         TableName: table,

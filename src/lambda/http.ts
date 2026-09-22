@@ -1,9 +1,19 @@
 import * as HTTPS from 'https';
 import * as SM from './secrets';
 import { get } from 'http';
+import * as DDB from './dynamo';
 
 const API_KEY_SECRET_ZYTE = process.env.API_KEY_SECRET_ZYTE;
 let zyteApiKey: string | undefined;
+
+// Generic short-lived response cache, see HttpRequestOptions.useCache below. Backed by a DynamoDB table
+// shared across lambdas (see src/lib/constructs/http-cache-table.ts). This lets a lambda that fails
+// partway through a run and gets retried from the start skip re-fetching URLs it already succeeded on.
+const HTTP_CACHE_TABLE_NAME = process.env.HTTP_CACHE_TABLE_NAME;
+const HTTP_CACHE_TTL_MINUTES = process.env.HTTP_CACHE_TTL_MINUTES ? Number(process.env.HTTP_CACHE_TTL_MINUTES) : 30;
+// DynamoDB items are capped at 400KB total; stay well under that (leaving room for key/attribute
+// overhead) rather than risk a failed write for a handful of oversized pages.
+const HTTP_CACHE_MAX_RESPONSE_BYTES = 350_000;
 
 export interface Status {
     readonly statusCode: number
@@ -24,7 +34,13 @@ export interface HttpRequestOptions {
     headers?: any,
     downgrade404Logging?: boolean
     method?: string,
-    body?: string
+    body?: string,
+    // If true, checks the shared HTTP response cache for this exact URL before making the request, and
+    // stores the result on success for HTTP_CACHE_TTL_MINUTES (default 30). Only supported for GET
+    // requests, since the cache key is the URL alone. Only successful responses are cached; failures
+    // (thrown Status errors) are always retried fresh. Requires the lambda to have HTTP_CACHE_TABLE_NAME
+    // set and read/write access to that table (see src/lib/constructs/http-cache-table.ts).
+    useCache?: boolean
 }
 
 const RETRYABLE_CODES = [
@@ -49,9 +65,22 @@ const DEFAULT_HTTP_CONNECTION_TIMEOUT = 10000;
 
 export async function httpsGet(url: string, options?: HttpRequestOptions): Promise<string> {
 
+    const useCache = shouldUseCache(url, options);
+
+    if (useCache) {
+        const cached = await getCachedResponse(url);
+        if (cached !== undefined) {
+            console.log("Using cached response for URL: " + url);
+            return cached;
+        }
+    }
+
     // try {
     const response = await innerHttpsGet(url, options);
     if (typeof response === 'string') {
+        if (useCache) {
+            await setCachedResponse(url, response as string);
+        }
         return response as string;
     } else {
         const status = response as Status;
@@ -70,6 +99,56 @@ export async function httpsGet(url: string, options?: HttpRequestOptions): Promi
     //     console.log("yet another catch");
     //     throw error;
     // }
+}
+
+function shouldUseCache(url: string, options?: HttpRequestOptions): boolean {
+    if (!options?.useCache) {
+        return false;
+    }
+    if (!HTTP_CACHE_TABLE_NAME) {
+        console.warn(`useCache was requested for URL ${url} but HTTP_CACHE_TABLE_NAME is not configured, skipping cache`);
+        return false;
+    }
+    const method = options?.method || 'GET';
+    if (method !== 'GET') {
+        // The cache key is the URL alone, which isn't safe to reuse across different request bodies.
+        console.warn(`useCache was requested for a ${method} request to URL ${url}, but caching only supports GET requests, skipping cache`);
+        return false;
+    }
+    return true;
+}
+
+async function getCachedResponse(url: string): Promise<string | undefined> {
+    try {
+        const item = await DDB.get(HTTP_CACHE_TABLE_NAME!, { url });
+        if (!item) {
+            return undefined;
+        }
+        if (typeof item.expiresAt === 'number' && item.expiresAt < Math.floor(Date.now() / 1000)) {
+            // DynamoDB TTL deletion is asynchronous and can lag behind the actual expiration, so also
+            // enforce expiry on read to avoid ever serving stale data back out of the cache.
+            console.log(`Cache entry for URL ${url} has expired, ignoring`);
+            return undefined;
+        }
+        return item.response;
+    } catch (error) {
+        console.warn(`Failed to read HTTP cache for URL ${url}, proceeding without cache: ${(error as Error).message}`);
+        return undefined;
+    }
+}
+
+async function setCachedResponse(url: string, response: string): Promise<void> {
+    try {
+        const sizeInBytes = Buffer.byteLength(response, 'utf8');
+        if (sizeInBytes > HTTP_CACHE_MAX_RESPONSE_BYTES) {
+            console.warn(`Response for URL ${url} is ${sizeInBytes} bytes, too large to cache (limit ${HTTP_CACHE_MAX_RESPONSE_BYTES}), skipping cache write`);
+            return;
+        }
+        const expiresAt = Math.floor(Date.now() / 1000) + (HTTP_CACHE_TTL_MINUTES * 60);
+        await DDB.put(HTTP_CACHE_TABLE_NAME!, { url, response, expiresAt });
+    } catch (error) {
+        console.warn(`Failed to write HTTP cache for URL ${url}: ${(error as Error).message}`);
+    }
 }
 
 async function zyteGet(url: string, attempts: number = 3, delay: number = 0): Promise<string> {

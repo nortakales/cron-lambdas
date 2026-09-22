@@ -9,6 +9,10 @@
         "apiKeyZyte": "zyte-api-key",
         "switchbotCredentials": "switchbot-credentials"
     },
+    "httpCache": {
+        "dynamoTableName": "http_cache",
+        "ttlMinutes": 30
+    },
     "autoxReminder": {
         "enabled": "false",
         "rate": "rate(30 minutes)",

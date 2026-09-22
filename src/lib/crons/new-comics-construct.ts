@@ -15,7 +15,7 @@ export class NewComicsCron extends Construct {
 
     readonly lambda: lambda.Function;
 
-    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function) {
+    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheTable: dynamodb.Table) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'NewComicsLambdaFunction', {
@@ -38,6 +38,8 @@ export class NewComicsCron extends Construct {
                 SERIES_TABLE_NAME: config.newComics.comicSeriesExcludeTableName,
                 DYNAMO_ACCESS_ENDPOINT: config.base.dynamoAccessEndpoint,
                 API_KEY_SECRET_DYNAMO_ACCESS: config.base.dynamoAccessApiKey,
+                HTTP_CACHE_TABLE_NAME: config.httpCache.dynamoTableName,
+                HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
             },
             timeout: cdk.Duration.seconds(60),
             retryAttempts: 2,
@@ -79,6 +81,8 @@ export class NewComicsCron extends Construct {
             removalPolicy: cdk.RemovalPolicy.RETAIN,
         });
         seriesExcludeTable.grantReadData(this.lambda);
+
+        httpCacheTable.grantReadWriteData(this.lambda);
 
         const schedule = new Rule(this, 'NewComicsSchedule', {
             ruleName: 'NewComicsSchedule',

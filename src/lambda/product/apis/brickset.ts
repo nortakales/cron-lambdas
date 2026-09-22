@@ -63,7 +63,7 @@ async function forceLogin() {
     const credentials = await SM.getSecretObject(CREDENTIALS_BRICKSET);
 
     const loginUrl = `${BASE_URL}login?apiKey=${credentials.apiKey}&username=${credentials.username}&password=${credentials.password}`;
-    const loginJson = await httpsGet(loginUrl);
+    const loginJson = await httpsGet(loginUrl, { useCache: true });
     const loginData: BricksetLoginResponse = JSON.parse(loginJson);
 
     if (loginData.status !== 'success') {
@@ -82,7 +82,7 @@ export async function getSet(setNumber: string) {
         setNumber = setNumber + '-1';
     }
     const setUrl = `${BASE_URL}getSets?apiKey=${credentials.apiKey}&userHash=${userHash}&params={'setNumber':'${setNumber}'}`;
-    const setJson = await httpsGet(setUrl);
+    const setJson = await httpsGet(setUrl, { useCache: true });
     const setData: BricketSetResponse = JSON.parse(setJson);
 
     if (setData.status !== 'success') {

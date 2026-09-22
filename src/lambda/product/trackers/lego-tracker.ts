@@ -12,7 +12,8 @@ const BRICKRANKER_BASE_URL = 'https://brickranker.com/rankings/set/';
 export async function getLatestProductData(product: Product, attempts: number = 3): Promise<Product> {
 
     const legoHtml = await httpsGet(LEGO_BASE_URL + product.urlKey, {
-        useProxy: true
+        useProxy: true,
+        useCache: true
     });
     const legoDom = parse(legoHtml);
 
@@ -53,7 +54,8 @@ export async function getLatestProductData(product: Product, attempts: number = 
 
     try {
         const brickRankerHtml = await httpsGet(BRICKRANKER_BASE_URL + getLegoModelNumber(product) + '-1', {
-            downgrade404Logging: true
+            downgrade404Logging: true,
+            useCache: true
         });
         const brickRankerDom = parse(brickRankerHtml);
 
@@ -137,7 +139,8 @@ async function scrapeRetirementDateFromBrickset(product: Product) {
 
     const html = await httpsGet(BRICKSET_BASE_URL + getLegoModelNumber(product), {
         attempts: 2,
-        useProxyOnFinalAttempt: true
+        useProxyOnFinalAttempt: true,
+        useCache: true
     });
     const dom = parse(html);
 

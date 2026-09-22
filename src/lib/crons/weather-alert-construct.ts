@@ -15,7 +15,7 @@ export class WeatherAlertCron extends Construct {
 
     readonly lambda: lambda.Function;
 
-    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function) {
+    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheTable: dynamodb.Table) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'WeatherAlertLambdaFunction', {
@@ -45,6 +45,8 @@ export class WeatherAlertCron extends Construct {
                 API_CREDENTIALS_SECRET_METEOMATICS: config.weatherAlert.apiCredentialsSecretMeteomatics,
                 API_KEY_ACCUWEATHER: config.weatherAlert.apiKeyAccuWeather,
                 API_KEY_ACCUWEATHER_ALTERNATE: config.weatherAlert.apiKeyAccuWeatherAlternate,
+                HTTP_CACHE_TABLE_NAME: config.httpCache.dynamoTableName,
+                HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
             },
             timeout: cdk.Duration.seconds(60),
             retryAttempts: 2,
@@ -107,5 +109,7 @@ export class WeatherAlertCron extends Construct {
             tableName: config.weatherAlert.historyDynamoTableName
         });
         historyTable.grantReadWriteData(this.lambda);
+
+        httpCacheTable.grantReadWriteData(this.lambda);
     }
 }

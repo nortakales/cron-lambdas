@@ -13,7 +13,7 @@ import { Construct } from 'constructs';
 
 export class ProductTrackerCron extends Construct {
 
-    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function) {
+    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheTable: dynamodb.Table) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'ProductTrackerLambdaFunction', {
@@ -38,6 +38,8 @@ export class ProductTrackerCron extends Construct {
                 API_KEY_DYNAMO_ACCESS_LAMBDA: config.base.dynamoAccessApiKey,
                 API_KEY_SECRET_ZYTE: config.base.apiKeyZyte,
                 CREDENTIALS_BRICKSET: config.productTracker.credentialsBrickset,
+                HTTP_CACHE_TABLE_NAME: config.httpCache.dynamoTableName,
+                HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
             },
             timeout: cdk.Duration.minutes(15),
             memorySize: 512,
@@ -112,6 +114,8 @@ export class ProductTrackerCron extends Construct {
             tableName: config.productTracker.productHistoryDynamoTableName
         });
         productHistoryTable.grantReadWriteData(lambdaFunction);
+
+        httpCacheTable.grantReadWriteData(lambdaFunction);
 
         const schedule = new Rule(this, 'ProductTrackerSchedule', {
             ruleName: 'ProductTrackerSchedule',
