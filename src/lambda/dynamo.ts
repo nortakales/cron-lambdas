@@ -19,8 +19,21 @@ const translateConfig: TranslateConfig = { marshallOptions, unmarshallOptions };
 
 const DDB = DynamoDBDocument.from(dynamoClient, translateConfig);
 
-// Some tables (e.g. the generic HTTP cache) can store large items (cached HTML/JSON bodies), so avoid
-// dumping the full item into CloudWatch logs every time one is read or written.
+// Some tables (e.g. the generic HTTP cache) can store large items (cached, possibly gzip-compressed
+// HTML/JSON bodies), so avoid dumping the full item into CloudWatch logs every time one is read or
+// written. Binary attributes come back from the document client as Buffers, whose default
+// JSON.stringify representation is a `{ type: 'Buffer', data: [...] }` array of every byte as a
+// separate number, which would balloon the string far past MAX_LOGGED_CHARS before truncation ever
+// gets a chance to run, so collapse those to a short summary first.
+function stringifyForLog(value: any): string {
+    return JSON.stringify(value, (_key, val) => {
+        if (val && typeof val === 'object' && val.type === 'Buffer' && Array.isArray(val.data)) {
+            return `<Buffer, ${val.data.length} bytes>`;
+        }
+        return val;
+    });
+}
+
 const MAX_LOGGED_CHARS = 2000;
 function truncateForLog(value: string): string {
     if (value.length <= MAX_LOGGED_CHARS) {
@@ -37,7 +50,7 @@ export async function get(table: string, key: { [key: string]: any }) {
     });
 
     if (item.Item !== undefined) {
-        console.log("Found in DDB: " + truncateForLog(JSON.stringify(item.Item)));
+        console.log("Found in DDB: " + truncateForLog(stringifyForLog(item.Item)));
     } else {
         console.log("Did not find DDB item with key " + JSON.stringify(key));
     }
@@ -68,7 +81,7 @@ export async function query(table: string, indexName: string, hashKeyName: strin
     const item = await DDB.query(query);
 
     if (item.Items !== undefined) {
-        console.log("Found in DDB: " + truncateForLog(JSON.stringify(item.Items)));
+        console.log("Found in DDB: " + truncateForLog(stringifyForLog(item.Items)));
     } else {
         console.log("Did not find DDB item(s) for query " + JSON.stringify(query));
     }
@@ -78,7 +91,7 @@ export async function query(table: string, indexName: string, hashKeyName: strin
 
 export async function put(table: string, item: { [key: string]: any }) {
 
-    console.log(`Writing to DDB: ${table}: ${truncateForLog(JSON.stringify(item))}`);
+    console.log(`Writing to DDB: ${table}: ${truncateForLog(stringifyForLog(item))}`);
 
     await DDB.put({
         TableName: table,

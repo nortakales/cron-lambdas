@@ -1,6 +1,7 @@
 import * as HTTPS from 'https';
 import * as SM from './secrets';
 import { get } from 'http';
+import * as zlib from 'zlib';
 import * as DDB from './dynamo';
 
 const API_KEY_SECRET_ZYTE = process.env.API_KEY_SECRET_ZYTE;
@@ -11,9 +12,11 @@ let zyteApiKey: string | undefined;
 // partway through a run and gets retried from the start skip re-fetching URLs it already succeeded on.
 const HTTP_CACHE_TABLE_NAME = process.env.HTTP_CACHE_TABLE_NAME;
 const HTTP_CACHE_TTL_MINUTES = process.env.HTTP_CACHE_TTL_MINUTES ? Number(process.env.HTTP_CACHE_TTL_MINUTES) : 30;
-// DynamoDB items are capped at 400KB total; stay well under that (leaving room for key/attribute
-// overhead) rather than risk a failed write for a handful of oversized pages.
-const HTTP_CACHE_MAX_RESPONSE_BYTES = 350_000;
+// DynamoDB items are hard-capped at 400KB total. Full rendered pages (e.g. lego.com product pages,
+// which run 700-900KB raw) routinely exceed that uncompressed, so responses are gzip-compressed before
+// being stored (HTML/JSON like this typically compresses 5-10x). This limit applies to the *compressed*
+// size, with headroom left for the url/expiresAt attribute overhead.
+const HTTP_CACHE_MAX_COMPRESSED_BYTES = 390_000;
 
 export interface Status {
     readonly statusCode: number
@@ -130,7 +133,13 @@ async function getCachedResponse(url: string): Promise<string | undefined> {
             console.log(`Cache entry for URL ${url} has expired, ignoring`);
             return undefined;
         }
-        return item.response;
+        if (!item.response) {
+            return undefined;
+        }
+        // Stored gzip-compressed (see setCachedResponse); the DynamoDB document client hands binary
+        // attributes back as a Buffer/Uint8Array.
+        const compressed = Buffer.isBuffer(item.response) ? item.response : Buffer.from(item.response);
+        return zlib.gunzipSync(compressed).toString('utf8');
     } catch (error) {
         console.warn(`Failed to read HTTP cache for URL ${url}, proceeding without cache: ${(error as Error).message}`);
         return undefined;
@@ -139,13 +148,17 @@ async function getCachedResponse(url: string): Promise<string | undefined> {
 
 async function setCachedResponse(url: string, response: string): Promise<void> {
     try {
-        const sizeInBytes = Buffer.byteLength(response, 'utf8');
-        if (sizeInBytes > HTTP_CACHE_MAX_RESPONSE_BYTES) {
-            console.warn(`Response for URL ${url} is ${sizeInBytes} bytes, too large to cache (limit ${HTTP_CACHE_MAX_RESPONSE_BYTES}), skipping cache write`);
+        // Full rendered pages (e.g. lego.com) can be 700-900KB raw, well past DynamoDB's 400KB item
+        // limit, so always compress before checking size / storing. HTML/JSON like this typically
+        // compresses 5-10x, which is usually enough to fit; if it still doesn't, fail open (skip
+        // caching) rather than lose the response we already successfully fetched.
+        const compressed = zlib.gzipSync(response);
+        if (compressed.length > HTTP_CACHE_MAX_COMPRESSED_BYTES) {
+            console.warn(`Compressed response for URL ${url} is ${compressed.length} bytes (${response.length} raw), still too large to cache (limit ${HTTP_CACHE_MAX_COMPRESSED_BYTES}), skipping cache write`);
             return;
         }
         const expiresAt = Math.floor(Date.now() / 1000) + (HTTP_CACHE_TTL_MINUTES * 60);
-        await DDB.put(HTTP_CACHE_TABLE_NAME!, { url, response, expiresAt });
+        await DDB.put(HTTP_CACHE_TABLE_NAME!, { url, response: compressed, expiresAt });
     } catch (error) {
         console.warn(`Failed to write HTTP cache for URL ${url}: ${(error as Error).message}`);
     }
