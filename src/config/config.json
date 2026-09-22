@@ -10,6 +10,7 @@
         "switchbotCredentials": "switchbot-credentials"
     },
     "httpCache": {
+        "s3BucketName": "cron-lambdas-http-cache",
         "ttlMinutes": 30
     },
     "autoxReminder": {

@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import * as config from '../../config/config.json';
 
 /**
  * Shared generic HTTP response cache used by src/lambda/http.ts (see the `useCache` request option).
@@ -25,6 +26,7 @@ export class HttpCacheBucket extends Construct {
         super(scope, id);
 
         this.bucket = new s3.Bucket(this, 'HttpCacheS3Bucket', {
+            bucketName: config.httpCache.s3BucketName,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
             autoDeleteObjects: true,
             lifecycleRules: [{
