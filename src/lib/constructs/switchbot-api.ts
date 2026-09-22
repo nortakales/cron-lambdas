@@ -4,7 +4,7 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Construct } from 'constructs';
 import * as cdk from 'aws-cdk-lib';
 import * as nodejslambda from 'aws-cdk-lib/aws-lambda-nodejs';
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as config from '../../config/config.json';
 import * as destinations from 'aws-cdk-lib/aws-logs-destinations';
@@ -12,7 +12,7 @@ import * as logs from 'aws-cdk-lib/aws-logs';
 
 export class SwitchBotAPI extends Construct {
 
-    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheTable: dynamodb.Table) {
+    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheBucket: s3.Bucket) {
         super(scope, id);
 
         const logGroup = new logs.LogGroup(this, id + "-AccessLogs");
@@ -51,7 +51,7 @@ export class SwitchBotAPI extends Construct {
             environment: {
                 REGION: config.base.region,
                 SWITCHBOT_CREDENTIALS_NAME: config.base.switchbotCredentials,
-                HTTP_CACHE_TABLE_NAME: config.httpCache.dynamoTableName,
+                HTTP_CACHE_BUCKET_NAME: httpCacheBucket.bucketName,
                 HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
             },
             timeout: cdk.Duration.seconds(5),
@@ -74,7 +74,7 @@ export class SwitchBotAPI extends Construct {
             filterPattern: logs.FilterPattern.anyTerm('ERROR')
         });
 
-        httpCacheTable.grantReadWriteData(lambdaFunction);
+        httpCacheBucket.grantReadWrite(lambdaFunction);
 
         const integration = new apigateway.LambdaIntegration(lambdaFunction, {
             requestTemplates: {

@@ -10,7 +10,6 @@
         "switchbotCredentials": "switchbot-credentials"
     },
     "httpCache": {
-        "dynamoTableName": "http_cache",
         "ttlMinutes": 30
     },
     "autoxReminder": {

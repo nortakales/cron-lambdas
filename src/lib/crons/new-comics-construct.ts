@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as nodejslambda from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Schedule, Rule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
@@ -15,7 +16,7 @@ export class NewComicsCron extends Construct {
 
     readonly lambda: lambda.Function;
 
-    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheTable: dynamodb.Table) {
+    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheBucket: s3.Bucket) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'NewComicsLambdaFunction', {
@@ -38,7 +39,7 @@ export class NewComicsCron extends Construct {
                 SERIES_TABLE_NAME: config.newComics.comicSeriesExcludeTableName,
                 DYNAMO_ACCESS_ENDPOINT: config.base.dynamoAccessEndpoint,
                 API_KEY_SECRET_DYNAMO_ACCESS: config.base.dynamoAccessApiKey,
-                HTTP_CACHE_TABLE_NAME: config.httpCache.dynamoTableName,
+                HTTP_CACHE_BUCKET_NAME: httpCacheBucket.bucketName,
                 HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
             },
             timeout: cdk.Duration.seconds(60),
@@ -82,7 +83,7 @@ export class NewComicsCron extends Construct {
         });
         seriesExcludeTable.grantReadData(this.lambda);
 
-        httpCacheTable.grantReadWriteData(this.lambda);
+        httpCacheBucket.grantReadWrite(this.lambda);
 
         const schedule = new Rule(this, 'NewComicsSchedule', {
             ruleName: 'NewComicsSchedule',

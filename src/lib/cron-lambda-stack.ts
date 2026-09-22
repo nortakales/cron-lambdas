@@ -13,7 +13,7 @@ import { AlexaSkillLambda } from './constructs/alexa-skill-lambda';
 import { S3Bucket } from 'aws-cdk-lib/aws-kinesisfirehose';
 import { CronLambdasS3Buckets } from './constructs/s3-buckets';
 import { IcloudBridge } from './constructs/icloud-bridge/icloud-bridge';
-import { HttpCacheTable } from './constructs/http-cache-table';
+import { HttpCacheBucket } from './constructs/http-cache-bucket';
 
 export class CronLambdaStack extends cdk.Stack {
 
@@ -24,18 +24,18 @@ export class CronLambdaStack extends cdk.Stack {
 
         // Shared generic HTTP response cache, used via the `useCache` option in src/lambda/http.ts.
         // Passed into any cron/API construct whose lambda(s) make httpsGet calls, so useCache is
-        // available to them; each construct grants itself access and sets the table name env var.
-        const httpCacheTable = new HttpCacheTable(this, "HttpCacheTable");
+        // available to them; each construct grants itself access and sets the bucket name env var.
+        const httpCacheBucket = new HttpCacheBucket(this, "HttpCacheBucket");
 
-        const weatherAlertCron = new WeatherAlertCron(this, "WeatherAlertCron", errorLogNotifier.lambda, httpCacheTable.table);
-        new AutoxReminderCron(this, "AutoxReminderCron", errorLogNotifier.lambda, httpCacheTable.table);
-        new NewComicsCron(this, "NewComicsCron", errorLogNotifier.lambda, httpCacheTable.table);
-        new ProductTrackerCron(this, "ProductTrackerCron", errorLogNotifier.lambda, httpCacheTable.table);
+        const weatherAlertCron = new WeatherAlertCron(this, "WeatherAlertCron", errorLogNotifier.lambda, httpCacheBucket.bucket);
+        new AutoxReminderCron(this, "AutoxReminderCron", errorLogNotifier.lambda, httpCacheBucket.bucket);
+        new NewComicsCron(this, "NewComicsCron", errorLogNotifier.lambda, httpCacheBucket.bucket);
+        new ProductTrackerCron(this, "ProductTrackerCron", errorLogNotifier.lambda, httpCacheBucket.bucket);
 
         new DeleteTimerConstruct(this, 'DeleteTimerConstruct', errorLogNotifier.lambda);
         new AdhocWeatherReportAPI(this, 'AdhocWeatherAPI', weatherAlertCron.lambda);
         new DynamoDBAccessAPI(this, 'DynamoDBAccessAPI', errorLogNotifier.lambda);
-        new SwitchBotAPI(this, 'SwitchBotAPI', errorLogNotifier.lambda, httpCacheTable.table);
+        new SwitchBotAPI(this, 'SwitchBotAPI', errorLogNotifier.lambda, httpCacheBucket.bucket);
         new AlexaSkillLambda(this, 'AlexaSkillLambda', errorLogNotifier.lambda);
 
         new IcloudBridge(this, 'IcloudBridge', errorLogNotifier.lambda);

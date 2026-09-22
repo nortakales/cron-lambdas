@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as nodejslambda from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Schedule, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
@@ -13,7 +14,7 @@ import { Construct } from 'constructs';
 
 export class AutoxReminderCron extends Construct {
 
-    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheTable: dynamodb.Table) {
+    constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheBucket: s3.Bucket) {
         super(scope, id);
 
         const dlqWithMonitor = new DLQWithMonitor(this, 'AutoxReminderLambdaFunction', {
@@ -36,7 +37,7 @@ export class AutoxReminderCron extends Construct {
                 API_KEY_SECRET_ZYTE: config.base.apiKeyZyte,
                 PUSH_NOTIFICATION_LAMBDA_ARN: config.autoxReminder.pushNotificationLambdaArn,
                 PUSHOVER_CONFIG_SECRET_KEY: config.base.pushoverConfigSecretKey,
-                HTTP_CACHE_TABLE_NAME: config.httpCache.dynamoTableName,
+                HTTP_CACHE_BUCKET_NAME: httpCacheBucket.bucketName,
                 HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
             },
             timeout: cdk.Duration.seconds(60),
@@ -90,7 +91,7 @@ export class AutoxReminderCron extends Construct {
         });
         dynamoTable.grantReadWriteData(lambdaFunction);
 
-        httpCacheTable.grantReadWriteData(lambdaFunction);
+        httpCacheBucket.grantReadWrite(lambdaFunction);
 
         const schedule = new Rule(this, 'AutoxReminderSchedule', {
             ruleName: 'AutoxReminderSchedule',

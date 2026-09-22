@@ -2,21 +2,21 @@ import * as HTTPS from 'https';
 import * as SM from './secrets';
 import { get } from 'http';
 import * as zlib from 'zlib';
-import * as DDB from './dynamo';
+import * as crypto from 'crypto';
+import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const API_KEY_SECRET_ZYTE = process.env.API_KEY_SECRET_ZYTE;
 let zyteApiKey: string | undefined;
 
-// Generic short-lived response cache, see HttpRequestOptions.useCache below. Backed by a DynamoDB table
-// shared across lambdas (see src/lib/constructs/http-cache-table.ts). This lets a lambda that fails
+// Generic short-lived response cache, see HttpRequestOptions.useCache below. Backed by an S3 bucket
+// shared across lambdas (see src/lib/constructs/http-cache-bucket.ts). This lets a lambda that fails
 // partway through a run and gets retried from the start skip re-fetching URLs it already succeeded on.
-const HTTP_CACHE_TABLE_NAME = process.env.HTTP_CACHE_TABLE_NAME;
+// S3 (rather than DynamoDB) because full rendered pages (e.g. lego.com product pages, which run
+// 700-900KB raw) can exceed DynamoDB's hard 400KB item limit even gzip-compressed; S3 has no such
+// practical size ceiling.
+const s3Client = new S3Client({ region: process.env.REGION });
+const HTTP_CACHE_BUCKET_NAME = process.env.HTTP_CACHE_BUCKET_NAME;
 const HTTP_CACHE_TTL_MINUTES = process.env.HTTP_CACHE_TTL_MINUTES ? Number(process.env.HTTP_CACHE_TTL_MINUTES) : 30;
-// DynamoDB items are hard-capped at 400KB total. Full rendered pages (e.g. lego.com product pages,
-// which run 700-900KB raw) routinely exceed that uncompressed, so responses are gzip-compressed before
-// being stored (HTML/JSON like this typically compresses 5-10x). This limit applies to the *compressed*
-// size, with headroom left for the url/expiresAt attribute overhead.
-const HTTP_CACHE_MAX_COMPRESSED_BYTES = 390_000;
 
 export interface Status {
     readonly statusCode: number
@@ -41,8 +41,8 @@ export interface HttpRequestOptions {
     // If true, checks the shared HTTP response cache for this exact URL before making the request, and
     // stores the result on success for HTTP_CACHE_TTL_MINUTES (default 30). Only supported for GET
     // requests, since the cache key is the URL alone. Only successful responses are cached; failures
-    // (thrown Status errors) are always retried fresh. Requires the lambda to have HTTP_CACHE_TABLE_NAME
-    // set and read/write access to that table (see src/lib/constructs/http-cache-table.ts).
+    // (thrown Status errors) are always retried fresh. Requires the lambda to have HTTP_CACHE_BUCKET_NAME
+    // set and read/write access to that bucket (see src/lib/constructs/http-cache-bucket.ts).
     useCache?: boolean
 }
 
@@ -108,39 +108,50 @@ function shouldUseCache(url: string, options?: HttpRequestOptions): boolean {
     if (!options?.useCache) {
         return false;
     }
-    if (!HTTP_CACHE_TABLE_NAME) {
-        console.warn(`useCache was requested for URL ${url} but HTTP_CACHE_TABLE_NAME is not configured, skipping cache`);
+    if (!HTTP_CACHE_BUCKET_NAME) {
+        console.warn(`useCache was requested for URL ${url} but HTTP_CACHE_BUCKET_NAME is not configured, skipping cache`);
         return false;
     }
     const method = options?.method || 'GET';
     if (method !== 'GET') {
-        // The cache key is the URL alone, which isn't safe to reuse across different request bodies.
+        // The cache key is derived from the URL alone, which isn't safe to reuse across different
+        // request bodies.
         console.warn(`useCache was requested for a ${method} request to URL ${url}, but caching only supports GET requests, skipping cache`);
         return false;
     }
     return true;
 }
 
+// S3 object keys can technically hold a raw URL, but hashing keeps keys a fixed, safe shape regardless
+// of URL length/characters and avoids leaking full URLs (some of which carry API keys/credentials as
+// query params, e.g. the Brickset calls) into S3 key names/logs.
+function cacheKeyForUrl(url: string): string {
+    return crypto.createHash('sha256').update(url).digest('hex');
+}
+
 async function getCachedResponse(url: string): Promise<string | undefined> {
     try {
-        const item = await DDB.get(HTTP_CACHE_TABLE_NAME!, { url });
-        if (!item) {
-            return undefined;
-        }
-        if (typeof item.expiresAt === 'number' && item.expiresAt < Math.floor(Date.now() / 1000)) {
-            // DynamoDB TTL deletion is asynchronous and can lag behind the actual expiration, so also
-            // enforce expiry on read to avoid ever serving stale data back out of the cache.
+        const object = await s3Client.send(new GetObjectCommand({
+            Bucket: HTTP_CACHE_BUCKET_NAME!,
+            Key: cacheKeyForUrl(url)
+        }));
+        const expiresAt = Number(object.Metadata?.expiresat);
+        if (Number.isFinite(expiresAt) && expiresAt < Math.floor(Date.now() / 1000)) {
+            // The lifecycle rule on the bucket is only a storage-cost backstop (S3 can't express a
+            // 30-minute expiration), so also enforce expiry here to avoid ever serving stale data.
             console.log(`Cache entry for URL ${url} has expired, ignoring`);
             return undefined;
         }
-        if (!item.response) {
+        if (!object.Body) {
             return undefined;
         }
-        // Stored gzip-compressed (see setCachedResponse); the DynamoDB document client hands binary
-        // attributes back as a Buffer/Uint8Array.
-        const compressed = Buffer.isBuffer(item.response) ? item.response : Buffer.from(item.response);
-        return zlib.gunzipSync(compressed).toString('utf8');
-    } catch (error) {
+        // Stored gzip-compressed, see setCachedResponse.
+        const compressed = await object.Body.transformToByteArray();
+        return zlib.gunzipSync(Buffer.from(compressed)).toString('utf8');
+    } catch (error: any) {
+        if (error?.name === 'NoSuchKey') {
+            return undefined;
+        }
         console.warn(`Failed to read HTTP cache for URL ${url}, proceeding without cache: ${(error as Error).message}`);
         return undefined;
     }
@@ -148,17 +159,14 @@ async function getCachedResponse(url: string): Promise<string | undefined> {
 
 async function setCachedResponse(url: string, response: string): Promise<void> {
     try {
-        // Full rendered pages (e.g. lego.com) can be 700-900KB raw, well past DynamoDB's 400KB item
-        // limit, so always compress before checking size / storing. HTML/JSON like this typically
-        // compresses 5-10x, which is usually enough to fit; if it still doesn't, fail open (skip
-        // caching) rather than lose the response we already successfully fetched.
         const compressed = zlib.gzipSync(response);
-        if (compressed.length > HTTP_CACHE_MAX_COMPRESSED_BYTES) {
-            console.warn(`Compressed response for URL ${url} is ${compressed.length} bytes (${response.length} raw), still too large to cache (limit ${HTTP_CACHE_MAX_COMPRESSED_BYTES}), skipping cache write`);
-            return;
-        }
         const expiresAt = Math.floor(Date.now() / 1000) + (HTTP_CACHE_TTL_MINUTES * 60);
-        await DDB.put(HTTP_CACHE_TABLE_NAME!, { url, response: compressed, expiresAt });
+        await s3Client.send(new PutObjectCommand({
+            Bucket: HTTP_CACHE_BUCKET_NAME!,
+            Key: cacheKeyForUrl(url),
+            Body: compressed,
+            Metadata: { expiresat: String(expiresAt) }
+        }));
     } catch (error) {
         console.warn(`Failed to write HTTP cache for URL ${url}: ${(error as Error).message}`);
     }
