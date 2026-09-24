@@ -52,6 +52,8 @@ export class WeatherAlertCron extends Construct {
                 HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
             },
             timeout: cdk.Duration.seconds(60),
+            // Was the 128 MB default, which peaked at ~110 MB with 6 sources. 14 sources + aggregation need more headroom.
+            memorySize: 256,
             retryAttempts: 2,
             deadLetterQueueEnabled: true,
             deadLetterQueue: dlqWithMonitor.dlq,
