@@ -1,7 +1,7 @@
 import { isStatusObject, Status } from "../../../http";
 import { getStartOfDay, toReadablePacificDate } from "../../utilities";
 import { WeatherData } from "../common/common-data";
-import { AggregatedProperty, AggregatedWeatherData, DailyConditions, HourlyConditions, SkippedDataSource } from "./aggregate-data";
+import { AggregatedAlertData, AggregatedAngleProperty, AggregatedProperty, AggregatedWeatherData, DailyConditions, HourlyConditions, MinutelyConditions, SkippedDataSource } from "./aggregate-data";
 import { dataSources } from "./data-sources";
 
 const TOTAL_DAYS = 8; // All current sources give today + 7 days
@@ -36,6 +36,38 @@ export async function getAggregatedData() {
         }
     }
 
+    // Map of timestamp to MinutelyConditions (currently only OpenWeather provides minutely data)
+    const aggregatedMinutelyData: { [key: number]: MinutelyConditions } = {};
+
+    for (let dataSourceName in allData) {
+        for (let minutelyData of allData[dataSourceName].minutely || []) {
+            const timestamp = minutelyData.datetime;
+            const aggregatedData = aggregatedMinutelyData[timestamp];
+            if (aggregatedData == null) {
+                aggregatedMinutelyData[timestamp] = {
+                    datetime: timestamp,
+                    precipitation: new AggregatedProperty(dataSourceName, minutelyData.precipitation)
+                };
+            } else {
+                aggregatedData.precipitation.addDataPoint(dataSourceName, minutelyData.precipitation);
+            }
+        }
+    }
+
+    // Official alerts, de-duplicated across sources (currently only OpenWeather provides alerts)
+    const aggregatedAlerts: { [key: string]: AggregatedAlertData } = {};
+
+    for (let dataSourceName in allData) {
+        for (let alert of allData[dataSourceName].alerts || []) {
+            const key = `${alert.event}|${alert.start}|${alert.end}`;
+            if (aggregatedAlerts[key] == null) {
+                aggregatedAlerts[key] = { ...alert, dataSources: [dataSourceName] };
+            } else if (!aggregatedAlerts[key].dataSources.includes(dataSourceName)) {
+                aggregatedAlerts[key].dataSources.push(dataSourceName);
+            }
+        }
+    }
+
     // Map of timestamp to HourlyConditions
     const aggregatedHourlyData: any = {};
 
@@ -52,7 +84,7 @@ export async function getAggregatedData() {
                     uvi: new AggregatedProperty(dataSourceName, hourlyData.uvi),
                     clouds: new AggregatedProperty(dataSourceName, hourlyData.clouds),
                     wind_speed: new AggregatedProperty(dataSourceName, hourlyData.wind_speed),
-                    wind_deg: new AggregatedProperty(dataSourceName, hourlyData.wind_deg),
+                    wind_deg: new AggregatedAngleProperty(dataSourceName, hourlyData.wind_deg),
                     wind_gust: new AggregatedProperty(dataSourceName, hourlyData.wind_gust),
                     temp: new AggregatedProperty(dataSourceName, hourlyData.temp),
                     feels_like: new AggregatedProperty(dataSourceName, hourlyData.feels_like),
@@ -102,7 +134,7 @@ export async function getAggregatedData() {
                     rain: new AggregatedProperty(dataSourceName, dailyData.rain),
                     snow: new AggregatedProperty(dataSourceName, dailyData.snow || 0),
                     wind_speed: new AggregatedProperty(dataSourceName, dailyData.wind_speed),
-                    wind_deg: new AggregatedProperty(dataSourceName, dailyData.wind_deg),
+                    wind_deg: new AggregatedAngleProperty(dataSourceName, dailyData.wind_deg),
                     wind_gust: new AggregatedProperty(dataSourceName, dailyData.wind_gust)
                 }
                 aggregatedDailyData[timestamp] = aggregatedData;
@@ -142,7 +174,14 @@ export async function getAggregatedData() {
     console.log("Hourly min: " + toReadablePacificDate(hourlyMin));
     console.log("Hourly max: " + toReadablePacificDate(hourlyMax));
 
+    const minutelyMin = now - 60;
+
     return {
+        minutely: Object.values(aggregatedMinutelyData)
+            .sort((a, b) => a.datetime - b.datetime)
+            .filter(minutelyData => minutelyData.datetime >= minutelyMin),
+        alerts: Object.values(aggregatedAlerts)
+            .sort((a, b) => a.start - b.start),
         hourly: Object.values(aggregatedHourlyData)
             .sort((a: any, b: any) => a.datetime - b.datetime)
             .filter((hourlyData: any) => hourlyData.datetime < hourlyMax)

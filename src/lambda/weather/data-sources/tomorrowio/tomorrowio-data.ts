@@ -22,6 +22,7 @@ export interface IntervalValues {
     precipitationProbability: number, // % 0 to 100
     precipitationIntensity: number, // inches per hour
     precipitationType: number, // "N/A" "Rain" "Snow" "Freezing Rain" "Ice Pellets"
+    rainAccumulation: number, // inches
     iceAccumulation: number, // inches
     snowAccumulation: number, // inches
     windSpeed: number, // mph

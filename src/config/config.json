@@ -33,7 +33,7 @@
     },
     "weatherAlert": {
         "enabled": "true",
-        "rate": "rate(1 hour)",
+        "rate": "rate(30 minutes)",
         "fromEmail": "\"Weather Alert\" <automation@nortakales.com>",
         "emailSubject": "Weather Alert",
         "emailList": [

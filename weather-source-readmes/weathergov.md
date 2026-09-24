@@ -24,9 +24,8 @@ Coordinates are limited to 4 decimal places. More precision gets a 301 redirect 
 
 https://api.weather.gov/points/47.807,-122.1924
 
-As of 2026-09-24 this returns **`SEW` / `131,77`** (forecast zone `WAZ313`). The code still hardcodes
-`SEW/130,76` (the older mapping). NWS says grid mappings can change, so re-check `/points` periodically
-(or look it up at runtime and cache it).
+As of 2026-09-24 this returns **`SEW` / `131,77`** (forecast zone `WAZ313`), which is what the code uses
+(it used `130,76` before). NWS says grid mappings can change, so re-check `/points` periodically.
 
 ## Forecast endpoints
 

@@ -133,7 +133,9 @@ export async function getAsCommonData() {
                     // 3: Freezing Rain
                     // 4: Ice Pellets / Sleet
                     pop: values.precipitationProbability,
-                    rain: values.precipitationIntensity,
+                    // rainAccumulation is the amount for the interval (the day's total for 1d, verified 2026-09
+                    // against summed hourly values). precipitationIntensity is an instantaneous in/hr rate.
+                    rain: values.rainAccumulation,
                     snow: values.snowAccumulation,
 
                     pressure: values.pressureSurfaceLevel,
@@ -168,7 +170,9 @@ export async function getAsCommonData() {
                     // 3: Freezing Rain
                     // 4: Ice Pellets / Sleet
                     pop: values.precipitationProbability,
-                    rain: values.precipitationIntensity,
+                    // rainAccumulation is the amount for the interval (the day's total for 1d, verified 2026-09
+                    // against summed hourly values). precipitationIntensity is an instantaneous in/hr rate.
+                    rain: values.rainAccumulation,
                     snow: values.snowAccumulation,
 
                     pressure: values.pressureSurfaceLevel,

@@ -39,10 +39,12 @@ export function getStartOfDay(datetime: number) {
     return moment(datetime).tz("America/Los_Angeles").startOf('day').valueOf();
 }
 
+// Intentionally labels the direction the wind is blowing TOWARD, not the meteorological convention of
+// where it comes FROM. All APIs report "from" degrees (0 = from the north), so 0 is labeled "South".
 export function getDirectionFromDegrees(degrees: number) {
     if (degrees < 0 || degrees > 360)
         return "Invalid direction";
-    if (degrees >= 337.5 && degrees < 22.5)
+    if (degrees >= 337.5 || degrees < 22.5)
         return "South";
     if (degrees >= 22.5 && degrees < 67.5)
         return "Southwest";
@@ -146,23 +148,32 @@ function averageAngleV4(anglesAndSpeeds: AngleAndSpeed[]) {
     let ewVector = 0;
     let nsVector = 0;
     for (let point of anglesAndSpeeds) {
-        if (point.angle && point.speed) {
+        // 0 is a valid angle (due north), so check for null rather than truthiness
+        if (point.angle != null && point.speed) {
             const radian = deg2rad * point.angle;
             total++;
             ewVector += Math.sin(radian) * point.speed;
             nsVector += Math.cos(radian) * point.speed;
         }
     }
-    const ewAverage = (ewVector / total) * -1;
-    const nsAverage = (nsVector / total) * -1;
-
-    let direction = Math.atan2(ewAverage, nsAverage) * rad2deg;
-    if (direction > 180) {
-        direction -= 180;
-    } else if (direction < 180) {
-        direction += 180;
+    if (total === 0) {
+        return NaN;
     }
-    return direction;
+
+    // atan2 returns (-180, 180], normalize to [0, 360). This was previously done by negating both vectors
+    // and adding 180, which returned 180 (due south) instead of 0 when the east/west component was ~0 and
+    // the average pointed due north (e.g. 350 and 10, or all 360).
+    return (Math.atan2(ewVector / total, nsVector / total) * rad2deg + 360) % 360;
+}
+
+// Unweighted circular mean of angles in degrees, e.g. [350, 10] -> 0 rather than the arithmetic 180
+export function circularMean(angles: number[]) {
+    return averageAngle(angles.map(angle => ({ angle, speed: 1 })));
+}
+
+// Smallest signed difference between two angles in degrees, in the range [-180, 180)
+export function angleDifference(a: number, b: number) {
+    return ((a - b + 540) % 360) - 180;
 }
 
 export function round(number: number, decimal: number) {

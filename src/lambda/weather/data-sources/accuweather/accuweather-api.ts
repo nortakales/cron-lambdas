@@ -93,6 +93,8 @@ function convertToCommonDaily(data: DailyAccuWeatherData[]): DailyConditions[] {
             day.Temperature.Maximum.Unit !== 'F' ||
             day.Day.Rain.Unit !== 'in' ||
             day.Night.Rain.Unit !== 'in' ||
+            day.Day.Snow.Unit !== 'in' ||
+            day.Night.Snow.Unit !== 'in' ||
             day.Day.Wind.Speed.Unit !== 'mi/h' ||
             day.Night.Wind.Speed.Unit !== 'mi/h' ||
             day.Day.WindGust.Speed.Unit !== 'mi/h' ||
@@ -107,6 +109,7 @@ function convertToCommonDaily(data: DailyAccuWeatherData[]): DailyConditions[] {
             },
             pop: day.Day.PrecipitationProbability,
             rain: day.Day.Rain.Value + day.Night.Rain.Value,
+            snow: day.Day.Snow.Value + day.Night.Snow.Value,
             //pressure: 0,
             //humidity: 0,
             //dew_point: 0,

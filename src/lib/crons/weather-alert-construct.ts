@@ -92,7 +92,7 @@ export class WeatherAlertCron extends Construct {
             ruleName: 'WeatherAlertSchedule',
             // Supports minute(s), hour(s), day(s):
             // https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
-            schedule: Schedule.expression(config.autoxReminder.rate),
+            schedule: Schedule.expression(config.weatherAlert.rate),
         });
         schedule.addTarget(new LambdaFunction(this.lambda));
 

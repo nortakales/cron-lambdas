@@ -21,12 +21,11 @@ Had to upgrade deps to use nodejs lambda, then got crazy cryptic docker error, e
 
 Full docs (architecture, every data source, candidate sources, known issues): [docs/weather-alert-system.md](docs/weather-alert-system.md)
 
-Implemented alerts: 7-day extreme temperature (heat and cold), 7-day snow, yearly first freeze, 7-day wind, 48-hour wind.
-The national weather alert and 1-hour heavy rain alert exist but only work in non-aggregate mode, so they don't currently run in production.
+Implemented alerts: 7-day extreme temperature (heat and cold), 7-day snow, yearly first freeze, 7-day wind, 48-hour wind,
+national weather alerts (official watches/warnings), and 1-hour heavy rain (minutely precip rate).
 
 TODO More reminders:
-* heavy rainfall: make the existing alert work in aggregate mode (hourly precip, or minutely data from OpenWeather/Pirate Weather)
-* official alerts: make the existing alert work in aggregate mode (e.g. NWS `/alerts/active?point=`)
+* more sources for official alerts (e.g. NWS `/alerts/active?point=`) and minutely rain (e.g. Pirate Weather); only OpenWeather provides them today
 * Using historical data (the `weather_alert_history` table exists but is never written to):
   * record temps
   * record rainfall

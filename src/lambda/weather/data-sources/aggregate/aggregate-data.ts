@@ -1,10 +1,15 @@
 import { ReportType } from "../../interfaces/alert-types";
+import { angleDifference, circularMean } from "../../utilities";
+import { AlertData } from "../common/common-data";
 
 export interface AggregatedWeatherData {
     current: CurrentConditions;
     minutely: MinutelyConditions[];
     hourly: HourlyConditions[];
     daily: DailyConditions[];
+    // Official weather alerts (watches/warnings/advisories) from every source that provides them,
+    // de-duplicated across sources
+    alerts: AggregatedAlertData[];
 
     skippedDataSources: SkippedDataSource[]
 }
@@ -37,7 +42,12 @@ export interface CurrentConditions extends BaseConditions {
 
 export interface MinutelyConditions {
     datetime: number;
-    precipitation: AggregatedProperty;
+    precipitation: AggregatedProperty; // in/hr
+}
+
+export interface AggregatedAlertData extends AlertData {
+    // shortCodes of the data sources that reported this alert
+    dataSources: string[];
 }
 
 export interface DailyConditions extends BaseConditions {
@@ -91,11 +101,14 @@ export class AggregatedProperty {
     }
 
     addDataPoint(dataSource: string, value: number) {
-        if (value == null) {
+        if (value == null || Number.isNaN(value)) {
             return;
         }
         this.data[dataSource] = value;
-        const values = Object.values(this.data);
+        this.recalculate(Object.values(this.data));
+    }
+
+    protected recalculate(values: number[]) {
         this.average = values.reduce((total, current) => total + current) / values.length;
         this.max = values.reduce((max, current) => max = (max == null || current > max ? current : max));
         this.min = values.reduce((min, current) => min = (min == null || current < min ? current : min));
@@ -118,5 +131,17 @@ export class AggregatedProperty {
         }
 
         return output;
+    }
+}
+
+// For angles in degrees (wind direction). A plain arithmetic mean breaks across north: 350 and 10 would
+// average to 180 (the opposite direction). Uses a circular mean, and std is the RMS of each value's
+// smallest angular distance from that mean. min/max are left as plain numeric min/max.
+export class AggregatedAngleProperty extends AggregatedProperty {
+
+    protected recalculate(values: number[]) {
+        super.recalculate(values);
+        this.average = circularMean(values);
+        this.std = Math.sqrt(values.map(x => Math.pow(angleDifference(x, this.average), 2)).reduce((a, b) => a + b) / values.length);
     }
 }

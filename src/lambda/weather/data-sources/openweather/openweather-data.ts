@@ -12,7 +12,7 @@ export interface OpenWeatherData {
 
 export interface MinutelyConditions {
     dt: number; // seconds
-    precipitation: number; // mm
+    precipitation: number; // mm/h (precipitation rate, not an amount)
 }
 
 export interface DailyConditions extends BaseConditions {

@@ -8,7 +8,7 @@ export interface WeatherData {
 
 export interface MinutelyConditions {
     datetime: number; // seconds
-    precipitation: number; // mm
+    precipitation: number; // in/hr (precipitation rate, not an amount)
 }
 
 export interface DailyConditions extends BaseConditions {

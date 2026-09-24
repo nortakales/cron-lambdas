@@ -7,7 +7,10 @@ import { WeatherGovData, WeatherGovProperty } from './weathergov-data';
 
 export async function getOpenWeatherData() {
 
-    const url = `https://api.weather.gov/gridpoints/SEW/130,76`;
+    // Grid cell for LATITUDE/LONGITUDE, from https://api.weather.gov/points/47.807,-122.1924
+    // NWS says these mappings can change, so re-check /points if the location or data looks off.
+    // (Was SEW/130,76 until 2026-09, which no longer contains the location.)
+    const url = `https://api.weather.gov/gridpoints/SEW/131,77`;
     //const url = `https://www.nortakales.com/thisisjustmetestingweatherapp`;
     const userAgent = '(Custom Weather App, nortakales@gmail.com)';
 
