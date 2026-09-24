@@ -109,7 +109,9 @@
                 "API_KEY_DYNAMO_ACCESS_LAMBDA": "dynamo-access-lambda-api-key",
                 "API_KEY_SECRET_ZYTE": "zyte-api-key",
                 "CREDENTIALS_BRICKSET": "brickset-credentials",
-                "FORCE_UPDATE": "true"
+                "FORCE_UPDATE": "true",
+                "HTTP_CACHE_BUCKET_NAME": "cron-lambdas-http-cache",
+                "HTTP_CACHE_TTL_MINUTES": 180
             },
             "internalConsoleOptions": "openOnSessionStart"
         },

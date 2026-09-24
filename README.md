@@ -17,14 +17,17 @@ TODO: Is there anything from SES I can get into CDK? I manually set that config 
 
 Had to upgrade deps to use nodejs lambda, then got crazy cryptic docker error, eventually had to `npm install --save-dev esbuild@0` to use esbuild instead, found that here: https://pypi.org/project/aws-cdk.aws-lambda-nodejs/
 
-## Weather Reminder
+## Weather Alert
+
+Full docs (architecture, every data source, candidate sources, known issues): [docs/weather-alert-system.md](docs/weather-alert-system.md)
+
+Implemented alerts: 7-day extreme temperature (heat and cold), 7-day snow, yearly first freeze, 7-day wind, 48-hour wind.
+The national weather alert and 1-hour heavy rain alert exist but only work in non-aggregate mode, so they don't currently run in production.
 
 TODO More reminders:
-* heavy rainfall (this might need to be hourly or maybe even can look at minute data to get true downpours)
-* First below freezing (at night) temp of the year
-* snowfall
-* heat waves
-* Using historical data:
+* heavy rainfall: make the existing alert work in aggregate mode (hourly precip, or minutely data from OpenWeather/Pirate Weather)
+* official alerts: make the existing alert work in aggregate mode (e.g. NWS `/alerts/active?point=`)
+* Using historical data (the `weather_alert_history` table exists but is never written to):
   * record temps
   * record rainfall
   * record snowfall
@@ -33,11 +36,10 @@ TODO More reminders:
 * Are there any gaps where I should maybe notify on a quicker basis, like if the last 48 hour alert the wind didn't look too bad, but in the next few hours it did start to get bad, maybe a 3 hour look ahead for bad weather
 * Use feels like temperature for anything?
 * do we care about sunrise/sunset, moonphase?
-* use alerts from their API
 * weekly forecast ? - this would really benefit from averaging across different sources
 
 TODO move all of this out of my main aws account
-TODO more weather sources
+TODO more weather sources (see candidates in docs/weather-alert-system.md)
 TODO store weather history, alerts for new extremes
 TODO move keys to AWS KMS
 TODO ditch the overall Lambda errors alarm in favor of DLQ alarms
