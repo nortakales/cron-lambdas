@@ -24,9 +24,11 @@ system works, every weather data source it uses, possible new sources, and known
    the average, min, max and population std-dev. Wind direction uses `AggregatedAngleProperty` (circular mean
    and angular std-dev). The windows kept are **the last hour through +72 hours** (hourly)
    and **today through +8 days** (daily).
-5. **Alert.** Each alert's `processAggregate()` runs, gated by the last-fired timestamp in DynamoDB
+5. **Store.** On scheduled runs, every hour/day that hasn't started yet is written to DynamoDB
+   `weather_forecast_history` (see [Forecast history & API](#forecast-history--api)).
+6. **Alert.** Each alert's `processAggregate()` runs, gated by the last-fired timestamp in DynamoDB
    `weather_alert_tracker` (the timestamp is only written when the alert fires).
-6. **Notify.** Email (SES) and/or Pushover.
+7. **Notify.** Email (SES) and/or Pushover.
 
 ### Report types
 
@@ -77,8 +79,70 @@ reaches a timestamp first, and no alert uses them.
 | **NWS Alerts** (`na`) | ✅ Enabled (added 2026-09-24) | `GET api.weather.gov/alerts/active?point={lat},{lon}&status=actual` | None (User-Agent) | Free | 1 → 48 | — | — | ❌ | ✅ Official watches/warnings/advisories (start = `onset`, end = `ends`) | Alerts only | [Alerts](https://www.weather.gov/documentation/services-web-api#/default/alerts_active) |
 | **Meteomatics** (`mm`) | ❌ Disabled ("no more free plan") | `GET /{start}--{end}:PT1H/{params}/{lat,lon}/json` + OAuth token from `login.meteomatics.com` | Basic auth → token (`meteomatics-api-credentials`) | No free plan anymore (14-day trial, then custom pricing) | (1 token + 1 data) | 8 days, 1 h | Computed from hourly | ❌ | ❌ | wind_speed_10m, wind_gusts_10m_1h, wind_dir_10m, t_2m, precip_1h | [Getting started](https://www.meteomatics.com/en/api/getting-started/) |
 
-Unused infra/config: the `weather_alert_history` DynamoDB table (0 items, never written) and the
-`accuweather-alternate-api-key` secret/env var (fetched on every call but never used since "Use single accuweather api key").
+Unused config: the `accuweather-alternate-api-key` secret/env var (fetched on every call but never used since
+"Use single accuweather api key").
+
+---
+
+## Forecast history & API
+
+Added 2026-09-24. Code: `src/lambda/weather/history/forecast-history.ts` (storage format, writer, reader),
+`src/lambda/weather/weather-data-api-lambda.ts` (API), `src/lib/constructs/weather-data-api.ts` (infra).
+
+### Storage
+
+DynamoDB table **`weather_forecast_history`**: partition key `series` (`"hourly"` | `"daily"`), sort key `epoch`
+(seconds: the hour's start, or local midnight for daily). Pay-per-request, deletion protection, point-in-time
+recovery (35 days), and a Retain policy.
+
+- **What's stored:** the aggregator's hourly rows (72 hours) and daily rows (8 days), after unit conversion. For each
+  metric: `avg`, `min`, `max`, `std`, `n` (number of sources), and `sources` (each source's value). Minutely data isn't
+  stored.
+  - Hourly metrics: `temp`, `feels_like`, `visibility`, `pop`, `rain`, `snow`, `wind_speed`, `wind_deg`, `wind_gust`.
+  - Daily metrics: `temp_max`, `temp_min`, `pop`, `rain`, `snow`, `wind_speed`, `wind_deg`, `wind_gust`.
+  - pressure/humidity/dew point/UV/clouds are left out, since they aren't really aggregated (first source wins).
+- **Other attributes:** `time` (ISO, Pacific), `date` (YYYY-MM-DD), `updatedAt` (the run that wrote it), `sources`
+  (short codes that contributed), `skippedSources` (sources that failed in that run).
+- **When items are written:** every scheduled run replaces the whole item for each hour/day that **hasn't started
+  yet**. A source skipped in a run is missing from those items until the next run.
+- **When items freeze:** an hour freezes when it starts. A day freezes at its **start** (local midnight), so a day's
+  history is the forecast from about 11:30 PM the night before. Freezing at the end of the day would store misleading
+  values, because some sources (e.g. Pirate Weather's wind) only cover the remaining hours of today.
+- **Scope:** ad-hoc runs never write. A storage failure logs an error (reaching the error notifier) but doesn't block alerts.
+- **Cost:** ~78 items of ~2 KB per run → ~225k write units/month, about $0.15/month. Storage grows ~20 MB/year.
+
+### API
+
+REST API "Weather Data API" (API Gateway → `WeatherDataApiLambdaFunction`). Read-only, meant to be called
+server-side (no CORS).
+
+- **Auth:** send the key in the `x-api-key` header. The key is the Secrets Manager secret `weather-data-api-key`
+  (`aws secretsmanager get-secret-value --secret-id weather-data-api-key --query SecretString --output text`).
+- **Throttling:** 5 requests/second, bursts of 10.
+- **Caching:** responses have `Cache-Control: max-age=300`, since the data changes every 30 minutes.
+
+| Endpoint | Returns |
+|---|---|
+| `GET /forecast?breakout=` | `hourly` (current hour → +72 h) and `daily` (today → +7 days) |
+| `GET /hourly?start=&end=&breakout=` | Hourly items. Defaults to the next 72 hours. Max range 31 days |
+| `GET /daily?start=&end=&breakout=` | Daily items. Defaults to today + 7 days. Max range 366 days |
+| `GET /sources` | Source short codes → names, and units for every metric |
+
+- `start`/`end` are inclusive and take epoch seconds or ISO 8601 (`2026-09-25`, `2026-09-25T09:00`; times without an
+  offset are Pacific).
+- `breakout=true` includes `sources` (per-source values) in each metric. It defaults to false, which returns only the
+  roll-up stats.
+- Errors return `{ "error": "..." }` with 400/401/404/500.
+
+Example (`breakout=false`):
+
+```json
+{ "generatedAt": "2026-09-24T14:50:00-07:00",
+  "hourly": [ { "series": "hourly", "epoch": 1790287200, "time": "2026-09-24T15:00:00-07:00", "date": "2026-09-24",
+                "updatedAt": "2026-09-24T14:32:10-07:00", "sources": ["aw", "ec", "..."], "skippedSources": [],
+                "metrics": { "temp": { "avg": 60.24, "min": 56.6, "max": 65, "std": 1.98, "n": 13 }, "...": {} } } ],
+  "daily": [ "..." ] }
+```
 
 ---
 

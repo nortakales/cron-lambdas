@@ -34,7 +34,7 @@ async function httpGet(event: any) {
     required(event.queryStringParameters, "event.queryStringParameters");
     required(event.queryStringParameters.apiKey, "event.apiKey");
     required(event.queryStringParameters.operation, "event.queryStringParameters.operation");
-    verifyApiKey(event.queryStringParameters.apiKey);
+    await verifyApiKey(event.queryStringParameters.apiKey);
 
     switch (event.queryStringParameters.operation) {
         case "PUT":
@@ -164,7 +164,7 @@ async function httpPost(event: any) {
     required(operation, "event.body.operation");
     required(table, "event.body.table");
     required(payload.apiKey, "event.body.apiKey");
-    verifyApiKey(payload.apiKey);
+    await verifyApiKey(payload.apiKey);
 
     switch (operation) {
         case "PUT":

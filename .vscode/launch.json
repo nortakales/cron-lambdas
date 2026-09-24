@@ -36,6 +36,7 @@
                 "API_KEY_ACCUWEATHER_ALTERNATE": "accuweather-alternate-api-key",
                 "API_KEY_SECRET_PIRATE_WEATHER": "pirateweather-apikey",
                 "API_KEY_SECRET_GOOGLE_WEATHER": "google-weather-apikey",
+                "FORECAST_HISTORY_TABLE_NAME": "weather_forecast_history",
                 "API_KEY_SECRET_ZYTE": "zyte-api-key"
             },
             "internalConsoleOptions": "openOnSessionStart"
@@ -140,6 +141,7 @@
                 "API_KEY_ACCUWEATHER_ALTERNATE": "accuweather-alternate-api-key",
                 "API_KEY_SECRET_PIRATE_WEATHER": "pirateweather-apikey",
                 "API_KEY_SECRET_GOOGLE_WEATHER": "google-weather-apikey",
+                "FORECAST_HISTORY_TABLE_NAME": "weather_forecast_history",
                 "API_KEY_SECRET_ZYTE": "zyte-api-key",
                 "LATITUDE": "47.806994",
                 "LONGITUDE": "-122.192443",

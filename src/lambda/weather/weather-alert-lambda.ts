@@ -16,6 +16,7 @@ import { startLambdaLog } from '../utilities/logging';
 import { Format, toReadablePacificDate } from './utilities';
 import { getAggregatedData } from './data-sources/aggregate/aggregate';
 import { AggregatedWeatherData } from './data-sources/aggregate/aggregate-data';
+import { storeForecast } from './history/forecast-history';
 
 const ENABLED = process.env.ENABLED!;
 const TABLE_NAME = process.env.TABLE_NAME!;
@@ -122,6 +123,14 @@ async function processRegularReport(reportType: ReportType) {
     let weatherData;
     if (reportType.isAggregate) {
         weatherData = await getAggregatedData();
+
+        // Store the forecast for the weather data API/history. Only on scheduled runs (this function), never
+        // ad-hoc ones. A failure here is logged (and reaches the error notifier) but doesn't block alerts.
+        try {
+            await storeForecast(weatherData);
+        } catch (error) {
+            console.error("ERROR storing forecast history, continuing with alerts", error);
+        }
     } else {
         weatherData = await openweather.getAsCommonData();
     }

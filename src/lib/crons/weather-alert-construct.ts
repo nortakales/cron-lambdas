@@ -15,6 +15,7 @@ import { Construct } from 'constructs';
 export class WeatherAlertCron extends Construct {
 
     readonly lambda: lambda.Function;
+    readonly forecastHistoryTable: dynamodb.Table;
 
     constructor(scope: Construct, id: string, errorLogNotifierLambda: lambda.Function, httpCacheBucket: s3.Bucket) {
         super(scope, id);
@@ -50,6 +51,7 @@ export class WeatherAlertCron extends Construct {
                 API_KEY_SECRET_GOOGLE_WEATHER: config.weatherAlert.apiKeySecretGoogleWeather,
                 HTTP_CACHE_BUCKET_NAME: httpCacheBucket.bucketName,
                 HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
+                FORECAST_HISTORY_TABLE_NAME: config.weatherAlert.forecastHistoryDynamoTableName,
             },
             timeout: cdk.Duration.seconds(60),
             // Was the 128 MB default, which peaked at ~110 MB with 6 sources. 14 sources + aggregation need more headroom.
@@ -100,20 +102,25 @@ export class WeatherAlertCron extends Construct {
         });
         schedule.addTarget(new LambdaFunction(this.lambda));
 
-        const historyTable = new dynamodb.Table(this, 'WeatherAlertHistoryDynamoTable', {
+// Hourly/daily forecast history, written on every scheduled run and served by the weather data API.
+        // See src/lambda/weather/history/forecast-history.ts
+        this.forecastHistoryTable = new dynamodb.Table(this, 'WeatherForecastHistoryDynamoTable', {
             partitionKey: {
-                name: 'date',
+                name: 'series', // "hourly" | "daily"
                 type: dynamodb.AttributeType.STRING
             },
             sortKey: {
-                name: 'source',
-                type: dynamodb.AttributeType.STRING
+                name: 'epoch', // seconds, the hour's start or local midnight
+                type: dynamodb.AttributeType.NUMBER
             },
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
             removalPolicy: cdk.RemovalPolicy.RETAIN,
-            tableName: config.weatherAlert.historyDynamoTableName
+            deletionProtection: true,
+            // History can't be re-fetched, so keep 35 days of point-in-time backups (pennies at this size)
+            pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
+            tableName: config.weatherAlert.forecastHistoryDynamoTableName
         });
-        historyTable.grantReadWriteData(this.lambda);
+        this.forecastHistoryTable.grantWriteData(this.lambda);
 
         httpCacheBucket.grantReadWrite(this.lambda);
     }

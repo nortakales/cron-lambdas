@@ -122,3 +122,49 @@ export async function del(table: string, key: { [key: string]: any }) {
         ReturnValues: ReturnValue.ALL_OLD
     });
 }
+const BATCH_WRITE_MAX_ITEMS = 25;
+const BATCH_WRITE_MAX_ATTEMPTS = 5;
+
+// Writes (puts) any number of items, 25 per request (the DynamoDB limit), retrying unprocessed items with backoff
+export async function batchPut(table: string, items: { [key: string]: any }[]) {
+
+    console.log(`Batch writing ${items.length} items to DDB: ${table}`);
+
+    for (let i = 0; i < items.length; i += BATCH_WRITE_MAX_ITEMS) {
+        let requests = items.slice(i, i + BATCH_WRITE_MAX_ITEMS).map(item => ({ PutRequest: { Item: item } }));
+
+        for (let attempt = 1; requests.length > 0; attempt++) {
+            if (attempt > BATCH_WRITE_MAX_ATTEMPTS) {
+                throw new Error(`Failed to write ${requests.length} items to ${table} after ${BATCH_WRITE_MAX_ATTEMPTS} attempts`);
+            }
+            if (attempt > 1) {
+                await new Promise(r => setTimeout(r, 100 * Math.pow(2, attempt)));
+            }
+            const output = await DDB.batchWrite({
+                RequestItems: { [table]: requests }
+            });
+            requests = (output.UnprocessedItems?.[table] || []) as typeof requests;
+        }
+    }
+}
+
+// Queries a partition for a sort key range (inclusive), following pagination
+export async function queryRange(table: string, hashKeyName: string, hashKey: string | number, rangeKeyName: string, rangeStart: string | number, rangeEnd: string | number) {
+
+    const items: { [key: string]: any }[] = [];
+    let exclusiveStartKey: { [key: string]: any } | undefined;
+
+    do {
+        const output = await DDB.query({
+            TableName: table,
+            KeyConditionExpression: '#hkey = :hkey and #rkey between :start and :end',
+            ExpressionAttributeNames: { '#hkey': hashKeyName, '#rkey': rangeKeyName },
+            ExpressionAttributeValues: { ':hkey': hashKey, ':start': rangeStart, ':end': rangeEnd },
+            ExclusiveStartKey: exclusiveStartKey
+        });
+        items.push(...(output.Items || []));
+        exclusiveStartKey = output.LastEvaluatedKey;
+    } while (exclusiveStartKey);
+
+    return items;
+}

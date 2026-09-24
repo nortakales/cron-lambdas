@@ -3,6 +3,7 @@ import { AutoxReminderCron } from './crons/autox-reminder-construct';
 import { WeatherAlertCron } from './crons/weather-alert-construct';
 import { DeleteTimerConstruct } from './constructs/delete-timer-construct';
 import { AdhocWeatherReportAPI } from './constructs/adhoc-weather-report-api';
+import { WeatherDataAPI } from './constructs/weather-data-api';
 import { NewComicsCron } from './crons/new-comics-construct';
 import { ErrorLogNotifier } from './constructs/error-log-notifier';
 import { Construct } from 'constructs';
@@ -34,6 +35,7 @@ export class CronLambdaStack extends cdk.Stack {
 
         new DeleteTimerConstruct(this, 'DeleteTimerConstruct', errorLogNotifier.lambda);
         new AdhocWeatherReportAPI(this, 'AdhocWeatherAPI', weatherAlertCron.lambda);
+        new WeatherDataAPI(this, 'WeatherDataAPI', errorLogNotifier.lambda, weatherAlertCron.forecastHistoryTable);
         new DynamoDBAccessAPI(this, 'DynamoDBAccessAPI', errorLogNotifier.lambda);
         new SwitchBotAPI(this, 'SwitchBotAPI', errorLogNotifier.lambda, httpCacheBucket.bucket);
         new AlexaSkillLambda(this, 'AlexaSkillLambda', errorLogNotifier.lambda);

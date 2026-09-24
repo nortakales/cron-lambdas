@@ -25,7 +25,7 @@ Implemented alerts: 7-day extreme temperature (heat and cold), 7-day snow, yearl
 national weather alerts (official watches/warnings), and 1-hour heavy rain (minutely precip rate).
 
 TODO More reminders:
-* Using historical data (the `weather_alert_history` table exists but is never written to):
+* Using historical data (forecast history is now stored in `weather_forecast_history`, but not actual observations):
   * record temps
   * record rainfall
   * record snowfall
@@ -38,7 +38,7 @@ TODO More reminders:
 
 TODO move all of this out of my main aws account
 TODO more weather sources (see candidates in docs/weather-alert-system.md)
-TODO store weather history, alerts for new extremes
+TODO alerts for new extremes (forecast history is stored, see docs/weather-alert-system.md; observed history isn't yet)
 TODO move keys to AWS KMS
 TODO ditch the overall Lambda errors alarm in favor of DLQ alarms
 
