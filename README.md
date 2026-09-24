@@ -25,7 +25,6 @@ Implemented alerts: 7-day extreme temperature (heat and cold), 7-day snow, yearl
 national weather alerts (official watches/warnings), and 1-hour heavy rain (minutely precip rate).
 
 TODO More reminders:
-* more sources for official alerts (e.g. NWS `/alerts/active?point=`) and minutely rain (e.g. Pirate Weather); only OpenWeather provides them today
 * Using historical data (the `weather_alert_history` table exists but is never written to):
   * record temps
   * record rainfall

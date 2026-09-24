@@ -54,16 +54,20 @@ export async function getAggregatedData() {
         }
     }
 
-    // Official alerts, de-duplicated across sources (currently only OpenWeather provides alerts)
-    const aggregatedAlerts: { [key: string]: AggregatedAlertData } = {};
+    // Official alerts, de-duplicated across sources. Different sources relay the same NWS alert with slightly
+    // different start/end times, so treat alerts as the same if they have the same event name (e.g. "Wind
+    // Advisory") and their time windows overlap.
+    const aggregatedAlerts: AggregatedAlertData[] = [];
 
     for (let dataSourceName in allData) {
         for (let alert of allData[dataSourceName].alerts || []) {
-            const key = `${alert.event}|${alert.start}|${alert.end}`;
-            if (aggregatedAlerts[key] == null) {
-                aggregatedAlerts[key] = { ...alert, dataSources: [dataSourceName] };
-            } else if (!aggregatedAlerts[key].dataSources.includes(dataSourceName)) {
-                aggregatedAlerts[key].dataSources.push(dataSourceName);
+            const existing = aggregatedAlerts.find(other =>
+                other.event?.toLowerCase() === alert.event?.toLowerCase() &&
+                other.start <= alert.end && alert.start <= other.end);
+            if (existing == null) {
+                aggregatedAlerts.push({ ...alert, dataSources: [dataSourceName] });
+            } else if (!existing.dataSources.includes(dataSourceName)) {
+                existing.dataSources.push(dataSourceName);
             }
         }
     }
@@ -180,8 +184,7 @@ export async function getAggregatedData() {
         minutely: Object.values(aggregatedMinutelyData)
             .sort((a, b) => a.datetime - b.datetime)
             .filter(minutelyData => minutelyData.datetime >= minutelyMin),
-        alerts: Object.values(aggregatedAlerts)
-            .sort((a, b) => a.start - b.start),
+        alerts: aggregatedAlerts.sort((a, b) => a.start - b.start),
         hourly: Object.values(aggregatedHourlyData)
             .sort((a: any, b: any) => a.datetime - b.datetime)
             .filter((hourlyData: any) => hourlyData.datetime < hourlyMax)

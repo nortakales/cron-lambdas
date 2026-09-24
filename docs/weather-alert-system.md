@@ -57,6 +57,8 @@ The ad-hoc API Gateway endpoint has **no auth**.
 ## Weather data sources (implemented)
 
 **Calls/day** is based on the actual 30-minute schedule (48 runs per day), not counting ad-hoc calls.
+Alerts from different sources (OpenWeather, Pirate Weather, NWS) are merged when they have the same event name and
+overlapping time windows. Minutely rain comes from OpenWeather and Pirate Weather.
 **Used metrics** are the fields mapped into `WeatherData` that the aggregator actually reads. Pressure, humidity,
 dew point, UV and clouds are mapped by some sources, but the aggregator only keeps them from whichever source
 reaches a timestamp first, and no alert uses them.
@@ -67,8 +69,12 @@ reaches a timestamp first, and no alert uses them.
 | **Weather.gov / NWS** (`wg`) | ✅ Enabled | Raw gridpoint data `GET /gridpoints/SEW/131,77` (was 130,76 until 2026-09-24) | None. The User-Agent header identifies the app | Free | 1 → 48 | ~8 days, native periods of 1–12 h expanded to hourly | Computed from hourly (local-day min/max/max/sum) | ❌ | ❌ (free alerts endpoint exists, not used) | **Hourly:** temp, apparent temp, PoP, QPF (split across the period), snowfall (split), wind speed/dir/gust. Parsed but unused: max/min temp, wind chill, heat index, dew point, RH, sky cover, ice accumulation | [API docs](https://www.weather.gov/documentation/services-web-api), [gridpoints FAQ](https://weather-gov.github.io/api/gridpoints) |
 | **Tomorrow.io** (`ti`) | ✅ Enabled | **v4 Timelines** `GET /v4/timelines`, timesteps `current,1h,1d` | `apikey` query param (`tomorrowio-apikey`) | Free: 500/day, 25/hour, 3/second | 1 → 48 | now → +5 days, 1 h | 5 days (1d steps start at 6 AM local) | ❌ | ❌ | **Hourly:** temp, apparent temp, PoP, `rainAccumulation`, `snowAccumulation`, wind speed/dir/gust (+pressure in **inHg**, humidity, dew point, UV, cloud cover). `visibility` is mapped but never requested. **Daily:** tempMax/Min, PoP, rainAccumulation (the day's total), snowAccumulation, wind | [Timelines](https://docs.tomorrow.io/reference/get-timelines), [data layers](https://docs.tomorrow.io/reference/data-layers-core) |
 | **Visual Crossing** (`vc`) | ✅ Enabled | **Legacy** `weatherdata/forecast` (`aggregateHours=1`). **Retires 2026-12-31** | `key` query param (`visualcrossing-apikey`) | Free: 1,000 records/day | 1 → 48 | Legacy forecast horizon (up to 15 days), 1 h | Computed from hourly (only today + 7 used) | ❌ | Requested (`alertLevel=detail`) but ignored | **Hourly:** temp, PoP, precip, snow, wind speed/dir/gust. Returned but unused: humidity, heat index, wind chill, dew point, UV, visibility, pressure, cloud cover, precip type, alerts | [Timeline API (replacement)](https://www.visualcrossing.com/resources/documentation/weather-api/timeline-weather-api/), [legacy docs](https://www.visualcrossing.com/resources/documentation/weather-api/weather-api-documentation/) |
-| **Open-Meteo** (`om`) | ✅ Enabled | `GET /v1/forecast`, default `best_match` model blend, legacy variable names (`windspeed_10m` etc.) | None | Free for non-commercial use (10k/day, 5k/hour, 600/min) | 1 → 48 | 7 days (168 h), 1 h | 7 days (today + 6) | ❌ | ❌ | **Hourly:** temp, RH, precipitation, snowfall, wind speed/dir/gust (rain, showers, snow depth fetched but unused). **Daily:** max/min temp, precip sum, snowfall sum, wind max, gust max, dominant dir. No PoP requested | [Forecast API](https://open-meteo.com/en/docs) |
+| **Open-Meteo** (`om`) | ✅ Enabled | `GET /v1/forecast`, default `best_match` blend (here: HRRR for ~48 h, then GFS) | None | Free for non-commercial use (10k/day, 5k/hour, 600/min) | 1 → 48 | 8 days (192 h), 1 h | 8 days | ❌ | ❌ | **Hourly:** temp, apparent temp, RH, PoP, precipitation, snowfall, wind speed/dir/gust. **Daily:** max/min temp, max PoP, precip sum, snowfall sum, wind max, gust max, dominant dir. Note: its PoP is identical to NBM's (`nb`), so that one field counts NBM twice | [Forecast API](https://open-meteo.com/en/docs) |
 | **AccuWeather** (`aw`) | ✅ Enabled | Core Weather Forecasts **v1**: `hourly/12hour` + `daily/5day` | `apikey` query param (`accuweather-api-key`). The new portal documents `Authorization: Bearer` | Free "Limited Trial" ended Sept 2025. Now a 14-day trial, then paid **Starter from $2/mo**. Calls currently succeed, so a paid key is presumably in use | 2 → 96 | 12 h, 1 h | 5 days | ❌ (MinuteCast is a separate product) | ❌ | **Hourly:** temp, RealFeel, visibility, PoP, rain, snow, wind speed/dir/gust (+humidity, dew point, UV, clouds). **Daily:** min/max, **day-only** PoP, day+night rain, day+night snow, max wind/gust, average dir | [Developer docs](https://developer.accuweather.com/documentation/overview), [auth](https://developer.accuweather.com/documentation/authentication) |
+| **Open-Meteo per-model**: ECMWF IFS (`ec`), NBM (`nb`), GEM (`gm`), ICON (`ic`), UKMO (`uk`) | ✅ Enabled (added 2026-09-24) | `GET /v1/forecast?models=` `ecmwf_ifs`, `ncep_nbm_conus`, `gem_seamless`, `icon_seamless`, `ukmo_seamless` (one call each) | None | Free (same limits as `om`) | 5 → 240 | 8 days, 1 h (ICON ~7.75 days, UKMO ~7.25 days; hours past a model's range are skipped) | 8 days (ICON/UKMO 7) | ❌ | ❌ | Same fields as `om` | [Forecast API](https://open-meteo.com/en/docs), [models](https://open-meteo.com/en/docs#weather_models) |
+| **Pirate Weather** (`pw`) | ✅ Enabled (added 2026-09-24) | `GET /forecast/{key}/{lat},{lon}?units=us&extend=hourly&version=2` (API V2.10) | Key in the URL **path** (`pirateweather-apikey`) | Free: 10,000 calls/month | 1 → 48 (~1,440/month) | 168 h, 1 h | 8 days | ✅ 61 min, precip rate in/hr | ✅ (title/issued/expires) | **Minutely:** precipIntensity. **Hourly:** temp, apparent temp, PoP, liquid accumulation (rain), snow accumulation, wind speed/bearing/gust (+pressure, humidity, dew point, UV, clouds, visibility). **Daily:** temperatureMax/Min (midnight to midnight), PoP, liquid/snow accumulation, bearing. Daily wind/gust = **max of hourly**, because PW's daily windSpeed/windGust are daily averages. PW is itself a blend (HRRR, NBM, ECMWF, GFS, GEFS, HRDPS, GDPS) | [API docs](https://docs.pirateweather.net/en/latest/API/) |
+| **Google Weather** (`gw`) | ✅ Enabled (added 2026-09-24) | Maps Platform Weather API v1: `forecast/hours:lookup` (paged, 24 h max per page) + `forecast/days:lookup` | `key` query param (`google-weather-apikey`) | Free: 10,000 calls/month, then $0.15 per 1,000. Cap the daily quota in GCP (~300/day) so it can't bill | 4 → 192 (~5,800/month) | 72 h, 1 h | 8 days (days run 7 AM–7 AM, split into day/night halves) | ❌ | ❌ | **Hourly:** temp, feels-like, PoP, qpf (rain), snowQpf, wind speed/dir/gust (+pressure, humidity, dew point, UV, clouds, visibility). **Daily:** max/min temp; PoP = max of halves; rain/snow = sum of halves; wind/gust = max of halves; dir = weighted average | [Docs](https://developers.google.com/maps/documentation/weather), [pricing](https://developers.google.com/maps/billing-and-pricing/pricing) |
+| **NWS Alerts** (`na`) | ✅ Enabled (added 2026-09-24) | `GET api.weather.gov/alerts/active?point={lat},{lon}&status=actual` | None (User-Agent) | Free | 1 → 48 | — | — | ❌ | ✅ Official watches/warnings/advisories (start = `onset`, end = `ends`) | Alerts only | [Alerts](https://www.weather.gov/documentation/services-web-api#/default/alerts_active) |
 | **Meteomatics** (`mm`) | ❌ Disabled ("no more free plan") | `GET /{start}--{end}:PT1H/{params}/{lat,lon}/json` + OAuth token from `login.meteomatics.com` | Basic auth → token (`meteomatics-api-credentials`) | No free plan anymore (14-day trial, then custom pricing) | (1 token + 1 data) | 8 days, 1 h | Computed from hourly | ❌ | ❌ | wind_speed_10m, wind_gusts_10m_1h, wind_dir_10m, t_2m, precip_1h | [Getting started](https://www.meteomatics.com/en/api/getting-started/) |
 
 Unused infra/config: the `weather_alert_history` DynamoDB table (0 items, never written) and the
@@ -78,11 +84,16 @@ Unused infra/config: the `weather_alert_history` DynamoDB table (0 items, never 
 
 ## Candidate sources (not implemented)
 
-Target: data comparable to what's already used (≥ 3 days hourly, ≥ 5–7 days daily, temp/wind/gust/precip/snow),
-at **$0–2/month**, at roughly 1,440–2,900 calls per month (hourly or 30-minute runs).
+NWS alerts, Open-Meteo per-model, Pirate Weather and Google Weather were implemented on 2026-09-24 (see above).
 
-| Candidate | Cost at our volume | Hourly | Daily | Minutely | Alerts | Notes | Docs |
-|---|---|---|---|---|---|---|---|
+| Candidate | Cost at our volume | Notes | Docs |
+|---|---|---|---|
+| Other Open-Meteo models | Free | Checked 2026-09-24 at this location. `jma_seamless`: no gusts or PoP. `meteofrance_seamless`: ~4.5 days. `cma_grapes_global`: ~5 days, no PoP. `knmi_seamless`/`dmi_seamless`/`metno_seamless` return exactly ECMWF's values here (regional models that fall back outside Europe). `gfs_seamless`/`ncep_hrrr_conus` duplicate `om`. `ecmwf_aifs025`, `kma_seamless`, `bom_access_global`: no data | [Models](https://open-meteo.com/en/docs#weather_models) |
+| **WeatherAPI.com** | Free: 100,000 calls/month (**no longer 1M**) | 3-day forecast only on free. Starter is $7/mo (7-day forecast), over budget | [Pricing](https://www.weatherapi.com/pricing.aspx) |
+| Meteomatics / Foreca / Ambee | Trial only or enterprise | Not viable | |
+| Weatherbit / Meteosource / Xweather | Not re-verified in this review | See git history of `.claude/reports/weather-sources-analysis.md` for the earlier assessment | |
+
+---|---|---|---|---|---|---|---|
 | **NWS Alerts** `GET api.weather.gov/alerts/active?point=lat,lon` | Free | — | — | — | ✅ Official NWS watches/warnings/advisories | Would add a second alerts source (only OpenWeather provides alerts today): official, free, no key. Verified 200 on 2026-09-24 | [Alerts](https://www.weather.gov/documentation/services-web-api#/default/alerts_active) |
 | **Open-Meteo, per-model** (`&models=ecmwf_ifs025,gfs_seamless,ncep_nbm_conus,ncep_hrrr_conus,gem_seamless,icon_seamless`) | Free, same single call | 8+ days (HRRR ~48 h) | up to 16 days | 15-min for some models | ❌ | Adds ~5 **independent NWP models** (ECMWF, GFS, NBM, Canadian GEM, German ICON) for free, which suits the averaging approach. Verified today: all returned full data except `ecmwf_aifs025` (empty hourly). Downside: one vendor, so it fails as a unit | [Forecast API](https://open-meteo.com/en/docs) |
 | **Pirate Weather** | Free: 10,000 calls/month (~1,440 needed). Donation tiers raise limits | 48 h (168 h with `extend=hourly`) | 8 days | ✅ 60 min | ✅ | Dark Sky-style schema. Blends HRRR/NBM/GFS/ECMWF; strong for the US. Has precip type and snow accumulation | [API docs](https://docs.pirateweather.net/en/latest/API/), [site](https://pirateweather.net/) |
@@ -115,6 +126,7 @@ From the 2026-09-24 review. File/line refs point to `src/lambda/weather/` unless
   `rainAccumulation`. A live check on 2026-09-24 showed the daily value equals the sum of hourly values
   (0.54 vs 0.55), while intensity said 0.24.
 - AccuWeather daily snow (`Day.Snow + Night.Snow`) was not mapped.
+- Open-Meteo now uses current variable names (`wind_speed_10m` etc.) and also requests PoP and apparent temperature.
 
 ### Open
 1. **The aggregator substitutes `snow || 0`** for sources without snow data. Accepted as-is.
@@ -124,7 +136,8 @@ From the 2026-09-24 review. File/line refs point to `src/lambda/weather/` unless
    sentinels that turn 0°F into 999 and cap max temp at ≥ 0. Meteomatics also resets max to `0` instead of `-999`.
 4. **Stats inflate on disagreement.** Temp/snow alerts use `avg ± σ`, so a single outlier source can trigger an alert.
 5. **Skipped-source messages are dropped** unless another alert also fires.
-6. **API keys leak into logs and notifications.** Request URLs with keys are logged (2-year retention). On failure,
+6. **API keys leak into logs and notifications.** Request URLs with keys are logged (2-year retention). This now
+   includes Pirate Weather (key in the URL path) and Google Weather (key query param). On failure,
    the URL is also in `statusMessage`, which goes to the ERROR log subscription → error notifier, **and** into the
    skipped-source text in email/push.
 7. **The ad-hoc API Gateway has no auth.** Anyone with the URL can make you spend paid quota.
@@ -132,8 +145,6 @@ From the 2026-09-24 review. File/line refs point to `src/lambda/weather/` unless
    (`/timeline/{lat},{lon}/next7days?unitGroup=us&include=hours,days,alerts`), about 8 records per call.
 9. **AccuWeather auth.** The new portal documents only `Authorization: Bearer <key>`. The `apikey` query param
    still works today.
-10. **Open-Meteo legacy variable names** (`windspeed_10m` etc.) still work. Current names are `wind_speed_10m` etc.
-    Update the names and `expectedHourlyUnits`/`expectedDailyUnits` together.
-11. **Tomorrow.io:** `visibility` is mapped but not in the requested `fields`. Timelines still works on the free plan.
-12. **Stale code comments:** `aggregate.ts` `TOTAL_DAYS` ("All current sources give today + 7 days") and
-    `TOTAL_HOURS`; `openmeteo-api.ts` "TODO need to convert units"; `weathergov-data.ts` "not clear if sum" TODOs.
+10. **Tomorrow.io:** `visibility` is mapped but not in the requested `fields`. Timelines still works on the free plan.
+11. **Stale code comments:** `aggregate.ts` `TOTAL_DAYS` ("All current sources give today + 7 days") and
+    `TOTAL_HOURS`; `weathergov-data.ts` "not clear if sum" TODOs.

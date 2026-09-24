@@ -46,6 +46,8 @@ export class WeatherAlertCron extends Construct {
                 API_CREDENTIALS_SECRET_METEOMATICS: config.weatherAlert.apiCredentialsSecretMeteomatics,
                 API_KEY_ACCUWEATHER: config.weatherAlert.apiKeyAccuWeather,
                 API_KEY_ACCUWEATHER_ALTERNATE: config.weatherAlert.apiKeyAccuWeatherAlternate,
+                API_KEY_SECRET_PIRATE_WEATHER: config.weatherAlert.apiKeySecretPirateWeather,
+                API_KEY_SECRET_GOOGLE_WEATHER: config.weatherAlert.apiKeySecretGoogleWeather,
                 HTTP_CACHE_BUCKET_NAME: httpCacheBucket.bucketName,
                 HTTP_CACHE_TTL_MINUTES: String(config.httpCache.ttlMinutes),
             },

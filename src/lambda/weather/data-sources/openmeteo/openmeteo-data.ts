@@ -12,29 +12,28 @@ export interface OpenMeteoData {
     daily: DailyData;
 }
 
+// Values can be null past the end of a model's forecast range
 export interface HourlyData {
     time: string[];
-    temperature_2m: number[];
-    relativehumidity_2m: number[];
-    precipitation: number[];
-    rain: number[];
-    showers: number[];
-    snowfall: number[];
-    snow_depth: number[];
-    windspeed_10m: number[];
-    winddirection_10m: number[];
-    windgusts_10m: number[];
+    temperature_2m: number[]; // F
+    apparent_temperature: number[]; // F
+    relative_humidity_2m: number[]; // % 0 to 100
+    precipitation_probability: number[]; // % 0 to 100
+    precipitation: number[]; // inches, preceding hour, all precipitation types (liquid equivalent)
+    snowfall: number[]; // inches of snow, preceding hour
+    wind_speed_10m: number[]; // mph
+    wind_direction_10m: number[]; // degrees
+    wind_gusts_10m: number[]; // mph
 }
 
 export interface DailyData {
     time: string[];
-    temperature_2m_max: number[];
-    temperature_2m_min: number[];
-    precipitation_sum: number[];
-    rain_sum: number[];
-    showers_sum: number[];
-    snowfall_sum: number[];
-    windspeed_10m_max: number[];
-    windgusts_10m_max: number[];
-    winddirection_10m_dominant: number[];
+    temperature_2m_max: number[]; // F
+    temperature_2m_min: number[]; // F
+    precipitation_probability_max: number[]; // % 0 to 100
+    precipitation_sum: number[]; // inches
+    snowfall_sum: number[]; // inches
+    wind_speed_10m_max: number[]; // mph
+    wind_gusts_10m_max: number[]; // mph
+    wind_direction_10m_dominant: number[]; // degrees
 }

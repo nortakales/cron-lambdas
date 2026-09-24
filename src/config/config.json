@@ -48,7 +48,9 @@
         "apiKeySecretVisualCrossing": "visualcrossing-apikey",
         "apiCredentialsSecretMeteomatics": "meteomatics-api-credentials",
         "apiKeyAccuWeather": "accuweather-api-key",
-        "apiKeyAccuWeatherAlternate": "accuweather-alternate-api-key"
+        "apiKeyAccuWeatherAlternate": "accuweather-alternate-api-key",
+        "apiKeySecretPirateWeather": "pirateweather-apikey",
+        "apiKeySecretGoogleWeather": "google-weather-apikey"
     },
     "newComics": {
         "enabled": "true",

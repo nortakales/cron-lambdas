@@ -34,6 +34,8 @@
                 "API_CREDENTIALS_SECRET_METEOMATICS": "meteomatics-api-credentials",
                 "API_KEY_ACCUWEATHER": "accuweather-api-key",
                 "API_KEY_ACCUWEATHER_ALTERNATE": "accuweather-alternate-api-key",
+                "API_KEY_SECRET_PIRATE_WEATHER": "pirateweather-apikey",
+                "API_KEY_SECRET_GOOGLE_WEATHER": "google-weather-apikey",
                 "API_KEY_SECRET_ZYTE": "zyte-api-key"
             },
             "internalConsoleOptions": "openOnSessionStart"
@@ -136,6 +138,8 @@
                 "API_CREDENTIALS_SECRET_METEOMATICS": "meteomatics-api-credentials",
                 "API_KEY_ACCUWEATHER": "accuweather-api-key",
                 "API_KEY_ACCUWEATHER_ALTERNATE": "accuweather-alternate-api-key",
+                "API_KEY_SECRET_PIRATE_WEATHER": "pirateweather-apikey",
+                "API_KEY_SECRET_GOOGLE_WEATHER": "google-weather-apikey",
                 "API_KEY_SECRET_ZYTE": "zyte-api-key",
                 "LATITUDE": "47.806994",
                 "LONGITUDE": "-122.192443",
