@@ -4,7 +4,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "test": "tsx --test \"src/**/*.test.ts\""
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.150",
@@ -12,6 +13,7 @@
     "aws-cdk": "2.1020.2",
     "esbuild": "^0.25.5",
     "ts-node": "^10.9.2",
+    "tsx": "^4.23.15",
     "typescript": "^5.8.3"
   },
   "dependencies": {

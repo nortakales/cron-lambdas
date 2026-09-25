@@ -3,6 +3,7 @@ import { DailyConditions, HourlyConditions, WeatherData } from '../common/common
 import { OpenMeteoData } from './openmeteo-data';
 import moment from 'moment-timezone';
 import { equals } from '../../utilities';
+import { fromWmoCode } from '../../conditions/conditions';
 
 const LATITUDE = process.env.LATITUDE!;
 const LONGITUDE = process.env.LONGITUDE!;
@@ -18,7 +19,9 @@ const hourlyVariables = [
     'snowfall',
     'wind_speed_10m',
     'wind_direction_10m',
-    'wind_gusts_10m'
+    'wind_gusts_10m',
+    'weather_code',
+    'is_day'
 ];
 
 const dailyVariables = [
@@ -29,7 +32,8 @@ const dailyVariables = [
     'snowfall_sum',
     'wind_speed_10m_max',
     'wind_gusts_10m_max',
-    'wind_direction_10m_dominant'
+    'wind_direction_10m_dominant',
+    'weather_code'
 ];
 
 const expectedHourlyUnits = {
@@ -42,7 +46,9 @@ const expectedHourlyUnits = {
     "snowfall": "inch",
     "wind_speed_10m": "mp/h",
     "wind_direction_10m": "°",
-    "wind_gusts_10m": "mp/h"
+    "wind_gusts_10m": "mp/h",
+    "weather_code": "wmo code",
+    "is_day": ""
 };
 
 const expectedDailyUnits = {
@@ -54,7 +60,8 @@ const expectedDailyUnits = {
     "snowfall_sum": "inch",
     "wind_speed_10m_max": "mp/h",
     "wind_gusts_10m_max": "mp/h",
-    "wind_direction_10m_dominant": "°"
+    "wind_direction_10m_dominant": "°",
+    "weather_code": "wmo code"
 }
 
 // model: an Open-Meteo model id (e.g. "ecmwf_ifs"), or undefined for Open-Meteo's default "best_match",
@@ -120,7 +127,9 @@ export async function getAsCommonData(model?: string) {
             clouds: undefined!,
             wind_speed: hourly.wind_speed_10m[index],
             wind_deg: hourly.wind_direction_10m[index],
-            wind_gust: hourly.wind_gusts_10m[index]
+            wind_gust: hourly.wind_gusts_10m[index],
+            condition: fromWmoCode(hourly.weather_code[index]),
+            is_day: hourly.is_day[index] == null ? undefined : hourly.is_day[index] === 1
         });
     });
 
@@ -146,7 +155,9 @@ export async function getAsCommonData(model?: string) {
             clouds: undefined!,
             wind_speed: daily.wind_speed_10m_max[index],
             wind_deg: daily.wind_direction_10m_dominant[index],
-            wind_gust: daily.wind_gusts_10m_max[index]
+            wind_gust: daily.wind_gusts_10m_max[index],
+            // Open-Meteo's daily weather_code is the most severe condition of the whole day (no daytime-only version)
+            condition: fromWmoCode(daily.weather_code[index])
         });
     });
 

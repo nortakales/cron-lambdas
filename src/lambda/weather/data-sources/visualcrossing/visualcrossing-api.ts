@@ -6,6 +6,7 @@ import { WeatherData } from '../common/common-data';
 import { AngleAndSpeed, averageAngle, Format, getStartOfDay, toReadablePacificDate } from '../../utilities';
 import queryString from 'query-string';
 import { VisualCrossingData } from './visualcrossing-data';
+import { fromVisualCrossingConditions } from '../../conditions/conditions';
 
 const API_KEY_SECRET_VISUAL_CROSSING = process.env.API_KEY_SECRET_VISUAL_CROSSING!;
 const LATITUDE = process.env.LATITUDE!;
@@ -141,7 +142,9 @@ export async function getAsCommonData() {
             temp: hourlyData.temp,
             pop: hourlyData.pop,
             rain: hourlyData.precip,
-            snow: hourlyData.snow
+            snow: hourlyData.snow,
+            // No daily condition: Visual Crossing's daily values here are computed by us from hourly, not provided
+            condition: fromVisualCrossingConditions(hourlyData.conditions)
         });
 
     }

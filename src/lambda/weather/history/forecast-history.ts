@@ -2,6 +2,7 @@ import * as DDB from '../../dynamo';
 import { Format, toReadablePacificDate } from '../utilities';
 import { AggregatedProperty, AggregatedWeatherData, DailyConditions, HourlyConditions } from '../data-sources/aggregate/aggregate-data';
 import moment from 'moment-timezone';
+import { AggregatedCondition, Condition } from '../conditions/conditions';
 
 // Stores the aggregated hourly/daily data from every scheduled run in DynamoDB, so it can be served by the weather
 // data API and kept as history. See docs/weather-alert-system.md "Forecast history & API".
@@ -26,6 +27,16 @@ export interface StoredMetric {
     sources: { [shortCode: string]: number };
 }
 
+// Weather condition (icon) from a two-step vote across the sources that provide one, see conditions.ts
+export interface StoredCondition {
+    value: Condition;
+    isDay?: boolean; // hourly only: majority of sources that report day/night. Daily conditions are daytime conditions
+    agreement: number; // share of voting sources whose condition equals value (0 to 1)
+    n: number; // number of sources that voted
+    votes: { [condition: string]: number };
+    sources: { [shortCode: string]: Condition };
+}
+
 export interface StoredForecast {
     series: Series;
     epoch: number; // seconds
@@ -35,6 +46,7 @@ export interface StoredForecast {
     sources: string[]; // shortCodes of the sources that contributed any metric
     skippedSources: string[]; // full names of sources that failed during the run that wrote this item
     metrics: { [metric: string]: StoredMetric };
+    condition?: StoredCondition;
 }
 
 // Only the metrics that are actually aggregated across sources. pressure/humidity/dew_point/uvi/clouds are only taken
@@ -76,7 +88,19 @@ function toStoredMetric(property: AggregatedProperty | undefined): StoredMetric 
     };
 }
 
-function toStoredForecast<T extends { datetime: number }>(series: Series, row: T,
+function toStoredCondition(condition: AggregatedCondition | undefined, includeIsDay: boolean): StoredCondition | undefined {
+    const result = condition?.result;
+    if (condition == null || result == null) {
+        return undefined;
+    }
+    return {
+        ...result,
+        isDay: includeIsDay ? condition.isDay : undefined,
+        sources: { ...condition.data }
+    };
+}
+
+function toStoredForecast<T extends { datetime: number, condition: AggregatedCondition }>(series: Series, row: T,
     metricGetters: { [name: string]: (row: T) => AggregatedProperty }, updatedAt: string, skippedSources: string[]): StoredForecast {
 
     const metrics: { [metric: string]: StoredMetric } = {};
@@ -89,6 +113,9 @@ function toStoredForecast<T extends { datetime: number }>(series: Series, row: T
         }
     }
 
+    const condition = toStoredCondition(row.condition, series === 'hourly');
+    Object.keys(condition?.sources || {}).forEach(source => sources.add(source));
+
     return {
         series,
         epoch: row.datetime,
@@ -97,7 +124,8 @@ function toStoredForecast<T extends { datetime: number }>(series: Series, row: T
         updatedAt,
         sources: [...sources].sort(),
         skippedSources,
-        metrics
+        metrics,
+        condition
     };
 }
 

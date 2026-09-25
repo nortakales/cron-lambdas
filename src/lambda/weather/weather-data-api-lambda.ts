@@ -4,6 +4,7 @@ import * as SM from '../secrets';
 import { startLambdaLog } from '../utilities/logging';
 import { getForecasts, Series, StoredForecast } from './history/forecast-history';
 import { dataSources } from './data-sources/aggregate/data-sources';
+import { CONDITIONS } from './conditions/conditions';
 
 // Read-only API over the forecast history table. See docs/weather-alert-system.md "Forecast history & API".
 //
@@ -74,13 +75,17 @@ function stripBreakout(forecasts: StoredForecast[], breakout: boolean) {
     if (breakout) {
         return forecasts;
     }
-    return forecasts.map(forecast => ({
-        ...forecast,
-        metrics: Object.fromEntries(Object.entries(forecast.metrics).map(([name, metric]) => {
-            const { sources, ...stats } = metric;
-            return [name, stats];
-        }))
-    }));
+    return forecasts.map(forecast => {
+        const { sources, ...condition } = forecast.condition || {} as any;
+        return {
+            ...forecast,
+            metrics: Object.fromEntries(Object.entries(forecast.metrics).map(([name, metric]) => {
+                const { sources, ...stats } = metric;
+                return [name, stats];
+            })),
+            condition: forecast.condition ? condition : undefined
+        };
+    });
 }
 
 async function getSeries(series: Series, params: { [key: string]: string }, breakout: boolean) {
@@ -144,7 +149,8 @@ exports.handler = async (event: any = {}, context: any = {}) => {
             case '/sources':
                 return response(200, {
                     sources: dataSources.map(source => ({ shortCode: source.shortCode, name: source.fullName, enabled: source.enabled })),
-                    units: METRIC_UNITS
+                    units: METRIC_UNITS,
+                    conditions: CONDITIONS
                 });
             default:
                 throw new HttpError(404, `Unknown path: ${event.path}`);

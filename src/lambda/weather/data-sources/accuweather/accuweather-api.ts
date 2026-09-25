@@ -3,6 +3,7 @@ import { httpsGet } from '../../../http';
 import { AccuWeatherData, DailyAccuWeatherData, HourlyAccuWeatherData } from './accuweather-data';
 import { DailyConditions, HourlyConditions, WeatherData } from '../common/common-data';
 import { averageAngle, getStartOfDay } from '../../utilities';
+import { fromAccuWeatherIcon } from '../../conditions/conditions';
 
 const API_KEY_ACCUWEATHER = process.env.API_KEY_ACCUWEATHER!;
 const API_KEY_ACCUWEATHER_ALTERNATE = process.env.API_KEY_ACCUWEATHER_ALTERNATE!;
@@ -79,7 +80,9 @@ function convertToCommonHourly(data: HourlyAccuWeatherData[]): HourlyConditions[
             clouds: hour.CloudCover,
             wind_speed: hour.Wind.Speed.Value,
             wind_deg: hour.Wind.Direction.Degrees,
-            wind_gust: hour.WindGust.Speed.Value
+            wind_gust: hour.WindGust.Speed.Value,
+            condition: fromAccuWeatherIcon(hour.WeatherIcon),
+            is_day: hour.IsDaylight
         } as unknown as HourlyConditions);
     }
     return returnData;
@@ -120,6 +123,7 @@ function convertToCommonDaily(data: DailyAccuWeatherData[]): DailyConditions[] {
                 { speed: day.Day.Wind.Speed.Value, angle: day.Day.Wind.Direction.Degrees },
                 { speed: day.Night.Wind.Speed.Value, angle: day.Night.Wind.Direction.Degrees }]),
             wind_gust: Math.max(day.Day.WindGust.Speed.Value, day.Night.WindGust.Speed.Value),
+            condition: fromAccuWeatherIcon(day.Day.Icon) // daytime condition
         } as DailyConditions);
     }
     return returnData;

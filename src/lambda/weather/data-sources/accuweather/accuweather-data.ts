@@ -6,6 +6,9 @@ export interface AccuWeatherData {
 export interface HourlyAccuWeatherData {
   DateTime: string, // ISO string
   EpochDateTime: number,
+  WeatherIcon: number, // 1-44
+  IconPhrase: string,
+  IsDaylight: boolean,
 
   Temperature: AccuWeatherDatapoint,
   RealFeelTemperature: AccuWeatherDatapoint,
@@ -39,6 +42,8 @@ export interface DailyAccuWeatherData {
 }
 
 export interface AccuWeatherHalfDayData {
+  Icon: number, // 1-44
+  IconPhrase: string,
   PrecipitationProbability: number,
   RainProbability: number,
   SnowProbability: number,

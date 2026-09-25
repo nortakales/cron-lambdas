@@ -35,7 +35,8 @@ export interface IntervalValues {
     cloudCover: number, // % 0 to 100
     cloudBase: number, // miles
     cloudCeiling: number, // miles
-    weatherCode: number,
+    weatherCode: number, // 4-digit code
+    weatherCodeDay: number, // 1d only, 5-digit daytime code
     humidity: number, // % 0 to 100
     pressureSurfaceLevel: number, // inHg
     dewPoint: number, // F

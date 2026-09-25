@@ -1,6 +1,7 @@
 import { ReportType } from "../../interfaces/alert-types";
 import { angleDifference, circularMean } from "../../utilities";
 import { AlertData } from "../common/common-data";
+import { AggregatedCondition } from "../../conditions/conditions";
 
 export interface AggregatedWeatherData {
     current: CurrentConditions;
@@ -58,6 +59,8 @@ export interface DailyConditions extends BaseConditions {
     pop: AggregatedProperty;
     rain: AggregatedProperty;
     snow: AggregatedProperty;
+
+    condition: AggregatedCondition;
 }
 export interface DailyFeelsLike {
     morn: AggregatedProperty;
@@ -85,6 +88,8 @@ export interface HourlyConditions extends BaseConditions {
     pop: AggregatedProperty;
     rain: AggregatedProperty;
     snow: AggregatedProperty;
+
+    condition: AggregatedCondition;
 }
 
 export class AggregatedProperty {

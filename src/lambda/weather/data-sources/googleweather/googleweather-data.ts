@@ -19,6 +19,8 @@ export interface GooglePrecipitation {
 
 export interface GoogleWeatherHour {
     interval: { startTime: string, endTime: string }; // ISO 8601, UTC
+    weatherCondition?: { type: string, description?: { text: string } };
+    isDaytime?: boolean;
     temperature?: GoogleTemperature;
     feelsLikeTemperature?: GoogleTemperature;
     dewPoint?: GoogleTemperature;
@@ -38,6 +40,7 @@ export interface GoogleWeatherHourlyResponse {
 
 export interface GoogleWeatherDayPart {
     interval: { startTime: string, endTime: string };
+    weatherCondition?: { type: string, description?: { text: string } };
     precipitation?: GooglePrecipitation;
     wind?: GoogleWind;
     relativeHumidity?: number;

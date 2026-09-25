@@ -4,6 +4,7 @@ import { OpenWeatherData } from './openweather-data';
 import { WeatherData } from '../common/common-data';
 import { getStartOfDay } from '../../utilities';
 import { mmToIn, mToMi } from '../../conversions';
+import { fromOpenWeatherId } from '../../conditions/conditions';
 
 const API_KEY_SECRET_OPEN_WEATHER = process.env.API_KEY_SECRET_OPEN_WEATHER!;
 const LATITUDE = process.env.LATITUDE!;
@@ -73,7 +74,11 @@ export async function getAsCommonData() {
 
             wind_speed: hourly.wind_speed,
             wind_deg: hourly.wind_deg,
-            wind_gust: hourly.wind_gust
+            wind_gust: hourly.wind_gust,
+
+            condition: fromOpenWeatherId(hourly.weather?.[0]?.id),
+            // icon ends in "d" for day, "n" for night
+            is_day: hourly.weather?.[0]?.icon ? hourly.weather[0].icon.endsWith('d') : undefined
         })),
         daily: openWeatherData.daily.map(daily => ({
             // In March, this was -8 at noon, and -8 at 1PM for DST crossover
@@ -113,7 +118,10 @@ export async function getAsCommonData() {
 
             wind_speed: daily.wind_speed,
             wind_deg: daily.wind_deg,
-            wind_gust: daily.wind_gust
+            wind_gust: daily.wind_gust,
+
+            // OpenWeather has no daytime-only condition, this is its condition for the whole day
+            condition: fromOpenWeatherId(daily.weather?.[0]?.id)
         })),
         alerts: openWeatherData.alerts == null ? [] : openWeatherData.alerts.map(alert => ({
             sender_name: alert.sender_name,

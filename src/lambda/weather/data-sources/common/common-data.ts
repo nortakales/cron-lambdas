@@ -1,3 +1,5 @@
+import { Condition } from "../../conditions/conditions";
+
 export interface WeatherData {
     current: CurrentConditions;
     minutely?: MinutelyConditions[];
@@ -26,6 +28,8 @@ export interface DailyConditions extends BaseConditions {
     pop: number; // % 0 to 100, max for the day
     rain: number; // inches, total for the day
     snow?: number; // inches, total for the day
+
+    condition?: Condition; // the source's own daytime condition, if it provides one
 }
 export interface DailyFeelsLike {
     morn: number;
@@ -77,6 +81,9 @@ export interface HourlyConditions extends BaseConditions {
     pop: number; // % 0 to 100
     rain: number // inches
     snow: number // inches
+
+    condition?: Condition; // the source's own condition, if it provides one
+    is_day?: boolean; // whether the source says this hour is daytime, if it provides that
 }
 
 export interface AlertData {

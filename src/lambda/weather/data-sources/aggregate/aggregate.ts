@@ -3,6 +3,7 @@ import { getStartOfDay, toReadablePacificDate } from "../../utilities";
 import { WeatherData } from "../common/common-data";
 import { AggregatedAlertData, AggregatedAngleProperty, AggregatedProperty, AggregatedWeatherData, DailyConditions, HourlyConditions, MinutelyConditions, SkippedDataSource } from "./aggregate-data";
 import { dataSources } from "./data-sources";
+import { AggregatedCondition } from "../../conditions/conditions";
 
 const TOTAL_DAYS = 8; // All current sources give today + 7 days
 const TOTAL_HOURS = 3 * 24 // We have 4 sources for 2 days, the rest for almost 7 days, but that is unneeded
@@ -95,8 +96,10 @@ export async function getAggregatedData() {
                     visibility: new AggregatedProperty(dataSourceName, hourlyData.visibility),
                     pop: new AggregatedProperty(dataSourceName, hourlyData.pop),
                     rain: new AggregatedProperty(dataSourceName, hourlyData.rain),
-                    snow: new AggregatedProperty(dataSourceName, hourlyData.snow)
+                    snow: new AggregatedProperty(dataSourceName, hourlyData.snow),
+                    condition: new AggregatedCondition()
                 }
+                aggregatedData.condition.addDataPoint(dataSourceName, hourlyData.condition, hourlyData.is_day);
                 aggregatedHourlyData[timestamp] = aggregatedData;
             } else {
                 // aggregatedData.pressure.addDataPoint(dataSourceName, hourlyData.pressure);
@@ -114,6 +117,7 @@ export async function getAggregatedData() {
                 aggregatedData.pop.addDataPoint(dataSourceName, hourlyData.pop);
                 aggregatedData.rain.addDataPoint(dataSourceName, hourlyData.rain);
                 aggregatedData.snow.addDataPoint(dataSourceName, hourlyData.snow);
+                aggregatedData.condition.addDataPoint(dataSourceName, hourlyData.condition, hourlyData.is_day);
             }
         }
     }
@@ -139,8 +143,10 @@ export async function getAggregatedData() {
                     snow: new AggregatedProperty(dataSourceName, dailyData.snow || 0),
                     wind_speed: new AggregatedProperty(dataSourceName, dailyData.wind_speed),
                     wind_deg: new AggregatedAngleProperty(dataSourceName, dailyData.wind_deg),
-                    wind_gust: new AggregatedProperty(dataSourceName, dailyData.wind_gust)
+                    wind_gust: new AggregatedProperty(dataSourceName, dailyData.wind_gust),
+                    condition: new AggregatedCondition()
                 }
+                aggregatedData.condition.addDataPoint(dataSourceName, dailyData.condition);
                 aggregatedDailyData[timestamp] = aggregatedData;
             } else {
                 aggregatedData.temp.max.addDataPoint(dataSourceName, dailyData.temp.max);
@@ -151,6 +157,7 @@ export async function getAggregatedData() {
                 aggregatedData.wind_speed.addDataPoint(dataSourceName, dailyData.wind_speed);
                 aggregatedData.wind_deg.addDataPoint(dataSourceName, dailyData.wind_deg);
                 aggregatedData.wind_gust.addDataPoint(dataSourceName, dailyData.wind_gust);
+                aggregatedData.condition.addDataPoint(dataSourceName, dailyData.condition);
             }
         }
     }

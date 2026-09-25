@@ -95,7 +95,8 @@ DynamoDB table **`weather_forecast_history`**: partition key `series` (`"hourly"
 (seconds: the hour's start, or local midnight for daily). Pay-per-request, deletion protection, point-in-time
 recovery (35 days), and a Retain policy.
 
-- **What's stored:** the aggregator's hourly rows (72 hours) and daily rows (8 days), after unit conversion. For each
+- **What's stored:** the aggregator's hourly rows (72 hours) and daily rows (8 days), after unit conversion, plus the
+  voted weather `condition` (see [Weather conditions](#weather-conditions)). For each
   metric: `avg`, `min`, `max`, `std`, `n` (number of sources), and `sources` (each source's value). Minutely data isn't
   stored.
   - Hourly metrics: `temp`, `feels_like`, `visibility`, `pop`, `rain`, `snow`, `wind_speed`, `wind_deg`, `wind_gust`.
@@ -126,7 +127,7 @@ server-side (no CORS).
 | `GET /forecast?breakout=` | `hourly` (current hour → +72 h) and `daily` (today → +7 days) |
 | `GET /hourly?start=&end=&breakout=` | Hourly items. Defaults to the next 72 hours. Max range 31 days |
 | `GET /daily?start=&end=&breakout=` | Daily items. Defaults to today + 7 days. Max range 366 days |
-| `GET /sources` | Source short codes → names, and units for every metric |
+| `GET /sources` | Source short codes → names, units for every metric, and the list of condition values |
 
 - `start`/`end` are inclusive and take epoch seconds or ISO 8601 (`2026-09-25`, `2026-09-25T09:00`; times without an
   offset are Pacific).
@@ -143,6 +144,49 @@ Example (`breakout=false`):
                 "metrics": { "temp": { "avg": 60.24, "min": 56.6, "max": 65, "std": 1.98, "n": 13 }, "...": {} } } ],
   "daily": [ "..." ] }
 ```
+
+---
+
+## Weather conditions
+
+Added 2026-09-25. Code: `src/lambda/weather/conditions/conditions.ts` (mappings + vote), tests in
+`conditions.test.ts` (`npm test`).
+
+Each source's own condition (the icon it would show) is mapped to one shared list:
+`clear`, `mostly_clear`, `partly_cloudy`, `mostly_cloudy`, `cloudy`, `fog`, `drizzle`, `light_rain`, `rain`,
+`heavy_rain`, `thunderstorm`, `snow`, `sleet` (sleet also covers freezing rain, ice pellets, hail, and rain/snow mix).
+
+**Only conditions a source provides are used; nothing is derived from other metrics.** NWS isn't used (it has sky
+cover % and precipitation, but no condition). Codes that don't fit the list (windy, hot, cold, haze, smoke, dust) don't
+vote.
+
+| Source | Hourly | Daily (daytime where available) |
+|---|---|---|
+| OpenWeather | `weather[0].id` (+ icon `d`/`n` for day/night) | `weather[0].id` (whole day, no daytime version) |
+| Open-Meteo ×6 | `weather_code` (WMO) + `is_day` | `weather_code` (most severe of the whole day, no daytime version) |
+| Tomorrow.io | `weatherCode` | `weatherCodeDay` (the plain 1d `weatherCode` can say clear on a rainy day) |
+| Visual Crossing | `conditions` text (e.g. "Rain, Overcast") | — (its daily values are computed by us) |
+| AccuWeather | `WeatherIcon` + `IsDaylight` (12 h) | `Day.Icon` |
+| Pirate Weather | `icon` with `icon=pirate` (expanded set; `-day`/`-night` suffix) | `icon` |
+| Google | `weatherCondition.type` + `isDaytime` | `daytimeForecast.weatherCondition.type` |
+
+"Chance of" conditions (Pirate Weather `possible-rain-*`, Google `CHANCE_OF_SHOWERS`) count as the light version of
+that precipitation type, since that's the icon the source shows.
+
+**Two-step vote** (per hour/day):
+1. If a **strict majority** of sources report precipitation, the type is chosen by plurality (ties: thunderstorm >
+   sleet > snow > rain; all rain intensities count as "rain"). For rain, the intensity is the median of the rain votes
+   on the drizzle → heavy_rain scale.
+2. Otherwise `fog` wins if it has at least as many votes as any single sky condition. If not, the result is the
+   median on the clear → cloudy scale. Minority precipitation votes count as `cloudy` there.
+
+With an even number of votes, the median averages the two middle positions and rounds toward cloudier/heavier (e.g.
+3 `clear` + 3 `cloudy` → `partly_cloudy`).
+
+**Stored and returned** as `condition` on each hourly/daily item: `value`, `agreement` (share of sources whose
+condition equals `value`), `n`, `votes` (count per condition), `isDay` (hourly only, majority of sources that report
+day/night; daily conditions are daytime), and `sources` (per-source condition, only with `breakout=true`). `/sources`
+lists all condition values.
 
 ---
 
@@ -209,6 +253,8 @@ From the 2026-09-24 review. File/line refs point to `src/lambda/weather/` unless
    (`/timeline/{lat},{lon}/next7days?unitGroup=us&include=hours,days,alerts`), about 8 records per call.
 9. **AccuWeather auth.** The new portal documents only `Authorization: Bearer <key>`. The `apikey` query param
    still works today.
-10. **Tomorrow.io:** `visibility` is mapped but not in the requested `fields`. Timelines still works on the free plan.
+10. **Tomorrow.io:** `visibility` is mapped but not in the requested `fields`. Timelines still works on the free plan,
+    but rejects an `endTime` more than 5 days ahead. Requesting exactly now + 5 days was rejected intermittently, so
+    the request now leaves an hour of margin (fixed 2026-09-25).
 11. **Stale code comments:** `aggregate.ts` `TOTAL_DAYS` ("All current sources give today + 7 days") and
     `TOTAL_HOURS`; `weathergov-data.ts` "not clear if sum" TODOs.

@@ -2,6 +2,7 @@ import * as SM from '../../../secrets';
 import { httpsGet } from '../../../http';
 import { AlertData, DailyConditions, HourlyConditions, MinutelyConditions, WeatherData } from '../common/common-data';
 import { PirateWeatherData } from './pirateweather-data';
+import { fromPirateWeatherIcon } from '../../conditions/conditions';
 
 const API_KEY_SECRET_PIRATE_WEATHER = process.env.API_KEY_SECRET_PIRATE_WEATHER!;
 const LATITUDE = process.env.LATITUDE!;
@@ -15,8 +16,9 @@ export async function getPirateWeatherData() {
     const apiKey = await SM.getSecretString(API_KEY_SECRET_PIRATE_WEATHER);
 
     // units=us: F, mph, inches, miles. extend=hourly: 168 hours instead of 48. version=2: adds
-    // liquidAccumulation/snowAccumulation/iceAccumulation fields.
-    const url = `https://api.pirateweather.net/forecast/${apiKey}/${LATITUDE},${LONGITUDE}?units=us&extend=hourly&version=2`;
+    // liquidAccumulation/snowAccumulation/iceAccumulation fields. icon=pirate: expanded icon set (mostly-clear-day,
+    // light-rain, possible-rain-day, ...) instead of the original Dark Sky set.
+    const url = `https://api.pirateweather.net/forecast/${apiKey}/${LATITUDE},${LONGITUDE}?units=us&extend=hourly&version=2&icon=pirate`;
 
     const data = await httpsGet(url);
     try {
@@ -62,7 +64,11 @@ export async function getAsCommonData() {
 
         wind_speed: hour.windSpeed,
         wind_deg: hour.windBearing,
-        wind_gust: hour.windGust
+        wind_gust: hour.windGust,
+
+        condition: fromPirateWeatherIcon(hour.icon),
+        // Icons that differ by time of day end in -day/-night; others (rain, cloudy, ...) don't say
+        is_day: hour.icon?.endsWith('-day') ? true : hour.icon?.endsWith('-night') ? false : undefined
     }));
 
     // Pirate Weather's daily windSpeed/windGust are daily AVERAGES (Dark Sky semantics), while every other
@@ -107,7 +113,9 @@ export async function getAsCommonData() {
 
         wind_speed: maxHourly(day.time, 'windSpeed')!,
         wind_deg: day.windBearing,
-        wind_gust: maxHourly(day.time, 'windGust')!
+        wind_gust: maxHourly(day.time, 'windGust')!,
+
+        condition: fromPirateWeatherIcon(day.icon)
     }));
 
     const alerts: AlertData[] = (data.alerts || []).map(alert => ({

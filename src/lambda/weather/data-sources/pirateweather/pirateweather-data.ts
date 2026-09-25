@@ -23,6 +23,7 @@ export interface PirateWeatherMinutely {
 
 export interface PirateWeatherHourly {
     time: number;
+    icon: string; // icon=pirate set, e.g. "mostly-clear-day", "light-rain"
     temperature: number; // F
     apparentTemperature: number; // F
     dewPoint: number; // F
@@ -45,6 +46,7 @@ export interface PirateWeatherHourly {
 
 export interface PirateWeatherDaily {
     time: number; // local midnight
+    icon: string; // icon=pirate set
     sunriseTime: number;
     sunsetTime: number;
     moonPhase: number;

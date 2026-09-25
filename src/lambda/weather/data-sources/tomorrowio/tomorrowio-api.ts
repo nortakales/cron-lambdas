@@ -4,6 +4,7 @@ import { CurrentConditions, DailyConditions, HourlyConditions, WeatherData } fro
 import { getStartOfDay } from '../../utilities';
 import queryString from 'query-string';
 import { TomorrowIOData } from './tomorrowio-data';
+import { fromTomorrowIoCode } from '../../conditions/conditions';
 
 const API_KEY_SECRET_TOMORROW_IO = process.env.API_KEY_SECRET_TOMORROW_IO!;
 const LATITUDE = process.env.LATITUDE!;
@@ -39,6 +40,7 @@ export async function getTomorrowIOData() {
         "cloudBase",
         "cloudCeiling",
         "weatherCode",
+        "weatherCodeDay", // 1d only: the daytime condition (the plain 1d weatherCode can say clear on a rainy day)
         "humidity",
         "pressureSurfaceLevel",
         "dewPoint",
@@ -51,8 +53,12 @@ export async function getTomorrowIOData() {
     // set the timesteps, like "current", "1h" and "1d"
     const timesteps = ["current", "1h", "1d"];
 
+    // The free plan rejects (403) an endTime more than 5 days ahead. Requesting exactly now + 5 days was rejected
+    // intermittently (2026-09), presumably when the request reaches their server a moment later than `now` here,
+    // so leave an hour of margin. Only the next 72 hours of hourly data are used anyway.
     const daysAhead = 5;
-    const daysAheadInMillis = daysAhead * 24 * 60 * 60 * 1000;
+    const marginInMillis = 60 * 60 * 1000;
+    const daysAheadInMillis = daysAhead * 24 * 60 * 60 * 1000 - marginInMillis;
     const now = new Date();
     const startTime = now.toISOString();
     const endTime = new Date(now.getTime() + daysAheadInMillis).toISOString();
@@ -146,7 +152,9 @@ export async function getAsCommonData() {
 
                     wind_speed: values.windSpeed,
                     wind_deg: values.windDirection,
-                    wind_gust: values.windGust
+                    wind_gust: values.windGust,
+
+                    condition: fromTomorrowIoCode(values.weatherCode)
                 });
             }
 
@@ -183,7 +191,9 @@ export async function getAsCommonData() {
 
                     wind_speed: values.windSpeed,
                     wind_deg: values.windDirection,
-                    wind_gust: values.windGust
+                    wind_gust: values.windGust,
+
+                    condition: fromTomorrowIoCode(values.weatherCodeDay)
                 });
             }
         }

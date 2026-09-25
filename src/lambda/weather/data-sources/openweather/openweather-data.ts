@@ -58,7 +58,7 @@ export interface BaseConditions {
     wind_deg: number; // angle
     wind_gust: number; // mph
 
-    weather: WeatherType;
+    weather: WeatherType[];
 }
 
 export interface CurrentConditions extends BaseConditions {

@@ -4,6 +4,7 @@ import { DailyConditions, HourlyConditions, WeatherData } from '../common/common
 import { averageAngle } from '../../utilities';
 import { GoogleWeatherDailyResponse, GoogleWeatherHourlyResponse, GoogleWeatherHour } from './googleweather-data';
 import moment from 'moment-timezone';
+import { fromGoogleType } from '../../conditions/conditions';
 
 const API_KEY_SECRET_GOOGLE_WEATHER = process.env.API_KEY_SECRET_GOOGLE_WEATHER!;
 const LATITUDE = process.env.LATITUDE!;
@@ -89,7 +90,10 @@ export async function getAsCommonData() {
 
             wind_speed: hour.wind?.speed?.value,
             wind_deg: hour.wind?.direction?.degrees,
-            wind_gust: hour.wind?.gust?.value
+            wind_gust: hour.wind?.gust?.value,
+
+            condition: fromGoogleType(hour.weatherCondition?.type),
+            is_day: hour.isDaytime
         } as HourlyConditions;
     });
 
@@ -137,7 +141,9 @@ export async function getAsCommonData() {
                 angle: half.wind?.direction?.degrees,
                 speed: half.wind?.speed?.value
             }))),
-            wind_gust: max(halves.map(half => half.wind?.gust?.value))
+            wind_gust: max(halves.map(half => half.wind?.gust?.value)),
+
+            condition: fromGoogleType(day.daytimeForecast?.weatherCondition?.type) // daytime condition
         } as unknown as DailyConditions;
     });
 

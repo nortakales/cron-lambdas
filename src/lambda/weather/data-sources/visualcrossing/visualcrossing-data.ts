@@ -22,6 +22,7 @@ export interface HourlyValues {
     //datetime: number, // millis, 1638018000000
 
     preciptype: string // rain, snow, freezing rain, ice, (can be empty)
+    conditions: string // e.g. "Rain, Overcast", "Partially cloudy"
     pop: number, // % 0 to 100
     precip: number, // actual amount in inches
     snow: number, // inches

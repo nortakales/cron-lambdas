@@ -24,6 +24,8 @@ export interface HourlyData {
     wind_speed_10m: number[]; // mph
     wind_direction_10m: number[]; // degrees
     wind_gusts_10m: number[]; // mph
+    weather_code: number[]; // WMO code
+    is_day: number[]; // 1 = day, 0 = night
 }
 
 export interface DailyData {
@@ -36,4 +38,5 @@ export interface DailyData {
     wind_speed_10m_max: number[]; // mph
     wind_gusts_10m_max: number[]; // mph
     wind_direction_10m_dominant: number[]; // degrees
+    weather_code: number[]; // WMO code, most severe condition of the day
 }
